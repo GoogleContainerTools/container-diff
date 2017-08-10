@@ -1,12 +1,20 @@
 {
 	"ImportPath": "github.com/GoogleCloudPlatform/container-diff",
-	"GoVersion": "go1.9",
+	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/Microsoft/go-winio",
 			"Comment": "v0.4.2",
 			"Rev": "f533f7a102197536779ea3a8cb881d639e21ec5a"
+		},
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "1.0.2-34-g181d419",
+			"Rev": "181d419aa9e2223811b824e8f0b4af96f9ba9302"
 		},
 		{
 			"ImportPath": "github.com/containers/image/docker",
@@ -43,52 +51,6 @@
 		{
 			"ImportPath": "github.com/containers/storage/pkg/homedir",
 			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
-		},
-		{
-			"ImportPath": "github.com/docker/distribution",
-			"Comment": "v2.6.0-rc.1-195-gcaa175c7",
-			"Rev": "caa175c71008fd3cf1fccf6c427f388d946b7750"
-		},
-		{
-			"ImportPath": "github.com/docker/distribution/context",
-			"Comment": "v2.6.0-rc.1-195-gcaa175c7",
-			"Rev": "caa175c71008fd3cf1fccf6c427f388d946b7750"
-		},
-		{
-			"ImportPath": "github.com/containers/image/docker",
-			"Rev": "c2a797dfe5bb4a9dd7f48332ce40c6223ffba492"
-		},
-		{
-			"ImportPath": "github.com/containers/image/docker/policyconfiguration",
-			"Rev": "c2a797dfe5bb4a9dd7f48332ce40c6223ffba492"
-		},
-		{
-			"ImportPath": "github.com/containers/image/docker/reference",
-			"Rev": "c2a797dfe5bb4a9dd7f48332ce40c6223ffba492"
-		},
-		{
-			"ImportPath": "github.com/containers/image/image",
-			"Rev": "c2a797dfe5bb4a9dd7f48332ce40c6223ffba492"
-		},
-		{
-			"ImportPath": "github.com/containers/image/manifest",
-			"Rev": "c2a797dfe5bb4a9dd7f48332ce40c6223ffba492"
-		},
-		{
-			"ImportPath": "github.com/containers/image/pkg/strslice",
-			"Rev": "c2a797dfe5bb4a9dd7f48332ce40c6223ffba492"
-		},
-		{
-			"ImportPath": "github.com/containers/image/transports",
-			"Rev": "c2a797dfe5bb4a9dd7f48332ce40c6223ffba492"
-		},
-		{
-			"ImportPath": "github.com/containers/image/types",
-			"Rev": "c2a797dfe5bb4a9dd7f48332ce40c6223ffba492"
-		},
-		{
-			"ImportPath": "github.com/containers/storage/pkg/homedir",
-			"Rev": "5d8c2f87387fa5be9fa526ae39fbd79b8bdf27be"
 		},
 		{
 			"ImportPath": "github.com/docker/distribution",
@@ -295,6 +257,7 @@
 		},
 		{
 			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Comment": "v1.0",
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
 		},
 		{
