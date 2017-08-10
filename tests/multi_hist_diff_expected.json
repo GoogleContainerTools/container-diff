@@ -1,0 +1,20 @@
+
+-----HistoryDiffer-----
+
+Docker history lines found only in gcr.io/gcp-runtimes/pip-base:
+-/bin/bash
+
+Docker history lines found only in gcr.io/gcp-runtimes/pip-modified: None
+
+-----PipDiffer-----
+
+Packages found only in gcr.io/gcp-runtimes/pip-base: None
+
+Packages found only in gcr.io/gcp-runtimes/pip-modified:
+NAME         VERSION        SIZE
+-mock        2.0.0          504226B
+-pbr         3.1.1          447110B
+-six         1.10.0         30098B
+
+Version differences: None
+

@@ -4,3 +4,5 @@
 -n node gcr.io/gcp-runtimes/node-base gcr.io/gcp-runtimes/node-modified tests/node_diff_actual.json
 -n nodeOrder gcr.io/gcp-runtimes/node-modified:2.0 gcr.io/gcp-runtimes/node-modified tests/node_diff_order_actual.json
 -npa multi gcr.io/gcp-runtimes/multi-base gcr.io/gcp-runtimes/multi-modified tests/multi_diff_actual.json
+-d history gcr.io/gcp-runtimes/diff-base gcr.io/gcp-runtimes/diff-modified tests/hist_diff_actual.json
+-pd multihist gcr.io/gcp-runtimes/pip-base gcr.io/gcp-runtimes/pip-modified tests/multi_hist_diff_actual.json
