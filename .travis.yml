@@ -9,4 +9,4 @@ go_import_path: github.com/GoogleCloudPlatform/container-diff
 script:
  - ./.gofmt.sh
  - sudo rm -rf /etc/docker
- - travis_wait ./container-diff-tests.sh
+ - travis_wait ./.container-diff-tests.sh

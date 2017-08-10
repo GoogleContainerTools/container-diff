@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"reflect"
-	"strings"
 
 	"github.com/golang/glog"
 )
@@ -48,63 +47,30 @@ type PackageInfo struct {
 	Size    string
 }
 
-func contains(info1 []PackageInfo, keys1 []string, key string, value PackageInfo) (int, bool) {
-	if len(info1) != len(keys1) {
-		return 0, false
-	}
-	for i, currVal := range info1 {
-		if !reflect.DeepEqual(currVal, value) {
-			continue
-		}
-		// Check if both global or local installations by trimming img-id and layer hash
-		tempPath1 := strings.SplitN(key, "/", 3)
-		tempPath2 := strings.SplitN(keys1[i], "/", 3)
-		if len(tempPath1) != 3 || len(tempPath2) != 3 {
-			continue
-		}
-		if tempPath1[2] == tempPath2[2] {
-			return i, true
-		}
-	}
-	return 0, false
-}
-
-func multiVersionDiff(infoDiff []MultiVersionInfo, key string, map1, map2 map[string]PackageInfo) []MultiVersionInfo {
-	diff1Possible := []PackageInfo{}
-	diff1PossibleKeys := []string{}
-
-	for key1, value1 := range map1 {
-		_, ok := map2[key1]
-		if !ok {
-			diff1Possible = append(diff1Possible, value1)
-			diff1PossibleKeys = append(diff1PossibleKeys, key1)
-		} else {
-			// if key in both maps, means layer hash is the same therefore packages are the same
-			delete(map2, key1)
-		}
-	}
-
+func multiVersionDiff(infoDiff []MultiVersionInfo, packageName string, map1, map2 map[string]PackageInfo) []MultiVersionInfo {
 	diff1 := []PackageInfo{}
 	diff2 := []PackageInfo{}
-	for key2, value2 := range map2 {
-		index, ok := contains(diff1Possible, diff1PossibleKeys, key2, value2)
+	for path, packInfo1 := range map1 {
+		packInfo2, ok := map2[path]
 		if !ok {
-			diff2 = append(diff2, value2)
+			diff1 = append(diff1, packInfo1)
+			continue
 		} else {
-			if index == 0 {
-				diff1Possible = diff1Possible[1:]
-				diff1PossibleKeys = diff1PossibleKeys[1:]
+			if reflect.DeepEqual(packInfo1, packInfo2) {
+				delete(map2, path)
+			} else {
+				diff1 = append(diff1, packInfo1)
+				diff2 = append(diff2, packInfo2)
+				delete(map2, path)
 			}
-			diff1Possible = append(diff1Possible[:index], diff1Possible[index:]...)
-			diff1PossibleKeys = append(diff1PossibleKeys[:index], diff1PossibleKeys[index:]...)
 		}
 	}
-
-	for _, val := range diff1Possible {
-		diff1 = append(diff1, val)
+	for _, packInfo2 := range map2 {
+		diff2 = append(diff2, packInfo2)
 	}
+
 	if len(diff1) > 0 || len(diff2) > 0 {
-		infoDiff = append(infoDiff, MultiVersionInfo{key, diff1, diff2})
+		infoDiff = append(infoDiff, MultiVersionInfo{packageName, diff1, diff2})
 	}
 	return infoDiff
 }
@@ -166,27 +132,27 @@ func diffMaps(map1, map2 interface{}) interface{} {
 	infoDiff := []Info{}
 	multiInfoDiff := []MultiVersionInfo{}
 
-	for _, key1 := range map1Value.MapKeys() {
-		value1 := map1Value.MapIndex(key1)
-		value2 := map2Value.MapIndex(key1)
-		if !value2.IsValid() {
-			diff1.SetMapIndex(key1, value1)
-		} else if !reflect.DeepEqual(value2.Interface(), value1.Interface()) {
+	for _, pack := range map1Value.MapKeys() {
+		packageEntry1 := map1Value.MapIndex(pack)
+		packageEntry2 := map2Value.MapIndex(pack)
+		if !packageEntry2.IsValid() {
+			diff1.SetMapIndex(pack, packageEntry1)
+		} else if !reflect.DeepEqual(packageEntry2.Interface(), packageEntry1.Interface()) {
 			if multiV {
-				multiInfoDiff = multiVersionDiff(multiInfoDiff, key1.String(),
-					value1.Interface().(map[string]PackageInfo), value2.Interface().(map[string]PackageInfo))
+				multiInfoDiff = multiVersionDiff(multiInfoDiff, pack.String(),
+					packageEntry1.Interface().(map[string]PackageInfo), packageEntry2.Interface().(map[string]PackageInfo))
 			} else {
-				infoDiff = append(infoDiff, Info{key1.String(), value1.Interface().(PackageInfo),
-					value2.Interface().(PackageInfo)})
+				infoDiff = append(infoDiff, Info{pack.String(), packageEntry1.Interface().(PackageInfo),
+					packageEntry2.Interface().(PackageInfo)})
 			}
-			map2Value.SetMapIndex(key1, reflect.Value{})
+			map2Value.SetMapIndex(pack, reflect.Value{})
 		} else {
-			map2Value.SetMapIndex(key1, reflect.Value{})
+			map2Value.SetMapIndex(pack, reflect.Value{})
 		}
 	}
 	for _, key2 := range map2Value.MapKeys() {
-		value2 := map2Value.MapIndex(key2)
-		diff2.SetMapIndex(key2, value2)
+		packageEntry2 := map2Value.MapIndex(key2)
+		diff2.SetMapIndex(key2, packageEntry2)
 	}
 	if multiV {
 		return MultiVersionPackageDiff{Packages1: diff1.Interface().(map[string]map[string]PackageInfo),

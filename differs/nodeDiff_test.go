@@ -29,17 +29,17 @@ func TestGetNodePackages(t *testing.T) {
 			descrip: "all packages in one layer",
 			path:    "testDirs/packageOne",
 			expected: map[string]map[string]utils.PackageInfo{
-				"pac1": {"testDirs/packageOne/node_modules/pac1/package.json": {Version: "1.0", Size: "41"}},
-				"pac2": {"testDirs/packageOne/usr/local/lib/node_modules/pac2/package.json": {Version: "2.0", Size: "41"}},
-				"pac3": {"testDirs/packageOne/node_modules/pac3/package.json": {Version: "3.0", Size: "41"}}},
+				"pac1": {"/node_modules/pac1/": {Version: "1.0", Size: "41"}},
+				"pac2": {"/usr/local/lib/node_modules/pac2/": {Version: "2.0", Size: "41"}},
+				"pac3": {"/node_modules/pac3/": {Version: "3.0", Size: "41"}}},
 		},
 		{
 			descrip: "Multi version packages",
 			path:    "testDirs/packageMulti",
 			expected: map[string]map[string]utils.PackageInfo{
-				"pac1": {"testDirs/packageMulti/node_modules/pac1/package.json": {Version: "1.0", Size: "41"}},
-				"pac2": {"testDirs/packageMulti/node_modules/pac2/package.json": {Version: "2.0", Size: "41"},
-					"testDirs/packageMulti/usr/local/lib/node_modules/pac2/package.json": {Version: "3.0", Size: "41"}}},
+				"pac1": {"/node_modules/pac1/": {Version: "1.0", Size: "41"}},
+				"pac2": {"/node_modules/pac2/": {Version: "2.0", Size: "41"},
+					"/usr/local/lib/node_modules/pac2/": {Version: "3.0", Size: "41"}}},
 		},
 	}
 
