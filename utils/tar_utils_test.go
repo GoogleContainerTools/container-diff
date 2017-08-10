@@ -1,15 +1,12 @@
 package utils
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"errors"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
-	"reflect"
 	"testing"
 )
 
@@ -54,22 +51,39 @@ func TestUnTar(t *testing.T) {
 			expected: "testTars/la-croix-update-actual",
 			starter:  "testTars/la-croix-starter",
 		},
+		{
+			descrip:  "Dir updated",
+			tarPath:  "testTars/la-croix-dir-update.tar",
+			target:   "testTars/la-croix-dir-update",
+			expected: "testTars/la-croix-dir-update-actual",
+			starter:  "testTars/la-croix-starter",
+		},
 	}
 	for _, test := range testCases {
+		remove := true
 		if test.starter != "" {
 			CopyDir(test.starter, test.target)
 		}
 		err := UnTar(test.tarPath, test.target)
 		if err != nil && !test.err {
 			t.Errorf(test.descrip, "Got unexpected error: %s", err)
+			remove = false
 		}
 		if err == nil && test.err {
 			t.Errorf(test.descrip, "Expected error but got none: %s", err)
+			remove = false
 		}
-		if !dirEquals(test.expected, test.target) || !dirEquals(test.target, test.expected) {
-			t.Errorf(test.descrip, "Directory created not correct structure.")
+		if !dirEquals(test.expected, test.target) {
+			d1, _ := GetDirectory(test.expected, true)
+			fmt.Println(d1.Content)
+			d2, _ := GetDirectory(test.target, true)
+			fmt.Println(d2.Content)
+			t.Error(test.descrip, ": Directory created not correct structure.")
+			remove = false
 		}
-		os.RemoveAll(test.target)
+		if remove {
+			os.RemoveAll(test.target)
+		}
 	}
 }
 
@@ -164,7 +178,7 @@ func TestIsTar(t *testing.T) {
 	}
 }
 
-func TestExtractTar(t *testing.T) {
+/*func TestExtractTar(t *testing.T) {
 	tarPath := "testTars/la-croix3.tar"
 	target := "testTars/la-croix3"
 	expected := "testTars/la-croix3-full"
@@ -177,70 +191,11 @@ func TestExtractTar(t *testing.T) {
 	}
 	os.RemoveAll(target)
 
-}
+}*/
 
 func dirEquals(actual string, path string) bool {
-	files1, _ := ioutil.ReadDir(actual)
-
-	for _, file := range files1 {
-		newActualPath := filepath.Join(actual, file.Name())
-		newExpectedPath := filepath.Join(path, file.Name())
-		fstat, ok := os.Stat(newExpectedPath)
-		if ok != nil {
-			return false
-		}
-
-		if file.IsDir() && !dirEquals(newActualPath, newExpectedPath) {
-			return false
-		}
-
-		if fstat.Name() != file.Name() {
-			return false
-		}
-		if fstat.Size() != file.Size() {
-			return false
-		}
-		if filepath.Ext(file.Name()) == ".tar" {
-			continue
-		}
-
-		content1, _ := ioutil.ReadFile(newActualPath)
-		content2, _ := ioutil.ReadFile(newExpectedPath)
-
-		if 0 != bytes.Compare(content1, content2) {
-			return false
-		}
-	}
-	return true
-}
-
-func TestDirToJSON(t *testing.T) {
-	tests := []struct {
-		path     string
-		target   string
-		expected string
-		deep     bool
-	}{
-		{"testTars/la-croix3-full", "testTars/la-croix3-full.json", "testTars/la-croix3-actual.json", true},
-		{"testTars/la-croix3-full", "testTars/la-croix3-temp.json", "testTars/la-croix3-shallow.json", false},
-	}
-	for _, testCase := range tests {
-		err := DirToJSON(testCase.path, testCase.target, testCase.deep)
-		if err != nil {
-			t.Errorf("Error converting structure to JSON")
-		}
-
-		var actualJSON Directory
-		var expectedJSON Directory
-		content1, _ := ioutil.ReadFile(testCase.target)
-		content2, _ := ioutil.ReadFile(testCase.expected)
-
-		json.Unmarshal(content1, &actualJSON)
-		json.Unmarshal(content2, &expectedJSON)
-
-		if !reflect.DeepEqual(actualJSON, expectedJSON) {
-			t.Errorf("JSON was incorrect")
-		}
-		os.Remove(testCase.target)
-	}
+	d1, _ := GetDirectory(actual, true)
+	d2, _ := GetDirectory(path, true)
+	_, same := DiffDirectory(d1, d2)
+	return same
 }

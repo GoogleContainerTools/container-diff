@@ -68,25 +68,42 @@ func TestGetModifiedEntries(t *testing.T) {
 }
 
 func TestGetDirectory(t *testing.T) {
-	type dirtestpair struct {
-		input            string
-		expected_success bool
+	tests := []struct {
+		descrip  string
+		path     string
+		expected Directory
+		deep     bool
+	}{
+		{
+			descrip: "deep", 
+			path: "testTars/la-croix3-full",
+			expected: Directory{
+				Root: "testTars/la-croix3-full", 
+				Content: []string{"/lime.txt","/nest","/nest/f1.txt","/nested-dir","/nested-dir/f2.txt","/passionfruit.txt","/peach-pear.txt"},
+			},
+			deep: true,
+		},
+		{
+			descrip: "shallow", 
+			path: "testTars/la-croix3-full",
+			expected: Directory{
+				Root: "testTars/la-croix3-full", 
+				Content: []string{"/lime.txt","/nest","/nested-dir","/passionfruit.txt","/peach-pear.txt"},
+			},
+			deep: false,
+		},
 	}
-
-	var dirtests = []dirtestpair{
-		{"test_files/dir.json", true},
-		{"test_files/dir_bad.json", false},
-		{"nonexistentpath", false},
-		{"", false},
-	}
-
-	for _, test := range dirtests {
-		_, err := GetDirectory(test.input)
-		if err != nil && test.expected_success {
-			t.Errorf("Got unexpected error: %s", err)
+	for _, testCase := range tests {
+		dir, err := GetDirectory(testCase.path, testCase.deep)
+		if err != nil {
+			t.Errorf("Error converting directory to Directory struct")
 		}
-		if err == nil && !test.expected_success {
-			t.Errorf("Expected error but got none")
+
+		actualDir := dir
+		expectedDir := testCase.expected
+
+		if !reflect.DeepEqual(actualDir, expectedDir) {
+			t.Errorf("%s test was incorrect\nExpected: %s\nGot: %s", testCase.descrip, expectedDir, actualDir)
 		}
 	}
 }

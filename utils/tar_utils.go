@@ -2,9 +2,7 @@ package utils
 
 import (
 	"archive/tar"
-	"encoding/json"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -77,9 +75,9 @@ func unpackTar(tr *tar.Reader, path string) error {
 
 // UnTar takes in a path to a tar file and writes the untarred version to the provided target.
 // Only untars one level, does not untar nested tars.
-func UnTar(filename string, path string) error {
-	if _, ok := os.Stat(path); ok != nil {
-		os.MkdirAll(path, 0777)
+func UnTar(filename string, target string) error {
+	if _, ok := os.Stat(target); ok != nil {
+		os.MkdirAll(target, 0777)
 	}
 
 	file, err := os.Open(filename)
@@ -88,7 +86,7 @@ func UnTar(filename string, path string) error {
 	}
 	defer file.Close()
 	tr := tar.NewReader(file)
-	err = unpackTar(tr, path)
+	err = unpackTar(tr, target)
 	if err != nil {
 		glog.Error(err)
 		return err
@@ -122,55 +120,6 @@ func ExtractTar(path string) error {
 	}
 
 	return filepath.Walk(path, untarWalkFn)
-}
-
-func TarToDir(tarPath string, deep bool) (string, string, error) {
-	err := ExtractTar(tarPath)
-	if err != nil {
-		return "", "", err
-	}
-	path := strings.TrimSuffix(tarPath, filepath.Ext(tarPath))
-	jsonPath := path + ".json"
-	err = DirToJSON(path, jsonPath, deep)
-	if err != nil {
-		return "", "", err
-	}
-	return jsonPath, path, nil
-}
-
-// DirToJSON records the directory structure starting at the provided path as in a json file.
-func DirToJSON(path string, target string, deep bool) error {
-	var directory Directory
-	directory.Root = path
-
-	if deep {
-		tarJSONWalkFn := func(currPath string, info os.FileInfo, err error) error {
-			newContent := strings.TrimPrefix(currPath, directory.Root)
-			if newContent != "" {
-				directory.Content = append(directory.Content, newContent)
-			}
-			return nil
-		}
-
-		filepath.Walk(path, tarJSONWalkFn)
-	} else {
-		contents, err := ioutil.ReadDir(path)
-		if err != nil {
-			return err
-		}
-
-		for _, file := range contents {
-			fileName := "/" + file.Name()
-			directory.Content = append(directory.Content, fileName)
-		}
-	}
-
-	data, err := json.Marshal(directory)
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(target, data, 0777)
 }
 
 func CheckTar(image string) bool {
