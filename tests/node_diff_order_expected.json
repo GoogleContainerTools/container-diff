@@ -1,0 +1,19 @@
+[
+  {
+    "DiffType": "NodeDiffer",
+    "Diff": {
+      "Image1": "gcr.io/gcp-runtimes/node-modified:2.0",
+      "Packages1": {},
+      "Image2": "gcr.io/gcp-runtimes/node-modified",
+      "Packages2": {
+        "pax": {
+          "node-modified/node_modules/pax/package.json": {
+            "Version": "0.2.1",
+            "Size": "11365"
+          }
+        }
+      },
+      "InfoDiff": []
+    }
+  }
+]

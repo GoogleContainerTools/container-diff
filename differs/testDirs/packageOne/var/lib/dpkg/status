@@ -1,0 +1,11 @@
+Package: pac1
+info: other stuff
+Version: 1.0
+
+Package: pac2
+info: more other stuff
+Version: 2.0
+
+Package: pac3
+Version: 3.0
+info: again other stuff

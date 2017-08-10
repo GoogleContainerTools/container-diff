@@ -1,0 +1,14 @@
+[
+  {
+    "DiffType": "FileDiffer",
+    "Diff": {
+      "Image1": "gcr.io/gcp-runtimes/diff-base",
+      "Image2": "gcr.io/gcp-runtimes/diff-modified",
+      "Adds": [],
+      "Dels": [
+        "/home/test"
+      ],
+      "Mods": null
+    }
+  }
+]

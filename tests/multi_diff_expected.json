@@ -1,0 +1,129 @@
+[
+  {
+    "DiffType": "AptDiffer",
+    "Diff": {
+      "Image1": "gcr.io/gcp-runtimes/multi-base",
+      "Packages1": {},
+      "Image2": "gcr.io/gcp-runtimes/multi-modified",
+      "Packages2": {
+        "dh-python": {
+          "Version": "1.20141111-2",
+          "Size": "277"
+        },
+        "libmpdec2": {
+          "Version": "2.4.1-1",
+          "Size": "275"
+        },
+        "libpython3-stdlib": {
+          "Version": "3.4.2-2",
+          "Size": "28"
+        },
+        "libpython3.4-minimal": {
+          "Version": "3.4.2-1",
+          "Size": "3310"
+        },
+        "libpython3.4-stdlib": {
+          "Version": "3.4.2-1",
+          "Size": "9484"
+        },
+        "python3": {
+          "Version": "3.4.2-2",
+          "Size": "36"
+        },
+        "python3-minimal": {
+          "Version": "3.4.2-2",
+          "Size": "96"
+        },
+        "python3.4": {
+          "Version": "3.4.2-1",
+          "Size": "336"
+        },
+        "python3.4-minimal": {
+          "Version": "3.4.2-1",
+          "Size": "4506"
+        }
+      },
+      "InfoDiff": []
+    }
+  },
+  {
+    "DiffType": "NodeDiffer",
+    "Diff": {
+      "Image1": "gcr.io/gcp-runtimes/multi-base",
+      "Packages1": {},
+      "Image2": "gcr.io/gcp-runtimes/multi-modified",
+      "Packages2": {
+        "pax": {
+          "multi-modified/node_modules/pax/package.json": {
+            "Version": "0.2.1",
+            "Size": "11998"
+          }
+        }
+      },
+      "InfoDiff": [
+        {
+          "Package": "sax",
+          "Info1": [
+            {
+              "Version": "1.2.4",
+              "Size": "56382"
+            }
+          ],
+          "Info2": [
+            {
+              "Version": "0.1.1",
+              "Size": "127107"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "DiffType": "PipDiffer",
+    "Diff": {
+      "Image1": "gcr.io/gcp-runtimes/multi-base",
+      "Packages1": {
+        "mock": {
+          "python3.6": {
+            "Version": "2.0.0",
+            "Size": "504226"
+          }
+        },
+        "pbr": {
+          "python3.6": {
+            "Version": "3.1.1",
+            "Size": "447110"
+          }
+        },
+        "pip": {
+          "python3.6": {
+            "Version": "9.0.1",
+            "Size": "5289421"
+          }
+        },
+        "setuptools": {
+          "python3.6": {
+            "Version": "36.2.2",
+            "Size": "839895"
+          }
+        },
+        "six": {
+          "python3.6": {
+            "Version": "1.10.0",
+            "Size": "30098"
+          }
+        },
+        "wheel": {
+          "python3.6": {
+            "Version": "0.29.0",
+            "Size": "103509"
+          }
+        }
+      },
+      "Image2": "gcr.io/gcp-runtimes/multi-modified",
+      "Packages2": {},
+      "InfoDiff": []
+    }
+  }
+]

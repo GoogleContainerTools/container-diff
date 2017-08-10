@@ -1,0 +1,82 @@
+[
+  {
+    "DiffType": "AptDiffer",
+    "Diff": {
+      "Image1": "gcr.io/gcp-runtimes/apt-base",
+      "Packages1": {
+        "dh-python": {
+          "Version": "2.20170125",
+          "Size": "402"
+        },
+        "libmpdec2": {
+          "Version": "2.4.2-1",
+          "Size": "254"
+        },
+        "libpython3-stdlib": {
+          "Version": "3.5.3-1",
+          "Size": "36"
+        },
+        "libpython3.5-minimal": {
+          "Version": "3.5.3-1",
+          "Size": "3747"
+        },
+        "libpython3.5-stdlib": {
+          "Version": "3.5.3-1",
+          "Size": "9896"
+        },
+        "python3": {
+          "Version": "3.5.3-1",
+          "Size": "67"
+        },
+        "python3-minimal": {
+          "Version": "3.5.3-1",
+          "Size": "120"
+        },
+        "python3.5": {
+          "Version": "3.5.3-1",
+          "Size": "319"
+        },
+        "python3.5-minimal": {
+          "Version": "3.5.3-1",
+          "Size": "9411"
+        }
+      },
+      "Image2": "gcr.io/gcp-runtimes/apt-modified",
+      "Packages2": {
+        "libffi6": {
+          "Version": "3.2.1-6",
+          "Size": "56"
+        },
+        "libpython-stdlib": {
+          "Version": "2.7.13-2",
+          "Size": "37"
+        },
+        "libpython2.7-minimal": {
+          "Version": "2.7.13-2",
+          "Size": "2767"
+        },
+        "libpython2.7-stdlib": {
+          "Version": "2.7.13-2",
+          "Size": "8550"
+        },
+        "python": {
+          "Version": "2.7.13-2",
+          "Size": "648"
+        },
+        "python-minimal": {
+          "Version": "2.7.13-2",
+          "Size": "145"
+        },
+        "python2.7": {
+          "Version": "2.7.13-2",
+          "Size": "359"
+        },
+        "python2.7-minimal": {
+          "Version": "2.7.13-2",
+          "Size": "3820"
+        }
+      },
+      "InfoDiff": []
+    }
+  }
+]
