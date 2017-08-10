@@ -47,31 +47,30 @@ type PackageInfo struct {
 	Size    string
 }
 
-
-func multiVersionDiff(infoDiff []MultiVersionInfo, key string, map1, map2 map[string]PackageInfo) []MultiVersionInfo {
+func multiVersionDiff(infoDiff []MultiVersionInfo, packageName string, map1, map2 map[string]PackageInfo) []MultiVersionInfo {
 	diff1 := []PackageInfo{}
 	diff2 := []PackageInfo{}
-	for key1, value1 := range map1 {
-		val2, ok := map2[key1]
+	for path, packInfo1 := range map1 {
+		packInfo2, ok := map2[path]
 		if !ok {
-			diff1 = append(diff1, value1)
+			diff1 = append(diff1, packInfo1)
 			continue
 		} else {
-			if reflect.DeepEqual(value1, val2) {
-				delete(map2, key1)
+			if reflect.DeepEqual(packInfo1, packInfo2) {
+				delete(map2, path)
 			} else {
-				diff1 = append(diff1, value1)
-				diff2 = append(diff2, val2)
-				delete(map2, key1)
+				diff1 = append(diff1, packInfo1)
+				diff2 = append(diff2, packInfo2)
+				delete(map2, path)
 			}
 		}
 	}
-	for _, value2 := range map2 {
-		diff2 = append(diff2, value2)
+	for _, packInfo2 := range map2 {
+		diff2 = append(diff2, packInfo2)
 	}
 
 	if len(diff1) > 0 || len(diff2) > 0 {
-		infoDiff = append(infoDiff, MultiVersionInfo{key, diff1, diff2})
+		infoDiff = append(infoDiff, MultiVersionInfo{packageName, diff1, diff2})
 	}
 	return infoDiff
 }
@@ -133,27 +132,27 @@ func diffMaps(map1, map2 interface{}) interface{} {
 	infoDiff := []Info{}
 	multiInfoDiff := []MultiVersionInfo{}
 
-	for _, key1 := range map1Value.MapKeys() {
-		value1 := map1Value.MapIndex(key1)
-		value2 := map2Value.MapIndex(key1)
-		if !value2.IsValid() {
-			diff1.SetMapIndex(key1, value1)
-		} else if !reflect.DeepEqual(value2.Interface(), value1.Interface()) {
+	for _, pack := range map1Value.MapKeys() {
+		packageEntry1 := map1Value.MapIndex(pack)
+		packageEntry2 := map2Value.MapIndex(pack)
+		if !packageEntry2.IsValid() {
+			diff1.SetMapIndex(pack, packageEntry1)
+		} else if !reflect.DeepEqual(packageEntry2.Interface(), packageEntry1.Interface()) {
 			if multiV {
-				multiInfoDiff = multiVersionDiff(multiInfoDiff, key1.String(),
-					value1.Interface().(map[string]PackageInfo), value2.Interface().(map[string]PackageInfo))
+				multiInfoDiff = multiVersionDiff(multiInfoDiff, pack.String(),
+					packageEntry1.Interface().(map[string]PackageInfo), packageEntry2.Interface().(map[string]PackageInfo))
 			} else {
-				infoDiff = append(infoDiff, Info{key1.String(), value1.Interface().(PackageInfo),
-					value2.Interface().(PackageInfo)})
+				infoDiff = append(infoDiff, Info{pack.String(), packageEntry1.Interface().(PackageInfo),
+					packageEntry2.Interface().(PackageInfo)})
 			}
-			map2Value.SetMapIndex(key1, reflect.Value{})
+			map2Value.SetMapIndex(pack, reflect.Value{})
 		} else {
-			map2Value.SetMapIndex(key1, reflect.Value{})
+			map2Value.SetMapIndex(pack, reflect.Value{})
 		}
 	}
 	for _, key2 := range map2Value.MapKeys() {
-		value2 := map2Value.MapIndex(key2)
-		diff2.SetMapIndex(key2, value2)
+		packageEntry2 := map2Value.MapIndex(key2)
+		diff2.SetMapIndex(key2, packageEntry2)
 	}
 	if multiV {
 		return MultiVersionPackageDiff{Packages1: diff1.Interface().(map[string]map[string]PackageInfo),
