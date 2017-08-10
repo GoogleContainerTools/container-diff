@@ -50,8 +50,8 @@ func (d PipDiffer) getPackages(path string) (map[string]map[string]utils.Package
 		packagesPath := filepath.Join(path, "usr/local/lib", pyVersion, "site-packages")
 		contents, err := ioutil.ReadDir(packagesPath)
 		if err != nil {
-			// layer's Python folder doesn't have a site-packages folder
-			return packages, nil
+			// python version folder doesn't have a site-packages folder
+			continue
 		}
 
 		for i := 0; i < len(contents); i++ {
