@@ -82,13 +82,13 @@ func TestDiffMaps(t *testing.T) {
 		{
 			descrip: "MultiVersion call with identical Packages in different layers",
 			map1: map[string]map[string]PackageInfo{
-				"pac5": {"img/hash1/globalPath": {"version", "size"}},
-				"pac3": {"img/hash1/notquite/localPath": {"version", "size"}},
-				"pac4": {"img/samePlace": {"version", "size"}}},
+				"pac5": {"globalPath": {"version", "size"}},
+				"pac3": {"notquite/localPath": {"version", "size"}},
+				"pac4": {"globalPath": {"version", "size"}}},
 			map2: map[string]map[string]PackageInfo{
-				"pac5": {"img/hash2/globalPath": {"version", "size"}},
-				"pac3": {"img/hash2/notquite/localPath": {"version", "size"}},
-				"pac4": {"img/samePlace": {"version", "size"}}},
+				"pac5": {"globalPath": {"version", "size"}},
+				"pac3": {"notquite/localPath": {"version", "size"}},
+				"pac4": {"globalPath": {"version", "size"}}},
 			expected: MultiVersionPackageDiff{
 				Packages1: map[string]map[string]PackageInfo{},
 				Packages2: map[string]map[string]PackageInfo{},
@@ -98,22 +98,22 @@ func TestDiffMaps(t *testing.T) {
 		{
 			descrip: "MultiVersion Packages",
 			map1: map[string]map[string]PackageInfo{
-				"pac5": {"img/onlyImg1": {"version", "size"}},
-				"pac4": {"img/hash1/samePlace": {"version", "size"}},
-				"pac1": {"img/layer1/layer/node_modules/pac1": {"1.0", "40"}},
-				"pac2": {"img/layer1/layer/usr/local/lib/node_modules/pac2": {"2.0", "50"},
-					"img/layer2/layer/usr/local/lib/node_modules/pac2": {"3.0", "50"}}},
+				"pac5": {"onlyImg1": {"version", "size"}},
+				"pac4": {"samePlace": {"version", "size"}},
+				"pac1": {"node_modules/pac1": {"1.0", "40"}},
+				"pac2": {"usr/local/lib/node_modules/pac2": {"2.0", "50"},
+					"node_modules/pac2": {"3.0", "50"}}},
 			map2: map[string]map[string]PackageInfo{
-				"pac4": {"img/hash2/samePlace": {"version", "size"}},
-				"pac1": {"img/layer2/layer/node_modules/pac1": {"2.0", "40"}},
-				"pac2": {"img/layer3/layer/usr/local/lib/node_modules/pac2": {"4.0", "50"}},
-				"pac3": {"img/layer2/layer/usr/local/lib/node_modules/pac2": {"5.0", "100"}}},
+				"pac4": {"samePlace": {"version", "size"}},
+				"pac1": {"node_modules/pac1": {"2.0", "40"}},
+				"pac2": {"usr/local/lib/node_modules/pac2": {"4.0", "50"}},
+				"pac3": {"usr/local/lib/node_modules/pac3": {"5.0", "100"}}},
 			expected: MultiVersionPackageDiff{
 				Packages1: map[string]map[string]PackageInfo{
-					"pac5": {"img/onlyImg1": {"version", "size"}},
+					"pac5": {"onlyImg1": {"version", "size"}},
 				},
 				Packages2: map[string]map[string]PackageInfo{
-					"pac3": {"img/layer2/layer/usr/local/lib/node_modules/pac2": {"5.0", "100"}},
+					"pac3": {"usr/local/lib/node_modules/pac3": {"5.0", "100"}},
 				},
 				InfoDiff: []MultiVersionInfo{
 					{
