@@ -27,7 +27,8 @@ func buildNodePaths(path string) ([]string, error) {
 	return []string{globalPaths, localPath}, nil
 }
 
-func (d NodeDiffer) getPackages(path string) (map[string]map[string]utils.PackageInfo, error) {
+func (d NodeDiffer) getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error) {
+	path := image.FSPath
 	packages := make(map[string]map[string]utils.PackageInfo)
 	if _, err := os.Stat(path); err != nil {
 		// path provided invalid

@@ -53,46 +53,91 @@ func TestGetPythonVersion(t *testing.T) {
 			t.Error("Expected error but got none.")
 		}
 		if !reflect.DeepEqual(version, test.expectedVersions) {
-			t.Errorf("Expected: %s.  Got: %s", test.expectedVersions, version)
+			t.Errorf("\nExpected: %s\nGot: %s", test.expectedVersions, version)
 		}
 	}
 }
 
 func TestGetPythonPackages(t *testing.T) {
 	testCases := []struct {
-		path             string
+		descrip          string
+		image            utils.Image
 		expectedPackages map[string]map[string]utils.PackageInfo
 	}{
 		{
-			path:             "testDirs/pipTests/noPackagesTest",
+			descrip: "noPackagesTest",
+			image: utils.Image{
+				FSPath: "testDirs/pipTests/noPackagesTest",
+			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{},
 		},
 		{
-			path: "testDirs/pipTests/packagesOneLayer",
+			descrip: "packagesMultiVersion, no PYTHONPATH",
+			image: utils.Image{
+				FSPath: "testDirs/pipTests/packagesMultiVersion",
+			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{
-				"packageone": {"python3.6": {Version: "3.6.9", Size: "0"}},
-				"packagetwo": {"python3.6": {Version: "4.6.2", Size: "0"}},
-				"script1":    {"python3.6": {Version: "1.0", Size: "0"}},
-				"script2":    {"python3.6": {Version: "2.0", Size: "0"}},
+				"packageone": {
+					"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"},
+					"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python2.7/site-packages": {Version: "0.1.1", Size: "0"},
+				},
+				"packagetwo": {"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
+				"script1":    {"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python3.6/site-packages": {Version: "1.0", Size: "0"}},
+				"script2":    {"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python3.6/site-packages": {Version: "2.0", Size: "0"}},
+				"script3":    {"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python2.7/site-packages": {Version: "3.0", Size: "0"}},
 			},
 		},
 		{
-			path: "testDirs/pipTests/packagesMultiVersion",
+			descrip: "packagesSingleVersion, no PYTHONPATH",
+			image: utils.Image{
+				FSPath: "testDirs/pipTests/packagesSingleVersion",
+			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{
-				"packageone": {"python3.6": {Version: "3.6.9", Size: "0"},
-					"python2.7": {Version: "0.1.1", Size: "0"}},
-				"packagetwo": {"python3.6": {Version: "4.6.2", Size: "0"}},
-				"script1":    {"python3.6": {Version: "1.0", Size: "0"}},
-				"script2":    {"python3.6": {Version: "2.0", Size: "0"}},
-				"script3":    {"python2.7": {Version: "3.0", Size: "0"}},
+				"packageone": {"testDirs/pipTests/packagesSingleVersion/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"}},
+				"packagetwo": {"testDirs/pipTests/packagesSingleVersion/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
+				"script1":    {"testDirs/pipTests/packagesSingleVersion/usr/local/lib/python3.6/site-packages": {Version: "1.0", Size: "0"}},
+				"script2":    {"testDirs/pipTests/packagesSingleVersion/usr/local/lib/python3.6/site-packages": {Version: "2.0", Size: "0"}},
+			},
+		},
+		{
+			descrip: "pythonPathTests, PYTHONPATH",
+			image: utils.Image{
+				FSPath: "testDirs/pipTests/pythonPathTests",
+				Config: utils.ConfigSchema{
+					Config: utils.ConfigObject{
+						Env: []string{"PYTHONPATH=testDirs/pipTests/pythonPathTests/pythonPath1:testDirs/pipTests/pythonPathTests/pythonPath2/subdir", "ENVVAR2=something"},
+					},
+				},
+			},
+			expectedPackages: map[string]map[string]utils.PackageInfo{
+				"packageone":   {"testDirs/pipTests/pythonPathTests/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"}},
+				"packagetwo":   {"testDirs/pipTests/pythonPathTests/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
+				"packagefive":  {"testDirs/pipTests/pythonPathTests/pythonPath2/subdir": {Version: "3.6.9", Size: "0"}},
+				"packagesix":   {"testDirs/pipTests/pythonPathTests/pythonPath1": {Version: "3.6.9", Size: "0"}},
+				"packageseven": {"testDirs/pipTests/pythonPathTests/pythonPath1": {Version: "4.6.2", Size: "0"}},
+			},
+		},
+		{
+			descrip: "pythonPathTests, no PYTHONPATH",
+			image: utils.Image{
+				FSPath: "testDirs/pipTests/pythonPathTests",
+				Config: utils.ConfigSchema{
+					Config: utils.ConfigObject{
+						Env: []string{"ENVVAR=something"},
+					},
+				},
+			},
+			expectedPackages: map[string]map[string]utils.PackageInfo{
+				"packageone": {"testDirs/pipTests/pythonPathTests/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"}},
+				"packagetwo": {"testDirs/pipTests/pythonPathTests/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
 			},
 		},
 	}
 	for _, test := range testCases {
 		d := PipDiffer{}
-		packages, _ := d.getPackages(test.path)
+		packages, _ := d.getPackages(test.image)
 		if !reflect.DeepEqual(packages, test.expectedPackages) {
-			t.Errorf("Expected: %s but got: %s", test.expectedPackages, packages)
+			t.Errorf("%s\nExpected: %s\nGot: %s", test.descrip, test.expectedPackages, packages)
 		}
 	}
 }

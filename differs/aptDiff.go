@@ -19,7 +19,8 @@ func (d AptDiffer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
 	return diff, err
 }
 
-func (d AptDiffer) getPackages(path string) (map[string]utils.PackageInfo, error) {
+func (d AptDiffer) getPackages(image utils.Image) (map[string]utils.PackageInfo, error) {
+	path := image.FSPath
 	packages := make(map[string]utils.PackageInfo)
 	if _, err := os.Stat(path); err != nil {
 		// invalid image directory path
