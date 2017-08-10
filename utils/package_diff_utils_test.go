@@ -165,63 +165,6 @@ func TestDiffMaps(t *testing.T) {
 	}
 }
 
-func TestContains(t *testing.T) {
-	testCases := []struct {
-		descrip     string
-		VersionList []PackageInfo
-		Layers      []string
-		currLayer   string
-		currVersion PackageInfo
-		index       int
-		ok          bool
-	}{
-		{
-			descrip:     "Does contain",
-			VersionList: []PackageInfo{{Version: "2", Size: "b"}, {Version: "1", Size: "a"}},
-			Layers:      []string{"img/1/global", "img/2/local"},
-			currLayer:   "img/3/local",
-			currVersion: PackageInfo{Version: "1", Size: "a"},
-			index:       1,
-			ok:          true,
-		},
-		{
-			descrip:     "Not contained",
-			VersionList: []PackageInfo{{Version: "1", Size: "a"}, {Version: "2", Size: "b"}},
-			Layers:      []string{"img/1/global", "img/2/local"},
-			currLayer:   "img/3/global",
-			currVersion: PackageInfo{Version: "2", Size: "a"},
-			index:       0,
-			ok:          false,
-		},
-		{
-			descrip:     "Does contain but path doesn't match",
-			VersionList: []PackageInfo{{Version: "1", Size: "a"}, {Version: "2", Size: "b"}},
-			Layers:      []string{"img/1/local", "img/2/local"},
-			currLayer:   "img/3/global",
-			currVersion: PackageInfo{Version: "1", Size: "a"},
-			index:       0,
-			ok:          false,
-		},
-		{
-			descrip:     "Layers and Versions not of same length",
-			VersionList: []PackageInfo{{Version: "1", Size: "a"}, {Version: "2", Size: "b"}},
-			Layers:      []string{"img/1/local"},
-			currLayer:   "img/3/global",
-			currVersion: PackageInfo{Version: "1", Size: "a"},
-			index:       0,
-			ok:          false,
-		},
-	}
-	for _, test := range testCases {
-		index, ok := contains(test.VersionList, test.Layers, test.currLayer, test.currVersion)
-		if test.ok != ok {
-			t.Errorf("Expected status: %t, but got: %t", test.ok, ok)
-		}
-		if test.index != index {
-			t.Errorf("Expected index: %d, but got: %d", test.index, index)
-		}
-	}
-}
 func TestCheckPackageMapType(t *testing.T) {
 	testCases := []struct {
 		descrip       string
