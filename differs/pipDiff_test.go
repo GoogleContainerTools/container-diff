@@ -78,13 +78,13 @@ func TestGetPythonPackages(t *testing.T) {
 			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{
 				"packageone": {
-					"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"},
-					"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python2.7/site-packages": {Version: "0.1.1", Size: "0"},
+					"/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"},
+					"/usr/local/lib/python2.7/site-packages": {Version: "0.1.1", Size: "0"},
 				},
-				"packagetwo": {"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
-				"script1":    {"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python3.6/site-packages": {Version: "1.0", Size: "0"}},
-				"script2":    {"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python3.6/site-packages": {Version: "2.0", Size: "0"}},
-				"script3":    {"testDirs/pipTests/packagesMultiVersion/usr/local/lib/python2.7/site-packages": {Version: "3.0", Size: "0"}},
+				"packagetwo": {"/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
+				"script1":    {"/usr/local/lib/python3.6/site-packages": {Version: "1.0", Size: "0"}},
+				"script2":    {"/usr/local/lib/python3.6/site-packages": {Version: "2.0", Size: "0"}},
+				"script3":    {"/usr/local/lib/python2.7/site-packages": {Version: "3.0", Size: "0"}},
 			},
 		},
 		{
@@ -93,10 +93,10 @@ func TestGetPythonPackages(t *testing.T) {
 				FSPath: "testDirs/pipTests/packagesSingleVersion",
 			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{
-				"packageone": {"testDirs/pipTests/packagesSingleVersion/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"}},
-				"packagetwo": {"testDirs/pipTests/packagesSingleVersion/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
-				"script1":    {"testDirs/pipTests/packagesSingleVersion/usr/local/lib/python3.6/site-packages": {Version: "1.0", Size: "0"}},
-				"script2":    {"testDirs/pipTests/packagesSingleVersion/usr/local/lib/python3.6/site-packages": {Version: "2.0", Size: "0"}},
+				"packageone": {"/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"}},
+				"packagetwo": {"/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
+				"script1":    {"/usr/local/lib/python3.6/site-packages": {Version: "1.0", Size: "0"}},
+				"script2":    {"/usr/local/lib/python3.6/site-packages": {Version: "2.0", Size: "0"}},
 			},
 		},
 		{
@@ -110,11 +110,11 @@ func TestGetPythonPackages(t *testing.T) {
 				},
 			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{
-				"packageone":   {"testDirs/pipTests/pythonPathTests/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"}},
-				"packagetwo":   {"testDirs/pipTests/pythonPathTests/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
-				"packagefive":  {"testDirs/pipTests/pythonPathTests/pythonPath2/subdir": {Version: "3.6.9", Size: "0"}},
-				"packagesix":   {"testDirs/pipTests/pythonPathTests/pythonPath1": {Version: "3.6.9", Size: "0"}},
-				"packageseven": {"testDirs/pipTests/pythonPathTests/pythonPath1": {Version: "4.6.2", Size: "0"}},
+				"packageone":   {"/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"}},
+				"packagetwo":   {"/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
+				"packagefive":  {"/pythonPath2/subdir": {Version: "3.6.9", Size: "0"}},
+				"packagesix":   {"/pythonPath1": {Version: "3.6.9", Size: "0"}},
+				"packageseven": {"/pythonPath1": {Version: "4.6.2", Size: "0"}},
 			},
 		},
 		{
@@ -128,8 +128,8 @@ func TestGetPythonPackages(t *testing.T) {
 				},
 			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{
-				"packageone": {"testDirs/pipTests/pythonPathTests/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"}},
-				"packagetwo": {"testDirs/pipTests/pythonPathTests/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
+				"packageone": {"/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: "0"}},
+				"packagetwo": {"/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: "0"}},
 			},
 		},
 	}

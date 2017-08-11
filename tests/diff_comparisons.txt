@@ -4,3 +4,5 @@ apt tests/apt_diff_actual.json tests/apt_diff_expected.json
 node tests/node_diff_actual.json tests/node_diff_expected.json
 node tests/node_diff_order_actual.json tests/node_diff_order_expected.json
 multi tests/multi_diff_actual.json tests/multi_diff_expected.json
+history tests/hist_diff_actual.json tests/hist_diff_expected.json
+multihist tests/multi_hist_diff_actual.json tests/multi_hist_diff_expected.json
