@@ -3,8 +3,10 @@ package differs
 import (
 	"io/ioutil"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 	"github.com/golang/glog"
@@ -37,18 +39,43 @@ func getPythonVersion(pathToLayer string) ([]string, error) {
 	return matches, nil
 }
 
-func (d PipDiffer) getPackages(path string) (map[string]map[string]utils.PackageInfo, error) {
-	packages := make(map[string]map[string]utils.PackageInfo)
+func getPythonPaths(vars []string) []string {
+	paths := []string{}
+	for _, envVar := range vars {
+		pythonPathPattern := regexp.MustCompile("^PYTHONPATH=(.*)")
+		match := pythonPathPattern.FindStringSubmatch(envVar)
+		if len(match) != 0 {
+			pythonPath := match[1]
+			paths = strings.Split(pythonPath, ":")
+			break
+		}
+	}
+	return paths
+}
 
+func (d PipDiffer) getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error) {
+	path := image.FSPath
+	packages := make(map[string]map[string]utils.PackageInfo)
+	pythonPaths := []string{}
+	if !reflect.DeepEqual(utils.ConfigSchema{}, image.Config) {
+		paths := getPythonPaths(image.Config.Config.Env)
+		for _, p := range paths {
+			pythonPaths = append(pythonPaths, p)
+		}
+	}
 	pythonVersions, err := getPythonVersion(path)
 	if err != nil {
-		// layer doesn't have a Python version installed
+		// Image doesn't have Python installed
 		return packages, nil
 	}
 
-	for _, pyVersion := range pythonVersions {
-		packagesPath := filepath.Join(path, "usr/local/lib", pyVersion, "site-packages")
-		contents, err := ioutil.ReadDir(packagesPath)
+	for _, pythonVersion := range pythonVersions {
+		packagesPath := filepath.Join(path, "usr/local/lib", pythonVersion, "site-packages")
+		pythonPaths = append(pythonPaths, packagesPath)
+	}
+
+	for _, pythonPath := range pythonPaths {
+		contents, err := ioutil.ReadDir(pythonPath)
 		if err != nil {
 			// python version folder doesn't have a site-packages folder
 			continue
@@ -57,7 +84,6 @@ func (d PipDiffer) getPackages(path string) (map[string]map[string]utils.Package
 		for i := 0; i < len(contents); i++ {
 			c := contents[i]
 			fileName := c.Name()
-
 			// check if package
 			packageDir := regexp.MustCompile("^([a-z|A-Z|0-9|_]+)-(([0-9]+?\\.){2,3})dist-info$")
 			packageMatch := packageDir.FindStringSubmatch(fileName)
@@ -69,7 +95,7 @@ func (d PipDiffer) getPackages(path string) (map[string]map[string]utils.Package
 				// by taking the file entry alphabetically before it (for a package) or after it (for a script)
 				var size string
 				if i-1 >= 0 && contents[i-1].Name() == packageName {
-					packagePath := filepath.Join(packagesPath, packageName)
+					packagePath := filepath.Join(pythonPath, packageName)
 					intSize, err := utils.GetDirectorySize(packagePath)
 					if err != nil {
 						glog.Errorf("Could not obtain size for package %s", packagePath)
@@ -85,7 +111,8 @@ func (d PipDiffer) getPackages(path string) (map[string]map[string]utils.Package
 					continue
 				}
 				currPackage := utils.PackageInfo{Version: version, Size: size}
-				addToMap(packages, packageName, pyVersion, currPackage)
+				mapPath := strings.Replace(pythonPath, path, "", 1)
+				addToMap(packages, packageName, mapPath, currPackage)
 			}
 		}
 	}
@@ -93,13 +120,13 @@ func (d PipDiffer) getPackages(path string) (map[string]map[string]utils.Package
 	return packages, nil
 }
 
-func addToMap(packages map[string]map[string]utils.PackageInfo, pack string, pyVersion string, packInfo utils.PackageInfo) {
+func addToMap(packages map[string]map[string]utils.PackageInfo, pack string, path string, packInfo utils.PackageInfo) {
 	if _, ok := packages[pack]; !ok {
 		// package not yet seen
 		infoMap := make(map[string]utils.PackageInfo)
-		infoMap[pyVersion] = packInfo
+		infoMap[path] = packInfo
 		packages[pack] = infoMap
 		return
 	}
-	packages[pack][pyVersion] = packInfo
+	packages[pack][path] = packInfo
 }
