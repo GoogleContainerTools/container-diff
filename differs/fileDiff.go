@@ -52,6 +52,7 @@ func diffImageFiles(image1, image2 utils.Image) (utils.DirDiff, error) {
 		Image2: image2.Source,
 		Adds:   adds,
 		Dels:   dels,
+		Mods:	[]string{},
 	}
 
 	err = os.Remove(target1)

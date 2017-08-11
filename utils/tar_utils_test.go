@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	//"fmt"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -74,10 +74,10 @@ func TestUnTar(t *testing.T) {
 			remove = false
 		}
 		if !dirEquals(test.expected, test.target) {
-			d1, _ := GetDirectory(test.expected, true)
-			fmt.Println(d1.Content)
-			d2, _ := GetDirectory(test.target, true)
-			fmt.Println(d2.Content)
+			//d1, _ := GetDirectory(test.expected, true)
+			//fmt.Println(d1.Content)
+			//d2, _ := GetDirectory(test.target, true)
+			//fmt.Println(d2.Content)
 			t.Error(test.descrip, ": Directory created not correct structure.")
 			remove = false
 		}

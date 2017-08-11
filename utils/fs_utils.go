@@ -98,6 +98,7 @@ type DirDiff struct {
 	Mods   []string
 }
 
+// DiffDirectory takes the diff of two directories, assuming both are completely unpacked
 func DiffDirectory(d1, d2 Directory) (DirDiff, bool) {
 	adds := GetAddedEntries(d1, d2)
 	dels := GetDeletedEntries(d1, d2)

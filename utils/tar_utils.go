@@ -127,6 +127,7 @@ func CheckTar(image string) bool {
 		return false
 	}
 	if _, err := os.Stat(image); err != nil {
+		glog.Errorf("%s does not exist", image)
 		return false
 	}
 	return true
