@@ -105,7 +105,8 @@ func TestGetAptPackages(t *testing.T) {
 	}
 	for _, test := range testCases {
 		d := AptDiffer{}
-		packages, err := d.getPackages(test.path)
+		image := utils.Image{FSPath: test.path}
+		packages, err := d.getPackages(image)
 		if err != nil && !test.err {
 			t.Errorf("Got unexpected error: %s", err)
 		}

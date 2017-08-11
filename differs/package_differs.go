@@ -7,22 +7,19 @@ import (
 )
 
 type MultiVersionPackageDiffer interface {
-	getPackages(path string) (map[string]map[string]utils.PackageInfo, error)
+	getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error)
 }
 
 type SingleVersionPackageDiffer interface {
-	getPackages(path string) (map[string]utils.PackageInfo, error)
+	getPackages(image utils.Image) (map[string]utils.PackageInfo, error)
 }
 
 func multiVersionDiff(image1, image2 utils.Image, differ MultiVersionPackageDiffer) (utils.DiffResult, error) {
-	img1FS := image1.FSPath
-	img2FS := image2.FSPath
-
-	pack1, err := differ.getPackages(img1FS)
+	pack1, err := differ.getPackages(image1)
 	if err != nil {
 		return &utils.MultiVersionPackageDiffResult{}, err
 	}
-	pack2, err := differ.getPackages(img2FS)
+	pack2, err := differ.getPackages(image2)
 	if err != nil {
 		return &utils.MultiVersionPackageDiffResult{}, err
 	}
@@ -33,14 +30,11 @@ func multiVersionDiff(image1, image2 utils.Image, differ MultiVersionPackageDiff
 }
 
 func singleVersionDiff(image1, image2 utils.Image, differ SingleVersionPackageDiffer) (utils.DiffResult, error) {
-	img1FS := image1.FSPath
-	img2FS := image2.FSPath
-
-	pack1, err := differ.getPackages(img1FS)
+	pack1, err := differ.getPackages(image1)
 	if err != nil {
 		return &utils.PackageDiffResult{}, err
 	}
-	pack2, err := differ.getPackages(img2FS)
+	pack2, err := differ.getPackages(image2)
 	if err != nil {
 		return &utils.PackageDiffResult{}, err
 	}

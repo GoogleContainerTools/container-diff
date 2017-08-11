@@ -85,7 +85,7 @@
       "Image1": "gcr.io/gcp-runtimes/multi-base",
       "Packages1": {
         "pbr": {
-          "python3.6": {
+          "multi-base/usr/local/lib/python3.6/site-packages": {
             "Version": "3.1.1",
             "Size": "447110"
           }
@@ -94,7 +94,7 @@
       "Image2": "gcr.io/gcp-runtimes/multi-modified",
       "Packages2": {
         "retrying": {
-          "python3.6": {
+          "multi-modified/usr/local/lib/python3.6/site-packages": {
             "Version": "1.3.3",
             "Size": "9955"
           }
@@ -102,17 +102,17 @@
       },
       "InfoDiff": [
         {
-          "Package": "mock",
+          "Package": "pip",
           "Info1": [
             {
-              "Version": "2.0.0",
-              "Size": "504226"
+              "Version": "9.0.1",
+              "Size": "5289421"
             }
           ],
           "Info2": [
             {
-              "Version": "0.8.0",
-              "Size": "73348"
+              "Version": "9.0.1",
+              "Size": "5289421"
             }
           ]
         },
@@ -132,6 +132,21 @@
           ]
         },
         {
+          "Package": "six",
+          "Info1": [
+            {
+              "Version": "1.10.0",
+              "Size": "30098"
+            }
+          ],
+          "Info2": [
+            {
+              "Version": "1.10.0",
+              "Size": "30098"
+            }
+          ]
+        },
+        {
           "Package": "wheel",
           "Info1": [
             {
@@ -143,6 +158,21 @@
             {
               "Version": "0.29.0",
               "Size": "137451"
+            }
+          ]
+        },
+        {
+          "Package": "mock",
+          "Info1": [
+            {
+              "Version": "2.0.0",
+              "Size": "504226"
+            }
+          ],
+          "Info2": [
+            {
+              "Version": "0.8.0",
+              "Size": "73348"
             }
           ]
         }
