@@ -79,7 +79,6 @@ func UnTar(filename string, target string) error {
 	if _, ok := os.Stat(target); ok != nil {
 		os.MkdirAll(target, 0777)
 	}
-
 	file, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -96,30 +95,6 @@ func UnTar(filename string, target string) error {
 
 func isTar(path string) bool {
 	return filepath.Ext(path) == ".tar"
-}
-
-// ExtractTar extracts the tar and any nested tar at the given path.
-// After execution the original tar file is removed and the untarred version is in it place.
-func ExtractTar(path string) error {
-	removeTar := false
-
-	var untarWalkFn func(path string, info os.FileInfo, err error) error
-
-	untarWalkFn = func(path string, info os.FileInfo, err error) error {
-		if isTar(path) {
-			target := strings.TrimSuffix(path, filepath.Ext(path))
-			UnTar(path, target)
-			if removeTar {
-				os.Remove(path)
-			}
-			// remove nested tar files that get copied but not the original tar passed
-			removeTar = true
-			filepath.Walk(target, untarWalkFn)
-		}
-		return nil
-	}
-
-	return filepath.Walk(path, untarWalkFn)
 }
 
 func CheckTar(image string) bool {

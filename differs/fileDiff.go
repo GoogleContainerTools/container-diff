@@ -1,11 +1,9 @@
 package differs
 
 import (
-	"os"
 	"sort"
 
 	"github.com/GoogleCloudPlatform/container-diff/utils"
-	"github.com/golang/glog"
 )
 
 type FileDiffer struct {
@@ -23,21 +21,11 @@ func diffImageFiles(image1, image2 utils.Image) (utils.DirDiff, error) {
 
 	var diff utils.DirDiff
 
-	target1 := "j1.json"
-	err := utils.DirToJSON(img1, target1, true)
+	img1Dir, err := utils.GetDirectory(img1, true)
 	if err != nil {
 		return diff, err
 	}
-	target2 := "j2.json"
-	err = utils.DirToJSON(img2, target2, true)
-	if err != nil {
-		return diff, err
-	}
-	img1Dir, err := utils.GetDirectory(target1)
-	if err != nil {
-		return diff, err
-	}
-	img2Dir, err := utils.GetDirectory(target2)
+	img2Dir, err := utils.GetDirectory(img2, true)
 	if err != nil {
 		return diff, err
 	}
@@ -52,16 +40,7 @@ func diffImageFiles(image1, image2 utils.Image) (utils.DirDiff, error) {
 		Image2: image2.Source,
 		Adds:   adds,
 		Dels:   dels,
-		Mods:	[]string{},
-	}
-
-	err = os.Remove(target1)
-	if err != nil {
-		glog.Error(err)
-	}
-	err = os.Remove(target2)
-	if err != nil {
-		glog.Error(err)
+		Mods:   []string{},
 	}
 	return diff, nil
 }

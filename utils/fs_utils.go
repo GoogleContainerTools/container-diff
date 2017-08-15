@@ -68,6 +68,22 @@ func GetModifiedEntries(d1, d2 Directory) []string {
 			glog.Errorf("Error checking directory entry %s: %s\n", f, err)
 			continue
 		}
+		f2stat, err := os.Stat(f2path)
+		if err != nil {
+			glog.Errorf("Error checking directory entry %s: %s\n", f, err)
+			continue
+		}
+
+		// If the directory entry in question is a tar, verify that the two have the same size
+		if isTar(f1path) {
+			if f1stat.Size() != f2stat.Size() {
+				modified = append(modified, f)
+			}
+			continue
+		}
+
+		// If the directory entry is not a tar and not a directory, then it's a file so make sure the file contents are the same
+		// Note: We skip over directory entries because to compare directories, we compare their contents
 		if !f1stat.IsDir() {
 			same, err := checkSameFile(f1path, f2path)
 			if err != nil {
@@ -103,7 +119,7 @@ func DiffDirectory(d1, d2 Directory) (DirDiff, bool) {
 	adds := GetAddedEntries(d1, d2)
 	dels := GetDeletedEntries(d1, d2)
 	mods := GetModifiedEntries(d1, d2)
-	
+
 	var same bool
 	if len(adds) == 0 && len(dels) == 0 && len(mods) == 0 {
 		same = true

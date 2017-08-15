@@ -95,7 +95,7 @@ func (p ImagePrepper) GetImage() (Image, error) {
 func getImageFromTar(tarPath string) (string, error) {
 	glog.Info("Extracting image tar to obtain image file system")
 	path := strings.TrimSuffix(tarPath, filepath.Ext(tarPath))
-	err := UnTar(tarPath, path)
+	err := unpackDockerSave(tarPath, path)
 	return path, err
 }
 
@@ -201,10 +201,7 @@ func (p IDPrepper) getFileSystem() (string, error) {
 	}
 
 	defer os.Remove(tarPath)
-	glog.Info("Extracting image tar to obtain image file system")
-	path := strings.TrimSuffix(tarPath, filepath.Ext(tarPath))
-	err = ExtractTar(tarPath)
-	return path, err
+	return getImageFromTar(tarPath)
 }
 
 func (p IDPrepper) getConfig() (ConfigSchema, error) {
@@ -255,13 +252,13 @@ func (p TarPrepper) getFileSystem() (string, error) {
 }
 
 func (p TarPrepper) getConfig() (ConfigSchema, error) {
-	tmpDir := strings.TrimSuffix(p.Source, filepath.Ext(p.Source))
-	defer os.Remove(tmpDir)
-	err := UnTar(p.Source, tmpDir)
+	tempDir := strings.TrimSuffix(p.Source, filepath.Ext(p.Source)) + "-config"
+	defer os.RemoveAll(tempDir)
+	err := UnTar(p.Source, tempDir)
 	if err != nil {
 		return ConfigSchema{}, err
 	}
-	contents, err := ioutil.ReadDir(tmpDir)
+	contents, err := ioutil.ReadDir(tempDir)
 	if err != nil {
 		glog.Errorf("Could not read image tar contents: %s", err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
@@ -276,7 +273,7 @@ func (p TarPrepper) getConfig() (ConfigSchema, error) {
 				glog.Error("Multiple possible config sources detected for image at " + p.Source + ". Multiple images likely contained in tar. Choosing first one, but diff results may not be completely accurate.")
 				break
 			}
-			fileName := filepath.Join(tmpDir, item.Name())
+			fileName := filepath.Join(tempDir, item.Name())
 			file, err := ioutil.ReadFile(fileName)
 			if err != nil {
 				glog.Errorf("Could not read config file %s: %s", fileName, err)

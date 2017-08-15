@@ -5,9 +5,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"syscall"
@@ -36,6 +40,7 @@ func ValidDockerVersion() (bool, error) {
 	}
 	return false, nil
 }
+
 func getImagePullResponse(image string, response []Event) (string, error) {
 	var imageDigest string
 	for _, event := range response {
@@ -302,4 +307,60 @@ func getImageConfig(image string) (container.Config, error) {
 		}
 	}
 	return config, nil
+}
+
+func getLayersFromManifest(manifestPath string) ([]string, error) {
+	type Manifest struct {
+		Layers []string
+	}
+
+	manifestJSON, err := ioutil.ReadFile(manifestPath)
+	if err != nil {
+		errMsg := fmt.Sprintf("Could not open manifest to get layer order: %s", err)
+		return []string{}, errors.New(errMsg)
+	}
+
+	var imageManifest []Manifest
+	err = json.Unmarshal(manifestJSON, &imageManifest)
+	if err != nil {
+		errMsg := fmt.Sprintf("Could not unmarshal manifest to get layer order: %s", err)
+		return []string{}, errors.New(errMsg)
+	}
+	return imageManifest[0].Layers, nil
+}
+
+func unpackDockerSave(tarPath string, target string) error {
+	if _, ok := os.Stat(target); ok != nil {
+		os.MkdirAll(target, 0777)
+	}
+
+	tempLayerDir := target + "-temp"
+	err := UnTar(tarPath, tempLayerDir)
+	if err != nil {
+		errMsg := fmt.Sprintf("Could not unpack saved Docker image %s: %s", tarPath, err)
+		return errors.New(errMsg)
+	}
+
+	manifest := filepath.Join(tempLayerDir, "manifest.json")
+	layers, err := getLayersFromManifest(manifest)
+	if err != nil {
+		return err
+	}
+
+	for _, layer := range layers {
+		layerTar := filepath.Join(tempLayerDir, layer)
+		if _, err := os.Stat(layerTar); err != nil {
+			glog.Infof("Did not unpack layer %s because no layer.tar found", layer)
+			continue
+		}
+		err = UnTar(layerTar, target)
+		if err != nil {
+			glog.Errorf("Could not unpack layer %s: %s", layer, err)
+		}
+	}
+	err = os.RemoveAll(tempLayerDir)
+	if err != nil {
+		glog.Errorf("Error deleting temp image layer filesystem: %s", err)
+	}
+	return nil
 }

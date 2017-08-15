@@ -1,8 +1,8 @@
 package utils
 
 import (
-	//"fmt"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -74,10 +74,6 @@ func TestUnTar(t *testing.T) {
 			remove = false
 		}
 		if !dirEquals(test.expected, test.target) {
-			//d1, _ := GetDirectory(test.expected, true)
-			//fmt.Println(d1.Content)
-			//d2, _ := GetDirectory(test.target, true)
-			//fmt.Println(d2.Content)
 			t.Error(test.descrip, ": Directory created not correct structure.")
 			remove = false
 		}
@@ -178,24 +174,12 @@ func TestIsTar(t *testing.T) {
 	}
 }
 
-/*func TestExtractTar(t *testing.T) {
-	tarPath := "testTars/la-croix3.tar"
-	target := "testTars/la-croix3"
-	expected := "testTars/la-croix3-full"
-	err := ExtractTar(tarPath)
-	if err != nil {
-		t.Errorf("Got unexpected error: %s", err)
-	}
-	if !dirEquals(expected, target) || !dirEquals(target, expected) {
-		t.Errorf("Directory created not correct structure.")
-	}
-	os.RemoveAll(target)
-
-}*/
-
 func dirEquals(actual string, path string) bool {
 	d1, _ := GetDirectory(actual, true)
 	d2, _ := GetDirectory(path, true)
-	_, same := DiffDirectory(d1, d2)
+	diff, same := DiffDirectory(d1, d2)
+	if !same {
+		fmt.Printf("%v", diff)
+	}
 	return same
 }

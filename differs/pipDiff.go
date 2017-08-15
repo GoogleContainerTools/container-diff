@@ -75,10 +75,7 @@ func (d PipDiffer) getPackages(image utils.Image) (map[string]map[string]utils.P
 	for _, pythonPath := range pythonPaths {
 		contents, err := ioutil.ReadDir(pythonPath)
 		if err != nil {
-<<<<<<< HEAD
 			// python version folder doesn't have a site-packages folder or PYTHONPATH doesn't exist
-=======
->>>>>>> Addressing Abby's comment
 			continue
 		}
 

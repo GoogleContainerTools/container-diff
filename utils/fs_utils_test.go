@@ -75,20 +75,20 @@ func TestGetDirectory(t *testing.T) {
 		deep     bool
 	}{
 		{
-			descrip: "deep", 
-			path: "testTars/la-croix3-full",
+			descrip: "deep",
+			path:    "testTars/la-croix3-full",
 			expected: Directory{
-				Root: "testTars/la-croix3-full", 
-				Content: []string{"/lime.txt","/nest","/nest/f1.txt","/nested-dir","/nested-dir/f2.txt","/passionfruit.txt","/peach-pear.txt"},
+				Root:    "testTars/la-croix3-full",
+				Content: []string{"/lime.txt", "/nest", "/nest/f1.txt", "/nested-dir", "/nested-dir/f2.txt", "/passionfruit.txt", "/peach-pear.txt"},
 			},
 			deep: true,
 		},
 		{
-			descrip: "shallow", 
-			path: "testTars/la-croix3-full",
+			descrip: "shallow",
+			path:    "testTars/la-croix3-full",
 			expected: Directory{
-				Root: "testTars/la-croix3-full", 
-				Content: []string{"/lime.txt","/nest","/nested-dir","/passionfruit.txt","/peach-pear.txt"},
+				Root:    "testTars/la-croix3-full",
+				Content: []string{"/lime.txt", "/nest", "/nested-dir", "/passionfruit.txt", "/peach-pear.txt"},
 			},
 			deep: false,
 		},
