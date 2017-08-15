@@ -25,6 +25,8 @@ var file bool
 var history bool
 var pip bool
 
+var save bool
+
 var diffFlagMap = map[string]*bool{
 	"apt":     &apt,
 	"node":    &node,
@@ -120,10 +122,12 @@ var RootCmd = &cobra.Command{
 			}
 			fmt.Println()
 			glog.Info("Removing image file system directories from system")
-			errMsg := remove(image1.FSPath, true)
-			errMsg += remove(image2.FSPath, true)
-			if errMsg != "" {
-				glog.Error(errMsg)
+			if !save {
+				errMsg := remove(image1.FSPath, true)
+				errMsg += remove(image2.FSPath, true)
+				if errMsg != "" {
+					glog.Error(errMsg)
+				}
 			}
 		} else {
 			glog.Error(err.Error())
@@ -222,4 +226,5 @@ func init() {
 	RootCmd.Flags().BoolVarP(&apt, "apt", "a", false, "Set this flag to use the apt differ.")
 	RootCmd.Flags().BoolVarP(&file, "file", "f", false, "Set this flag to use the file differ.")
 	RootCmd.Flags().BoolVarP(&history, "history", "d", false, "Set this flag to use the dockerfile history differ.")
+	RootCmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 }
