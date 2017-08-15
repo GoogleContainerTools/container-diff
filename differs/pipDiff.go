@@ -111,7 +111,8 @@ func (d PipDiffer) getPackages(image utils.Image) (map[string]map[string]utils.P
 					continue
 				}
 				currPackage := utils.PackageInfo{Version: version, Size: size}
-				addToMap(packages, packageName, pythonPath, currPackage)
+				mapPath := strings.Replace(pythonPath, path, "", 1)
+				addToMap(packages, packageName, mapPath, currPackage)
 			}
 		}
 	}
