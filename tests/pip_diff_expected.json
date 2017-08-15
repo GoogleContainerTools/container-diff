@@ -27,21 +27,6 @@
       },
       "InfoDiff": [
         {
-          "Package": "wheel",
-          "Info1": [
-            {
-              "Version": "0.29.0",
-              "Size": "103348"
-            }
-          ],
-          "Info2": [
-            {
-              "Version": "0.29.0",
-              "Size": "103509"
-            }
-          ]
-        },
-        {
           "Package": "pip",
           "Info1": [
             {
@@ -53,6 +38,21 @@
             {
               "Version": "9.0.1",
               "Size": "5289421"
+            }
+          ]
+        },
+        {
+          "Package": "wheel",
+          "Info1": [
+            {
+              "Version": "0.29.0",
+              "Size": "103348"
+            }
+          ],
+          "Info2": [
+            {
+              "Version": "0.29.0",
+              "Size": "103509"
             }
           ]
         }
