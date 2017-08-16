@@ -1,6 +1,0 @@
-tests/multi_version_packages_test_processor.py tests/node_diff_expected.json
-tests/multi_version_packages_test_processor.py tests/node_diff_actual.json
-tests/multi_version_packages_test_processor.py tests/multi_diff_expected.json
-tests/multi_version_packages_test_processor.py tests/multi_diff_actual.json
-tests/multi_version_packages_test_processor.py tests/node_diff_order_expected.json
-tests/multi_version_packages_test_processor.py tests/node_diff_order_actual.json
