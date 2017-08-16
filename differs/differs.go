@@ -12,25 +12,31 @@ import (
 type DiffRequest struct {
 	Image1    utils.Image
 	Image2    utils.Image
-	DiffTypes []Differ
+	DiffTypes []Analyzer
 }
 
-type Differ interface {
+type SingleRequest struct {
+	Image        utils.Image
+	AnalyzeTypes []Analyzer
+}
+
+type Analyzer interface {
 	Diff(image1, image2 utils.Image) (utils.DiffResult, error)
+	Analyze(image utils.Image) (utils.AnalyzeResult, error)
 }
 
-var diffs = map[string]Differ{
-	"history": HistoryDiffer{},
-	"file":    FileDiffer{},
-	"apt":     AptDiffer{},
-	"pip":     PipDiffer{},
-	"node":    NodeDiffer{},
+var analyzers = map[string]Analyzer{
+	"history": HistoryAnalyzer{},
+	"file":    FileAnalyzer{},
+	"apt":     AptAnalyzer{},
+	"pip":     PipAnalyzer{},
+	"node":    NodeAnalyzer{},
 }
 
-func (diff DiffRequest) GetDiff() (map[string]utils.DiffResult, error) {
-	img1 := diff.Image1
-	img2 := diff.Image2
-	diffs := diff.DiffTypes
+func (req DiffRequest) GetDiff() (map[string]utils.DiffResult, error) {
+	img1 := req.Image1
+	img2 := req.Image2
+	diffs := req.DiffTypes
 
 	results := map[string]utils.DiffResult{}
 	for _, differ := range diffs {
@@ -52,16 +58,40 @@ func (diff DiffRequest) GetDiff() (map[string]utils.DiffResult, error) {
 	return results, err
 }
 
-func GetDiffers(diffNames []string) (diffFuncs []Differ, err error) {
-	for _, diffName := range diffNames {
-		if d, exists := diffs[diffName]; exists {
-			diffFuncs = append(diffFuncs, d)
+func (req SingleRequest) GetAnalysis() (map[string]utils.AnalyzeResult, error) {
+	img := req.Image
+	analyses := req.AnalyzeTypes
+
+	results := map[string]utils.AnalyzeResult{}
+	for _, analyzer := range analyses {
+		analyzeName := reflect.TypeOf(analyzer).Name()
+		if analysis, err := analyzer.Analyze(img); err == nil {
+			results[analyzeName] = analysis
 		} else {
-			glog.Errorf("Unknown differ specified", diffName)
+			glog.Errorf("Error getting analysis with %s: %s", analyzeName, err)
 		}
 	}
-	if len(diffFuncs) == 0 {
-		err = errors.New("No known differs specified")
+
+	var err error
+	if len(results) == 0 {
+		err = fmt.Errorf("Could not perform analysis on %s", img)
+	} else {
+		err = nil
+	}
+
+	return results, err
+}
+
+func GetAnalyzers(analyzeNames []string) (analyzeFuncs []Analyzer, err error) {
+	for _, name := range analyzeNames {
+		if a, exists := analyzers[name]; exists {
+			analyzeFuncs = append(analyzeFuncs, a)
+		} else {
+			glog.Errorf("Unknown analyzer/differ specified", name)
+		}
+	}
+	if len(analyzeFuncs) == 0 {
+		err = errors.New("No known analyzers/differs specified")
 	}
 	return
 }

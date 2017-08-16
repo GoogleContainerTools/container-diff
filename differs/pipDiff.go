@@ -12,54 +12,29 @@ import (
 	"github.com/golang/glog"
 )
 
-type PipDiffer struct {
+type PipAnalyzer struct {
 }
 
 // PipDiff compares pip-installed Python packages between layers of two different images.
-func (d PipDiffer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
-	diff, err := multiVersionDiff(image1, image2, d)
+func (a PipAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
+	diff, err := multiVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func getPythonVersion(pathToImage string) ([]string, error) {
-	matches := []string{}
-	libPath := filepath.Join(pathToImage, "usr/local/lib")
-	libContents, err := ioutil.ReadDir(libPath)
-	if err != nil {
-		return matches, err
-	}
-
-	for _, file := range libContents {
-		pattern := regexp.MustCompile("^python[0-9]+\\.[0-9]+$")
-		match := pattern.FindString(file.Name())
-		if match != "" {
-			matches = append(matches, match)
-		}
-	}
-	return matches, nil
+func (a PipAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {
+	analysis, err := multiVersionAnalysis(image, a)
+	return analysis, err
 }
 
-func getPythonPaths(vars []string) []string {
-	paths := []string{}
-	for _, envVar := range vars {
-		pythonPathPattern := regexp.MustCompile("^PYTHONPATH=(.*)")
-		match := pythonPathPattern.FindStringSubmatch(envVar)
-		if len(match) != 0 {
-			pythonPath := match[1]
-			paths = strings.Split(pythonPath, ":")
-			break
-		}
-	}
-	return paths
-}
-
-func (d PipDiffer) getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error) {
+func (a PipAnalyzer) getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error) {
 	path := image.FSPath
 	packages := make(map[string]map[string]utils.PackageInfo)
 	pythonPaths := []string{}
 	if !reflect.DeepEqual(utils.ConfigSchema{}, image.Config) {
 		paths := getPythonPaths(image.Config.Config.Env)
-		pythonPaths = append(pythonPaths, paths...)
+		for _, p := range paths {
+			pythonPaths = append(pythonPaths, p)
+		}
 	}
 	pythonVersions, err := getPythonVersion(path)
 	if err != nil {
@@ -75,7 +50,7 @@ func (d PipDiffer) getPackages(image utils.Image) (map[string]map[string]utils.P
 	for _, pythonPath := range pythonPaths {
 		contents, err := ioutil.ReadDir(pythonPath)
 		if err != nil {
-			// python version folder doesn't have a site-packages folder or PYTHONPATH doesn't exist
+			// python version folder doesn't have a site-packages folder
 			continue
 		}
 
@@ -127,4 +102,36 @@ func addToMap(packages map[string]map[string]utils.PackageInfo, pack string, pat
 		return
 	}
 	packages[pack][path] = packInfo
+}
+
+func getPythonVersion(pathToLayer string) ([]string, error) {
+	matches := []string{}
+	libPath := filepath.Join(pathToLayer, "usr/local/lib")
+	libContents, err := ioutil.ReadDir(libPath)
+	if err != nil {
+		return matches, err
+	}
+
+	for _, file := range libContents {
+		pattern := regexp.MustCompile("^python[0-9]+\\.[0-9]+$")
+		match := pattern.FindString(file.Name())
+		if match != "" {
+			matches = append(matches, match)
+		}
+	}
+	return matches, nil
+}
+
+func getPythonPaths(vars []string) []string {
+	paths := []string{}
+	for _, envVar := range vars {
+		pythonPathPattern := regexp.MustCompile("^PYTHONPATH=(.*)")
+		match := pythonPathPattern.FindStringSubmatch(envVar)
+		if len(match) != 0 {
+			pythonPath := match[1]
+			paths = strings.Split(pythonPath, ":")
+			break
+		}
+	}
+	return paths
 }

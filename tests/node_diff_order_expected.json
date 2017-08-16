@@ -1,10 +1,10 @@
 [
   {
-    "DiffType": "NodeDiffer",
+    "Image1": "gcr.io/gcp-runtimes/node-modified:2.0",
+    "Image2": "gcr.io/gcp-runtimes/node-modified",
+    "DiffType": "Node",
     "Diff": {
-      "Image1": "gcr.io/gcp-runtimes/node-modified:2.0",
       "Packages1": {},
-      "Image2": "gcr.io/gcp-runtimes/node-modified",
       "Packages2": {
         "pax": {
           "/node_modules/pax/": {

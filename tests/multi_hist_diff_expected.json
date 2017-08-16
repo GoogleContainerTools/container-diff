@@ -1,9 +1,9 @@
 [
   {
-    "DiffType": "HistoryDiffer",
+    "Image1": "gcr.io/gcp-runtimes/pip-base",
+    "Image2": "gcr.io/gcp-runtimes/pip-modified",
+    "DiffType": "History",
     "Diff": {
-      "Image1": "gcr.io/gcp-runtimes/pip-base",
-      "Image2": "gcr.io/gcp-runtimes/pip-modified",
       "Adds": [
         "/bin/bash"
       ],
@@ -11,11 +11,11 @@
     }
   },
   {
-    "DiffType": "PipDiffer",
+    "Image1": "gcr.io/gcp-runtimes/pip-base",
+    "Image2": "gcr.io/gcp-runtimes/pip-modified",
+    "DiffType": "Pip",
     "Diff": {
-      "Image1": "gcr.io/gcp-runtimes/pip-base",
       "Packages1": {},
-      "Image2": "gcr.io/gcp-runtimes/pip-modified",
       "Packages2": {
         "mock": {
           "/usr/local/lib/python3.6/site-packages": {

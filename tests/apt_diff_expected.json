@@ -1,8 +1,9 @@
 [
   {
-    "DiffType": "AptDiffer",
+    "Image1": "gcr.io/gcp-runtimes/apt-base",
+    "Image2": "gcr.io/gcp-runtimes/apt-modified",
+    "DiffType": "Apt",
     "Diff": {
-      "Image1": "gcr.io/gcp-runtimes/apt-base",
       "Packages1": {
         "dh-python": {
           "Version": "2.20170125",
@@ -41,7 +42,6 @@
           "Size": "9411"
         }
       },
-      "Image2": "gcr.io/gcp-runtimes/apt-modified",
       "Packages2": {
         "libffi6": {
           "Version": "3.2.1-6",

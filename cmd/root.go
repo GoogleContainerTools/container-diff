@@ -25,7 +25,7 @@ var file bool
 var history bool
 var pip bool
 
-var diffFlagMap = map[string]*bool{
+var analyzeFlagMap = map[string]*bool{
 	"apt":     &apt,
 	"node":    &node,
 	"file":    &file,
@@ -45,99 +45,158 @@ var RootCmd = &cobra.Command{
 
 		utils.SetDockerEngine(eng)
 
-		img1Arg := args[0]
-		img2Arg := args[1]
-		diffArgs := []string{}
-		allDiffers := getAllDiffers()
-		for _, name := range allDiffers {
-			if *diffFlagMap[name] == true {
-				diffArgs = append(diffArgs, name)
+		analyzeArgs := []string{}
+		allAnalyzers := getAllAnalyzers()
+		for _, name := range allAnalyzers {
+			if *analyzeFlagMap[name] == true {
+				analyzeArgs = append(analyzeArgs, name)
 			}
 		}
-		// If no differs are specified, perform all diffs as the default
-		if len(diffArgs) == 0 {
-			diffArgs = allDiffers
+
+		// If no differs/analyzers are specified, perform them all as the default
+		if len(analyzeArgs) == 0 {
+			analyzeArgs = allAnalyzers
 		}
 
-		var wg sync.WaitGroup
-		wg.Add(2)
-
-		glog.Infof("Starting diff on images %s and %s, using differs: %s", img1Arg, img2Arg, diffArgs)
-
-		var image1, image2 utils.Image
-		var err error
-		go func() {
-			defer wg.Done()
-			image1, err = utils.ImagePrepper{img1Arg}.GetImage()
-			if err != nil {
-				glog.Error(err.Error())
-				os.Exit(1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			image2, err = utils.ImagePrepper{img2Arg}.GetImage()
-			if err != nil {
-				glog.Error(err.Error())
-				os.Exit(1)
-			}
-		}()
-
-		diffTypes, err := differs.GetDiffers(diffArgs)
-		if err != nil {
-			glog.Error(err.Error())
-			os.Exit(1)
-		}
-		wg.Wait()
-
-		req := differs.DiffRequest{image1, image2, diffTypes}
-		if diffs, err := req.GetDiff(); err == nil {
-			// Outputs diff results in alphabetical order by differ name
-			diffTypes := []string{}
-			for name := range diffs {
-				diffTypes = append(diffTypes, name)
-			}
-			sort.Strings(diffTypes)
-			glog.Info("Retrieving diffs")
-			diffResults := []utils.DiffResult{}
-			for _, diffType := range diffTypes {
-				diff := diffs[diffType]
-				if json {
-					diffResults = append(diffResults, diff.GetStruct())
-				} else {
-					err = diff.OutputText(diffType)
-					if err != nil {
-						glog.Error(err)
-					}
-				}
-			}
-			if json {
-				err = utils.JSONify(diffResults)
-				if err != nil {
-					glog.Error(err)
-				}
-			}
-			fmt.Println()
-			glog.Info("Removing image file system directories from system")
-			errMsg := remove(image1.FSPath, true)
-			errMsg += remove(image2.FSPath, true)
-			if errMsg != "" {
-				glog.Error(errMsg)
-			}
+		if len(args) == 1 {
+			analyzeImage(args[0], analyzeArgs)
 		} else {
-			glog.Error(err.Error())
-			os.Exit(1)
+			diffImages(args[0], args[1], analyzeArgs)
 		}
 	},
 }
 
-func getAllDiffers() []string {
-	allDiffers := []string{}
-	for name := range diffFlagMap {
-		allDiffers = append(allDiffers, name)
+func diffImages(image1Arg, image2Arg string, diffArgs []string) {
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	glog.Infof("Starting diff on images %s and %s, using differs: %s", image1Arg, image2Arg, diffArgs)
+
+	var image1, image2 utils.Image
+	var err error
+	go func() {
+		defer wg.Done()
+		image1, err = utils.ImagePrepper{image1Arg}.GetImage()
+		if err != nil {
+			glog.Error(err.Error())
+			os.Exit(1)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		image2, err = utils.ImagePrepper{image2Arg}.GetImage()
+		if err != nil {
+			glog.Error(err.Error())
+			os.Exit(1)
+		}
+	}()
+
+	diffTypes, err := differs.GetAnalyzers(diffArgs)
+	if err != nil {
+		glog.Error(err.Error())
+		os.Exit(1)
 	}
-	return allDiffers
+	wg.Wait()
+
+	req := differs.DiffRequest{image1, image2, diffTypes}
+	if diffs, err := req.GetDiff(); err == nil {
+		// Outputs diff results in alphabetical order by differ name
+		sortedTypes := []string{}
+		for name := range diffs {
+			sortedTypes = append(sortedTypes, name)
+		}
+		sort.Strings(sortedTypes)
+		glog.Info("Retrieving diffs")
+		diffResults := []utils.DiffResult{}
+		for _, diffType := range sortedTypes {
+			diff := diffs[diffType]
+			if json {
+				diffResults = append(diffResults, diff.GetStruct())
+			} else {
+				err = diff.OutputText(diffType)
+				if err != nil {
+					glog.Error(err)
+				}
+			}
+		}
+		if json {
+			err = utils.JSONify(diffResults)
+			if err != nil {
+				glog.Error(err)
+			}
+		}
+		fmt.Println()
+		glog.Info("Removing image file system directories from system")
+		errMsg := remove(image1.FSPath, true)
+		errMsg += remove(image2.FSPath, true)
+		if errMsg != "" {
+			glog.Error(errMsg)
+		}
+	} else {
+		glog.Error(err.Error())
+		os.Exit(1)
+	}
+}
+
+func analyzeImage(imageArg string, analyzerArgs []string) {
+	image, err := utils.ImagePrepper{imageArg}.GetImage()
+	if err != nil {
+		glog.Error(err.Error())
+		os.Exit(1)
+	}
+	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
+	if err != nil {
+		glog.Error(err.Error())
+		os.Exit(1)
+	}
+
+	req := differs.SingleRequest{image, analyzeTypes}
+	if analyses, err := req.GetAnalysis(); err == nil {
+		// Outputs analysis results in alphabetical order by differ name
+		sortedTypes := []string{}
+		for name := range analyses {
+			sortedTypes = append(sortedTypes, name)
+		}
+		sort.Strings(sortedTypes)
+		glog.Info("Retrieving diffs")
+		analyzeResults := []utils.AnalyzeResult{}
+		for _, analyzeType := range sortedTypes {
+			analysis := analyses[analyzeType]
+			if json {
+				analyzeResults = append(analyzeResults, analysis.GetStruct())
+			} else {
+				err = analysis.OutputText(analyzeType)
+				if err != nil {
+					glog.Error(err)
+				}
+			}
+		}
+		if json {
+			err = utils.JSONify(analyzeResults)
+			if err != nil {
+				glog.Error(err)
+			}
+		}
+		fmt.Println()
+		glog.Info("Removing image file system directories from system")
+		errMsg := remove(image.FSPath, true)
+		if errMsg != "" {
+			glog.Error(errMsg)
+		}
+	} else {
+		glog.Error(err.Error())
+		os.Exit(1)
+	}
+
+}
+
+func getAllAnalyzers() []string {
+	allAnalyzers := []string{}
+	for name := range analyzeFlagMap {
+		allAnalyzers = append(allAnalyzers, name)
+	}
+	return allAnalyzers
 }
 
 func validateArgs(args []string) (bool, error) {
@@ -158,11 +217,11 @@ func validateArgs(args []string) (bool, error) {
 
 func checkArgNum(args []string) (bool, error) {
 	var errMessage string
-	if len(args) < 2 {
-		errMessage = "Too few arguments. Should have two images as arguments: [IMAGE1] [IMAGE2]."
+	if len(args) < 1 {
+		errMessage = "Too few arguments. Should have one or two images as arguments."
 		return false, errors.New(errMessage)
 	} else if len(args) > 2 {
-		errMessage = "Too many arguments. Should have two images as arguments: [IMAGE1] [IMAGE2]."
+		errMessage = "Too many arguments. Should have at most two images as arguments."
 		return false, errors.New(errMessage)
 	} else {
 		return true, nil
@@ -179,15 +238,12 @@ func checkImage(arg string) bool {
 func checkArgType(args []string) (bool, error) {
 	var buffer bytes.Buffer
 	valid := true
-	if !checkImage(args[0]) {
-		valid = false
-		errMessage := fmt.Sprintf("Argument %s is not an image ID, URL, or tar\n", args[0])
-		buffer.WriteString(errMessage)
-	}
-	if !checkImage(args[1]) {
-		valid = false
-		errMessage := fmt.Sprintf("Argument %s is not an image ID, URL, or tar\n", args[1])
-		buffer.WriteString(errMessage)
+	for _, arg := range args {
+		if !checkImage(arg) {
+			valid = false
+			errMessage := fmt.Sprintf("Argument %s is not an image ID, URL, or tar\n", args[0])
+			buffer.WriteString(errMessage)
+		}
 	}
 	if !valid {
 		return false, errors.New(buffer.String())
