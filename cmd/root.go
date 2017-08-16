@@ -128,6 +128,9 @@ var RootCmd = &cobra.Command{
 				if errMsg != "" {
 					glog.Error(errMsg)
 				}
+			} else {
+				dir, _ := os.Getwd()
+				glog.Infof("Images were saved at %s as %s and %s", dir, image1.FSPath, image2.FSPath)
 			}
 		} else {
 			glog.Error(err.Error())
