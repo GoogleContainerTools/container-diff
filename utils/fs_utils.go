@@ -2,11 +2,11 @@ package utils
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/golang/glog"
 )
@@ -22,18 +22,33 @@ func GetDirectorySize(path string) (int64, error) {
 	return size, err
 }
 
-func GetDirectory(dirpath string) (Directory, error) {
-	dirfile, err := ioutil.ReadFile(dirpath)
-	if err != nil {
-		return Directory{}, err
-	}
+// GetDirectoryContents converts the directory starting at the provided path into a Directory struct.
+func GetDirectory(path string, deep bool) (Directory, error) {
+	var directory Directory
+	directory.Root = path
+	var err error
+	if deep {
+		walkFn := func(currPath string, info os.FileInfo, err error) error {
+			newContent := strings.TrimPrefix(currPath, directory.Root)
+			if newContent != "" {
+				directory.Content = append(directory.Content, newContent)
+			}
+			return nil
+		}
 
-	var dir Directory
-	err = json.Unmarshal(dirfile, &dir)
-	if err != nil {
-		return Directory{}, err
+		err = filepath.Walk(path, walkFn)
+	} else {
+		contents, err := ioutil.ReadDir(path)
+		if err != nil {
+			return directory, err
+		}
+
+		for _, file := range contents {
+			fileName := "/" + file.Name()
+			directory.Content = append(directory.Content, fileName)
+		}
 	}
-	return dir, nil
+	return directory, err
 }
 
 // Checks for content differences between files of the same name from different directories
@@ -53,6 +68,22 @@ func GetModifiedEntries(d1, d2 Directory) []string {
 			glog.Errorf("Error checking directory entry %s: %s\n", f, err)
 			continue
 		}
+		f2stat, err := os.Stat(f2path)
+		if err != nil {
+			glog.Errorf("Error checking directory entry %s: %s\n", f, err)
+			continue
+		}
+
+		// If the directory entry in question is a tar, verify that the two have the same size
+		if isTar(f1path) {
+			if f1stat.Size() != f2stat.Size() {
+				modified = append(modified, f)
+			}
+			continue
+		}
+
+		// If the directory entry is not a tar and not a directory, then it's a file so make sure the file contents are the same
+		// Note: We skip over directory entries because to compare directories, we compare their contents
 		if !f1stat.IsDir() {
 			same, err := checkSameFile(f1path, f2path)
 			if err != nil {
@@ -83,12 +114,20 @@ type DirDiff struct {
 	Mods   []string
 }
 
-func compareDirEntries(d1, d2 Directory) DirDiff {
+// DiffDirectory takes the diff of two directories, assuming both are completely unpacked
+func DiffDirectory(d1, d2 Directory) (DirDiff, bool) {
 	adds := GetAddedEntries(d1, d2)
 	dels := GetDeletedEntries(d1, d2)
 	mods := GetModifiedEntries(d1, d2)
 
-	return DirDiff{d1.Root, d2.Root, adds, dels, mods}
+	var same bool
+	if len(adds) == 0 && len(dels) == 0 && len(mods) == 0 {
+		same = true
+	} else {
+		same = false
+	}
+
+	return DirDiff{d1.Root, d2.Root, adds, dels, mods}, same
 }
 
 func checkSameFile(f1name, f2name string) (bool, error) {
@@ -120,8 +159,4 @@ func checkSameFile(f1name, f2name string) (bool, error) {
 		return false, nil
 	}
 	return true, nil
-}
-
-func DiffDirectory(d1, d2 Directory) DirDiff {
-	return compareDirEntries(d1, d2)
 }

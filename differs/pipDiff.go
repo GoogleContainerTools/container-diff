@@ -21,9 +21,9 @@ func (d PipDiffer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
 	return diff, err
 }
 
-func getPythonVersion(pathToLayer string) ([]string, error) {
+func getPythonVersion(pathToImage string) ([]string, error) {
 	matches := []string{}
-	libPath := filepath.Join(pathToLayer, "usr/local/lib")
+	libPath := filepath.Join(pathToImage, "usr/local/lib")
 	libContents, err := ioutil.ReadDir(libPath)
 	if err != nil {
 		return matches, err
@@ -59,9 +59,7 @@ func (d PipDiffer) getPackages(image utils.Image) (map[string]map[string]utils.P
 	pythonPaths := []string{}
 	if !reflect.DeepEqual(utils.ConfigSchema{}, image.Config) {
 		paths := getPythonPaths(image.Config.Config.Env)
-		for _, p := range paths {
-			pythonPaths = append(pythonPaths, p)
-		}
+		pythonPaths = append(pythonPaths, paths...)
 	}
 	pythonVersions, err := getPythonVersion(path)
 	if err != nil {
@@ -77,7 +75,7 @@ func (d PipDiffer) getPackages(image utils.Image) (map[string]map[string]utils.P
 	for _, pythonPath := range pythonPaths {
 		contents, err := ioutil.ReadDir(pythonPath)
 		if err != nil {
-			// python version folder doesn't have a site-packages folder
+			// python version folder doesn't have a site-packages folder or PYTHONPATH doesn't exist
 			continue
 		}
 
