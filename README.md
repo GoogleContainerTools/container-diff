@@ -33,7 +33,7 @@ Download the [container-diff-windows-amd64.exe](https://storage.googleapis.com/c
 
 ## Quickstart
 
-To use container-diff to perform single image analysis, you need one Docker image (in the form of an ID, tarball, or URL from a repo).  Once you have that images you can run any of the following analyzers:
+To use container-diff to perform single image analysis, you need one Docker image (in the form of an ID, tarball, or URL from a repo).  Once you have that image, you can run any of the following analyzers:
 
 ```
 container-diff <img>     [Run all analyzers]
@@ -44,7 +44,7 @@ container-diff <img> -a  [Apt]
 container-diff <img> -n  [Node]
 ```
 
-To use container-diff to perform a diff analysis on two images, you need two Docker images (in the form of an ID, tarball, or URL from a repo).  Once you have those images you can run any of the following differs:
+To use container-diff to perform a diff analysis on two images, you need two Docker images (in the form of an ID, tarball, or URL from a repo).  Once you have those images, you can run any of the following differs:
 ```
 container-diff <img1> <img2>     [Run all differs]
 container-diff <img1> <img2> -d  [History]
@@ -85,7 +85,7 @@ To use the docker client instead of shelling out to your local docker daemon, ad
 
 ## Analysis Result Format
 
-The jsons for analysis results are in the follow format:
+The JSONs for analysis results are in the follow format:
 ```
 {
     "Image": "foo",
@@ -152,7 +152,7 @@ type HistDiff struct {
 
 ### Filesystem Diff
 
-The filessystem differ has the following json output structure: 
+The filesystem differ has the following json output structure: 
 
 ```
 type DirDiff struct {
@@ -244,7 +244,7 @@ Version differences: None
 
 Feel free to develop your own analyzer leveraging the utils currently available.  PRs are welcome.
 
-### Custom Differ Quickstart
+### Custom Analyzer Quickstart
 
 In order to quickly make your own analyzer, follow these steps:
 
