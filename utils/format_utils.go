@@ -14,13 +14,13 @@ import (
 )
 
 var templates = map[string]string{
-	"utils.PackageDiffResult":         SingleVersionDiffOutput,
-	"utils.MultiPackageDiffResult":    MultiVersionDiffOutput,
-	"utils.HistDiffResult":            HistoryDiffOutput,
-	"utils.DirDiffResult":             FSDiffOutput,
-	"utils.ListAnalyzeResult":         ListAnalysisOutput,
-	"utils.MultiPackageAnalyzeResult": MultiVersionPackageOutput,
-	"utils.PackageAnalyzeResult":      SingleVersionPackageOutput,
+	"utils.SingleVersionPackageDiffResult":    SingleVersionDiffOutput,
+	"utils.MultiVersionPackageDiffResult":     MultiVersionDiffOutput,
+	"utils.HistDiffResult":                    HistoryDiffOutput,
+	"utils.DirDiffResult":                     FSDiffOutput,
+	"utils.ListAnalyzeResult":                 ListAnalysisOutput,
+	"utils.MultiVersionPackageAnalyzeResult":  MultiVersionPackageOutput,
+	"utils.SingleVersionPackageAnalyzeResult": SingleVersionPackageOutput,
 }
 
 func JSONify(diff interface{}) error {

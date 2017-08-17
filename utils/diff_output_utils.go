@@ -5,33 +5,33 @@ type DiffResult interface {
 	OutputText(diffType string) error
 }
 
-type MultiPackageDiffResult struct {
+type MultiVersionPackageDiffResult struct {
 	Image1   string
 	Image2   string
 	DiffType string
 	Diff     MultiVersionPackageDiff
 }
 
-func (r MultiPackageDiffResult) GetStruct() DiffResult {
+func (r MultiVersionPackageDiffResult) GetStruct() DiffResult {
 	return r
 }
 
-func (r MultiPackageDiffResult) OutputText(diffType string) error {
+func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
 	return TemplateOutput(r)
 }
 
-type PackageDiffResult struct {
+type SingleVersionPackageDiffResult struct {
 	Image1   string
 	Image2   string
 	DiffType string
 	Diff     PackageDiff
 }
 
-func (r PackageDiffResult) GetStruct() DiffResult {
+func (r SingleVersionPackageDiffResult) GetStruct() DiffResult {
 	return r
 }
 
-func (r PackageDiffResult) OutputText(diffType string) error {
+func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
 	return TemplateOutput(r)
 }
 

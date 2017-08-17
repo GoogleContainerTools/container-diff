@@ -18,15 +18,15 @@ type SingleVersionPackageAnalyzer interface {
 func multiVersionDiff(image1, image2 utils.Image, differ MultiVersionPackageAnalyzer) (utils.DiffResult, error) {
 	pack1, err := differ.getPackages(image1)
 	if err != nil {
-		return &utils.MultiPackageDiffResult{}, err
+		return &utils.MultiVersionPackageDiffResult{}, err
 	}
 	pack2, err := differ.getPackages(image2)
 	if err != nil {
-		return &utils.MultiPackageDiffResult{}, err
+		return &utils.MultiVersionPackageDiffResult{}, err
 	}
 
 	diff := utils.GetMultiVersionMapDiff(pack1, pack2)
-	return &utils.MultiPackageDiffResult{
+	return &utils.MultiVersionPackageDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
 		DiffType: strings.TrimSuffix(reflect.TypeOf(differ).Name(), "Analyzer"),
@@ -37,15 +37,15 @@ func multiVersionDiff(image1, image2 utils.Image, differ MultiVersionPackageAnal
 func singleVersionDiff(image1, image2 utils.Image, differ SingleVersionPackageAnalyzer) (utils.DiffResult, error) {
 	pack1, err := differ.getPackages(image1)
 	if err != nil {
-		return &utils.PackageDiffResult{}, err
+		return &utils.SingleVersionPackageDiffResult{}, err
 	}
 	pack2, err := differ.getPackages(image2)
 	if err != nil {
-		return &utils.PackageDiffResult{}, err
+		return &utils.SingleVersionPackageDiffResult{}, err
 	}
 
 	diff := utils.GetMapDiff(pack1, pack2)
-	return &utils.PackageDiffResult{
+	return &utils.SingleVersionPackageDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
 		DiffType: strings.TrimSuffix(reflect.TypeOf(differ).Name(), "Analyzer"),
@@ -56,10 +56,10 @@ func singleVersionDiff(image1, image2 utils.Image, differ SingleVersionPackageAn
 func multiVersionAnalysis(image utils.Image, analyzer MultiVersionPackageAnalyzer) (utils.AnalyzeResult, error) {
 	pack, err := analyzer.getPackages(image)
 	if err != nil {
-		return &utils.MultiPackageAnalyzeResult{}, err
+		return &utils.MultiVersionPackageAnalyzeResult{}, err
 	}
 
-	analysis := utils.MultiPackageAnalyzeResult{
+	analysis := utils.MultiVersionPackageAnalyzeResult{
 		Image:       image.Source,
 		AnalyzeType: strings.TrimSuffix(reflect.TypeOf(analyzer).Name(), "Analyzer"),
 		Analysis:    pack,
@@ -70,10 +70,10 @@ func multiVersionAnalysis(image utils.Image, analyzer MultiVersionPackageAnalyze
 func singleVersionAnalysis(image utils.Image, analyzer SingleVersionPackageAnalyzer) (utils.AnalyzeResult, error) {
 	pack, err := analyzer.getPackages(image)
 	if err != nil {
-		return &utils.PackageAnalyzeResult{}, err
+		return &utils.SingleVersionPackageAnalyzeResult{}, err
 	}
 
-	analysis := utils.PackageAnalyzeResult{
+	analysis := utils.SingleVersionPackageAnalyzeResult{
 		Image:       image.Source,
 		AnalyzeType: strings.TrimSuffix(reflect.TypeOf(analyzer).Name(), "Analyzer"),
 		Analysis:    pack,
