@@ -156,6 +156,9 @@ type MultiVersionInfo struct {
 
 To run container-diff on image IDs, docker must be installed.
 
+If encountering this error ```open /etc/docker/certs.d/gcr.io: permission
+denied```, run ```sudo rm -rf /etc/docker```.
+
 ## Example Run
 
 ```
