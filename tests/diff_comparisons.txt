@@ -1,8 +1,8 @@
-file tests/file_diff_actual.json tests/file_diff_expected.json
-pip tests/pip_diff_actual.json tests/pip_diff_expected.json
-apt tests/apt_diff_actual.json tests/apt_diff_expected.json
-node tests/node_diff_actual.json tests/node_diff_expected.json
-nodeOrder tests/node_diff_order_actual.json tests/node_diff_order_expected.json
-multi tests/multi_diff_actual.json tests/multi_diff_expected.json
-history tests/hist_diff_actual.json tests/hist_diff_expected.json
-multihist tests/multi_hist_diff_actual.json tests/multi_hist_diff_expected.json
+file diff tests/file_diff_actual.json tests/file_diff_expected.json
+apt diff tests/apt_diff_actual.json tests/apt_diff_expected.json
+nodeOrder diff tests/node_diff_order_actual.json tests/node_diff_order_expected.json
+multi diff tests/multi_diff_actual.json tests/multi_diff_expected.json
+history diff tests/hist_diff_actual.json tests/hist_diff_expected.json
+pip analysis tests/pip_analysis_actual.json tests/pip_analysis_expected.json
+apt analysis tests/apt_analysis_actual.json tests/apt_analysis_expected.json
+node analysis tests/node_analysis_actual.json tests/node_analysis_expected.json

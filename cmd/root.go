@@ -216,7 +216,7 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 }
 
 func cleanupImage(image utils.Image) {
-	if reflect.DeepEqual(image, (utils.Image{})) {
+	if !reflect.DeepEqual(image, (utils.Image{})) {
 		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
 		errMsg := remove(image.FSPath, true)
 		if errMsg != "" {
