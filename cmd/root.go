@@ -6,6 +6,7 @@ import (
 	goflag "flag"
 	"fmt"
 	"os"
+	"reflect"
 	"sort"
 	"sync"
 
@@ -35,9 +36,9 @@ var analyzeFlagMap = map[string]*bool{
 }
 
 var RootCmd = &cobra.Command{
-	Use:   "[image1] [image2]",
-	Short: "Compare two images.",
-	Long:  `Compares two images using the specifed differs as indicated via flags (see documentation for available differs).`,
+	Use:   "To analyze a single image: [image].  To compare two images: [image1] [image2]",
+	Short: "Analyze a single image or compare two images.",
+	Long:  `Analyzes a single image or compares two images using the specifed analyzers/differs as indicated via flags (see documentation for available ones).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if validArgs, err := validateArgs(args); !validArgs {
 			glog.Error(err.Error())
@@ -59,15 +60,23 @@ var RootCmd = &cobra.Command{
 			analyzeArgs = allAnalyzers
 		}
 
+		var err error
+		// In the case of one image, "analyzes" it
+		// In the case of two images, takes their "diff"
 		if len(args) == 1 {
-			analyzeImage(args[0], analyzeArgs)
+			err = analyzeImage(args[0], analyzeArgs)
 		} else {
-			diffImages(args[0], args[1], analyzeArgs)
+			err = diffImages(args[0], args[1], analyzeArgs)
+		}
+
+		if err != nil {
+			glog.Error(err)
+			os.Exit(1)
 		}
 	},
 }
 
-func diffImages(image1Arg, image2Arg string, diffArgs []string) {
+func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -80,7 +89,6 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) {
 		image1, err = utils.ImagePrepper{image1Arg}.GetImage()
 		if err != nil {
 			glog.Error(err.Error())
-			os.Exit(1)
 		}
 	}()
 
@@ -89,16 +97,22 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) {
 		image2, err = utils.ImagePrepper{image2Arg}.GetImage()
 		if err != nil {
 			glog.Error(err.Error())
-			os.Exit(1)
 		}
 	}()
+	wg.Wait()
+	if err != nil {
+		cleanupImage(image1)
+		cleanupImage(image2)
+		return errors.New("Could not perform image diff")
+	}
 
 	diffTypes, err := differs.GetAnalyzers(diffArgs)
 	if err != nil {
 		glog.Error(err.Error())
-		os.Exit(1)
+		cleanupImage(image1)
+		cleanupImage(image2)
+		return errors.New("Could not perform image diff")
 	}
-	wg.Wait()
 
 	req := differs.DiffRequest{image1, image2, diffTypes}
 	if diffs, err := req.GetDiff(); err == nil {
@@ -127,34 +141,36 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) {
 				glog.Error(err)
 			}
 		}
-		fmt.Println()
 		if !save {
-			glog.Info("Removing image file system directories from system")
-			errMsg := remove(image1.FSPath, true)
-			errMsg += remove(image2.FSPath, true)
-			if errMsg != "" {
-				glog.Error(errMsg)
-			}
+			cleanupImage(image1)
+			cleanupImage(image2)
+
 		} else {
 			dir, _ := os.Getwd()
 			glog.Infof("Images were saved at %s as %s and %s", dir, image1.FSPath, image2.FSPath)
 		}
 	} else {
 		glog.Error(err.Error())
-		os.Exit(1)
+		cleanupImage(image1)
+		cleanupImage(image2)
+		return errors.New("Could not perform image diff")
 	}
+
+	return nil
 }
 
-func analyzeImage(imageArg string, analyzerArgs []string) {
+func analyzeImage(imageArg string, analyzerArgs []string) error {
 	image, err := utils.ImagePrepper{imageArg}.GetImage()
 	if err != nil {
 		glog.Error(err.Error())
-		os.Exit(1)
+		cleanupImage(image)
+		return errors.New("Could not perform image analysis")
 	}
 	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
 		glog.Error(err.Error())
-		os.Exit(1)
+		cleanupImage(image)
+		return errors.New("Could not perform image analysis")
 	}
 
 	req := differs.SingleRequest{image, analyzeTypes}
@@ -184,22 +200,29 @@ func analyzeImage(imageArg string, analyzerArgs []string) {
 				glog.Error(err)
 			}
 		}
-		fmt.Println()
 		if !save {
-			glog.Info("Removing image file system directory from system")
-			errMsg := remove(image.FSPath, true)
-			if errMsg != "" {
-				glog.Error(errMsg)
-			}
+			cleanupImage(image)
 		} else {
 			dir, _ := os.Getwd()
 			glog.Infof("Image was saved at %s as %s", dir, image.FSPath)
 		}
 	} else {
 		glog.Error(err.Error())
-		os.Exit(1)
+		cleanupImage(image)
+		return errors.New("Could not perform image analysis")
 	}
 
+	return nil
+}
+
+func cleanupImage(image utils.Image) {
+	if reflect.DeepEqual(image, (utils.Image{})) {
+		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
+		errMsg := remove(image.FSPath, true)
+		if errMsg != "" {
+			glog.Error(errMsg)
+		}
+	}
 }
 
 func getAllAnalyzers() []string {
