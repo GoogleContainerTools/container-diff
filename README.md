@@ -33,7 +33,7 @@ Download the [container-diff-windows-amd64.exe](https://storage.googleapis.com/c
 
 ## Quickstart
 
-To use container-diff to perform single image analysis, you need one Docker image (in the form of an ID, tarball, or URL from a repo).  Once you have that image, you can run any of the following analyzers:
+To use container-diff to perform analysis on a single image, you need one Docker image (in the form of an ID, tarball, or URL from a repo).  Once you have that image, you can run any of the following analyzers:
 
 ```
 container-diff <img>     [Run all analyzers]
@@ -85,7 +85,7 @@ To use the docker client instead of shelling out to your local docker daemon, ad
 
 ## Analysis Result Format
 
-The JSONs for analysis results are in the follow format:
+The JSONs for analysis results are in the following format:
 ```
 {
     "Image": "foo",
@@ -128,7 +128,7 @@ In this mapping scheme, each package name corresponds to another map where the f
 
 ## Diff Result Format
 
-The jsons for diff results are in the follow format:
+The JSONs for diff results are in the following format:
 ```
 {
     "Image1": "foo",
