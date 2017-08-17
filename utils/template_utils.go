@@ -1,6 +1,6 @@
 package utils
 
-const FSOutput = `
+const FSDiffOutput = `
 -----{{.DiffType}}-----
 
 These entries have been added to {{.Image1}}:{{if not .Diff.Adds}} None{{else}}
@@ -16,7 +16,7 @@ These entries have been changed between {{.Image1}} and {{.Image2}}:{{if not .Di
 	{{end}}{{end}}
 `
 
-const SingleVersionOutput = `
+const SingleVersionDiffOutput = `
 -----{{.DiffType}}-----
 
 Packages found only in {{.Image1}}:{{if not .Diff.Packages1}} None{{else}}
@@ -29,7 +29,7 @@ Version differences:{{if not .Diff.InfoDiff}} None{{else}}
 PACKAGE	IMAGE1 ({{.Image1}})	IMAGE2 ({{.Image2}}){{range .Diff.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{.Info1.Version}}, {{.Info1.Size}}B	{{.Info2.Version}}, {{.Info2.Size}}B{{end}}{{end}}
 `
 
-const MultiVersionOutput = `
+const MultiVersionDiffOutput = `
 -----{{.DiffType}}-----
 
 Packages found only in {{.Image1}}:{{if not .Diff.Packages1}} None{{else}}
@@ -42,7 +42,7 @@ Version differences:{{if not .Diff.InfoDiff}} None{{else}}
 PACKAGE	IMAGE1 ({{.Image1}})	IMAGE2 ({{.Image2}}){{range .Diff.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{range .Info1}}{{.Version}}, {{.Size}}B{{end}}	{{range .Info2}}{{.Version}}, {{.Size}}B{{end}}{{end}}{{end}}
 `
 
-const HistoryOutput = `
+const HistoryDiffOutput = `
 -----{{.DiffType}}-----
 
 Docker history lines found only in {{.Image1}}:{{if not .Diff.Adds}} None{{else}}{{block "list" .Diff.Adds}}{{"\n"}}{{range .}}{{print "-" .}}{{end}}{{end}}{{end}}
@@ -51,9 +51,21 @@ Docker history lines found only in {{.Image2}}:{{if not .Diff.Dels}} None{{else}
 `
 
 const ListAnalysisOutput = `
------{{.DiffType}}-----
+-----{{.AnalyzeType}}-----
 
-Docker history lines found only in {{.Diff.Image1}}:{{if not .Diff.Adds}} None{{else}}{{block "list" .Diff.Adds}}{{"\n"}}{{range .}}{{print "-" .}}{{end}}{{end}}{{end}}
+Analysis for {{.Image}}:{{if not .Analysis}} None{{else}}{{block "list" .Analysis}}{{"\n"}}{{range .}}{{print "-" .}}{{end}}{{end}}{{end}}
+`
 
-Docker history lines found only in {{.Diff.Image2}}:{{if not .Diff.Dels}} None{{else}}{{block "list2" .Diff.Dels}}{{"\n"}}{{range .}}{{print "-" .}}{{end}}{{end}}{{end}}
+const MultiVersionPackageOutput = `
+-----{{.AnalyzeType}}-----
+
+Packages found in {{.Image}}:{{if not .Analysis}} None{{else}}
+NAME	VERSION	SIZE{{range $name, $value := .Analysis}}{{"\n"}}{{print "-"}}{{$name}}	{{range $key, $info := $value}}{{$info.Version}}	{{$info.Size}}B{{end}}{{end}}{{end}}
+`
+
+const SingleVersionPackageOutput = `
+-----{{.AnalyzeType}}-----
+
+Packages found in {{.Image}}:{{if not .Analysis}} None{{else}}
+NAME	VERSION	SIZE{{range $name, $value := .Analysis}}{{"\n"}}{{print "-"}}{{$name}}	{{$value.Version}}	{{$value.Size}}B{{end}}{{end}}
 `

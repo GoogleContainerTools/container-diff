@@ -18,6 +18,7 @@ import (
 
 var json bool
 var eng bool
+var save bool
 
 var apt bool
 var node bool
@@ -127,11 +128,16 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) {
 			}
 		}
 		fmt.Println()
-		glog.Info("Removing image file system directories from system")
-		errMsg := remove(image1.FSPath, true)
-		errMsg += remove(image2.FSPath, true)
-		if errMsg != "" {
-			glog.Error(errMsg)
+		if !save {
+			glog.Info("Removing image file system directories from system")
+			errMsg := remove(image1.FSPath, true)
+			errMsg += remove(image2.FSPath, true)
+			if errMsg != "" {
+				glog.Error(errMsg)
+			}
+		} else {
+			dir, _ := os.Getwd()
+			glog.Infof("Images were saved at %s as %s and %s", dir, image1.FSPath, image2.FSPath)
 		}
 	} else {
 		glog.Error(err.Error())
@@ -179,10 +185,15 @@ func analyzeImage(imageArg string, analyzerArgs []string) {
 			}
 		}
 		fmt.Println()
-		glog.Info("Removing image file system directories from system")
-		errMsg := remove(image.FSPath, true)
-		if errMsg != "" {
-			glog.Error(errMsg)
+		if !save {
+			glog.Info("Removing image file system directory from system")
+			errMsg := remove(image.FSPath, true)
+			if errMsg != "" {
+				glog.Error(errMsg)
+			}
+		} else {
+			dir, _ := os.Getwd()
+			glog.Infof("Image was saved at %s as %s", dir, image.FSPath)
 		}
 	} else {
 		glog.Error(err.Error())
@@ -278,4 +289,5 @@ func init() {
 	RootCmd.Flags().BoolVarP(&apt, "apt", "a", false, "Set this flag to use the apt differ.")
 	RootCmd.Flags().BoolVarP(&file, "file", "f", false, "Set this flag to use the file differ.")
 	RootCmd.Flags().BoolVarP(&history, "history", "d", false, "Set this flag to use the dockerfile history differ.")
+	RootCmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 }

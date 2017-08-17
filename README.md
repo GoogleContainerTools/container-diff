@@ -114,7 +114,7 @@ type PackageInfo struct {
 
 #### Single Version Diffs
 
-The single version differs (apt, pip) have the following json output structure:
+Single version differs (apt) have the following json output structure:
 
 ```
 type PackageDiff struct {
@@ -130,7 +130,7 @@ Image1 and Image2 are the image names.  Packages1 and Packages2 map package name
 
 #### Multi Version Diffs
 
-The multi version differs (node) support processing images which may have multiple versions of the same package.  Below is the json output structure:
+The multi version differs (pip, node) support processing images which may have multiple versions of the same package.  Below is the json output structure:
 
 ```
 type MultiVersionPackageDiff struct {
@@ -154,42 +154,36 @@ type MultiVersionInfo struct {
 
 ## Known issues
 
-To run container-diff on image IDs or URLs, docker must be installed.
+To run container-diff on image IDs, docker must be installed.
 
 ## Example Run
 
 ```
-$ container-diff gcr.io/google-appengine/python:latest gcr.io/google-appengine/python:2017-07-25-110644 -p -a -n
+$ container-diff gcr.io/google-appengine/python:2017-07-21-123058 gcr.io/google-appengine/python:2017-06-29-190410 -a -n -p
 
------Apt Diff-----
+-----AptDiffer-----
 
-Packages found only in gcr.io/google-appengine/python:latest: None
+Packages found only in gcr.io/google-appengine/python:2017-07-21-123058: None
 
-Packages found only in gcr.io/google-appengine/python:2017-07-25-110644: None
+Packages found only in gcr.io/google-appengine/python:2017-06-29-190410: None
 
 Version differences:
-        (Package:        gcr.io/google-appengine/python:latest        gcr.io/google-appengine/python:2017-07-25-110644)
-        perl:            {5.20.2-3 deb8u7 17584}                      {5.20.2-3 deb8u8 17584}
-        
-        libgnutls-deb0-28:        {3.3.8-6 deb8u6 1808}        {3.3.8-6 deb8u7 1808}
-        
-        perl-base:        {5.20.2-3 deb8u7 5098}        {5.20.2-3 deb8u8 5098}
-        
-        perl-modules:        {5.20.2-3 deb8u7 15108}        {5.20.2-3 deb8u8 15108}
-        
------Node Diff-----
+PACKAGE             IMAGE1 (gcr.io/google-appengine/python:2017-07-21-123058)        IMAGE2 (gcr.io/google-appengine/python:2017-06-29-190410)
+-libgcrypt20        1.6.3-2 deb8u4, 998B                                             1.6.3-2 deb8u3, 1002B
 
-Packages found only in gcr.io/google-appengine/python:latest: None
+-----NodeDiffer-----
 
-Packages found only in gcr.io/google-appengine/python:2017-07-25-110644: None
+Packages found only in gcr.io/google-appengine/python:2017-07-21-123058: None
+
+Packages found only in gcr.io/google-appengine/python:2017-06-29-190410: None
 
 Version differences: None
 
------Pip Diff-----
+-----PipDiffer-----
 
-Packages found only in gcr.io/google-appengine/python:latest: None
+Packages found only in gcr.io/google-appengine/python:2017-07-21-123058: None
 
-Packages found only in gcr.io/google-appengine/python:2017-07-25-110644: None
+Packages found only in gcr.io/google-appengine/python:2017-06-29-190410: None
 
 Version differences: None
 
@@ -205,14 +199,14 @@ Feel free to develop your own differ leveraging the utils currently available.  
 In order to quickly make your own differ, follow these steps:
 
 1. Add your diff identifier to the flags in [root.go](https://github.com/GoogleCloudPlatform/container-diff/blob/ReadMe/cmd/root.go)
-2. Determine if you can use existing differ tools.  If you can make use of existing tools, you then need to construct the structs to feed to the diff tools by getting all of the packages for each image or the analogous quality to be diffed.  To determine if you can leverage existing tools, think through these questions:
+2. Determine if you can use existing differ tools.  If you can make use of existing tools, you then need to construct the structs to feed into the diff tools by getting all of the packages for each image or the analogous quality to be diffed.  To determine if you can leverage existing tools, think through these questions:
 - Are you trying to diff packages?
     - Yes: Does the relevant package manager support different versions of the same package on one image?
-        - Yes: Use `GetMultiVerisonMapDiff` to diff `map[string]map[string]utils.PackageInfo` objects.  See [nodeDiff.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/nodeDiff.go#L33) for an example.
-        -  No: Use `GetMapDiff` to diff `map[string]utils.PackageInfo` objects.  See [aptDiff.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/aptDiff.go#L29) or [pipDiff.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/pipDiff.go#L23) for examples. 
+        - Yes: Use `GetMultiVerisonMapDiff` to diff `map[string]map[string]utils.PackageInfo` objects.  See [nodeDiff.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/nodeDiff.go#L33)  or [pipDiff.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/pipDiff.go#L23) for examples.
+        -  No: Use `GetMapDiff` to diff `map[string]utils.PackageInfo` objects.  See [aptDiff.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/aptDiff.go#L29). 
     - No: Look to [History](https://github.com/GoogleCloudPlatform/container-diff/blob/ReadMe/differs/historyDiff.go) and [File System](https://github.com/GoogleCloudPlatform/container-diff/blob/ReadMe/differs/fileDiff.go) differs as models for diffing.
 
-3. Write your Diff driver such that you have a struct for your differ type and a method for that differ called Diff:
+3. Write your Diff driver in the `differs` directory, such that you have a struct for your differ type and a method for that differ called Diff:
 
 ```
 type YourDiffer struct {}
@@ -225,7 +219,15 @@ If using existing package differ tools, you should create the appropriate struct
 
 Otherwise, create your own differ which should yield information to fill a DiffResult in the next step.
 
-4. Create a DiffResult for your differ if you're not using existing utils or want to wrap the output.  This is where you define how your differ should output for a human readable format and as a struct which can then be written to a `.json` file.  See [output_utils.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/utils/output_utils.go).
+4. Create a DiffResult for your differ.  
+```
+type DiffResult interface {
+	GetStruct() DiffResult
+	OutputText(diffType string) error
+}
+```
+
+This is where you define how your differ should output for a human readable format (`OutputText`) and as a struct which can then be written to a `.json` file.  See [output_utils.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/utils/output_utils.go).
 
 5. Add your differ to the diffs map in [differs.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/differs.go#L22) with the corresponding Differ struct as the value.
 
