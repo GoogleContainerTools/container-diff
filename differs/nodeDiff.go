@@ -56,7 +56,7 @@ func (d NodeDiffer) getPackages(image utils.Image) (map[string]map[string]utils.
 			var currInfo utils.PackageInfo
 			currInfo.Version = packageJSON.Version
 			packagePath := strings.TrimSuffix(currPackage, "package.json")
-			size, err := utils.GetDirectorySize(packagePath)
+			size, err := utils.GetSize(packagePath)
 			if err != nil {
 				glog.Warningf("Error getting package size at %s: %s\n", currPackage, err)
 				return packages, err

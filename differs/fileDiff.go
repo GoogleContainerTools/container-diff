@@ -34,13 +34,15 @@ func diffImageFiles(image1, image2 utils.Image) (utils.DirDiff, error) {
 	sort.Strings(adds)
 	dels := utils.GetDeletedEntries(img1Dir, img2Dir)
 	sort.Strings(dels)
+	mods := utils.GetModifiedEntries(img1Dir, img2Dir)
+	sort.Strings(mods)
 
 	diff = utils.DirDiff{
 		Image1: image1.Source,
 		Image2: image2.Source,
 		Adds:   adds,
 		Dels:   dels,
-		Mods:   []string{},
+		Mods:   mods,
 	}
 	return diff, nil
 }

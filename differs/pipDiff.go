@@ -94,7 +94,7 @@ func (d PipDiffer) getPackages(image utils.Image) (map[string]map[string]utils.P
 				var size string
 				if i-1 >= 0 && contents[i-1].Name() == packageName {
 					packagePath := filepath.Join(pythonPath, packageName)
-					intSize, err := utils.GetDirectorySize(packagePath)
+					intSize, err := utils.GetSize(packagePath)
 					if err != nil {
 						glog.Errorf("Could not obtain size for package %s", packagePath)
 						size = ""

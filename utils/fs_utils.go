@@ -9,9 +9,32 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
+	"code.cloudfoundry.org/bytefmt"
 )
 
-func GetDirectorySize(path string) (int64, error) {
+// Directory stores a representaiton of a file directory.
+type Directory struct {
+	Root    string
+	Content []string
+}
+
+type DirectoryEntry struct {
+	Name string
+	Size string
+}
+
+func GetSize(path string) (int64, error) {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return -1, errors.Errorf("Could not get size for %s: %s", path, err)
+	}
+	if stat.IsDir() {
+		return getDirectorySize(path)
+	}
+	return stat.Size(), nil
+}
+
+func getDirectorySize(path string) (int64, error) {
 	var size int64
 	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -109,9 +132,25 @@ func GetDeletedEntries(d1, d2 Directory) []string {
 type DirDiff struct {
 	Image1 string
 	Image2 string
-	Adds   []string
-	Dels   []string
-	Mods   []string
+	Adds   []DirectoryEntry
+	Dels   []DirectoryEntry
+	Mods   []DirectoryEntry
+}
+
+func createDirectoryEntries(entryNames []string) (entries []DirectoryEntry) {
+	for _, name := range entryNames {
+		strSize := ""
+		size, err := GetSize(name)
+		if err == nil {
+			strSize = bytefmt.ByteSize(size)
+		}
+		entry := DirectoryEntry{
+			Name: name,
+			Size: strSize,
+		}
+		entries = append(entries, entry)
+	}
+	return entries
 }
 
 // DiffDirectory takes the diff of two directories, assuming both are completely unpacked
