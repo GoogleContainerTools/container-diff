@@ -4,11 +4,25 @@
     "Image2": "gcr.io/gcp-runtimes/diff-modified",
     "DiffType": "File",
     "Diff": {
-      "Adds": [],
+      "Adds": null,
       "Dels": [
-        "/home/test"
+        {
+          "Name": "/home/test",
+          "Size": 0
+        }
       ],
-      "Mods": []
+      "Mods": [
+        {
+          "Name": "/bin/[",
+          "Size1": 1026712,
+          "Size2": 1026712
+        },
+        {
+          "Name": "/bin/getconf",
+          "Size1": 78584,
+          "Size2": 78584
+        }
+      ]
     }
   }
 ]
