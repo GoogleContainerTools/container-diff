@@ -6,7 +6,6 @@ import (
 	"errors"
 	"html/template"
 	"os"
-	"reflect"
 	"strings"
 	"text/tabwriter"
 
@@ -14,14 +13,14 @@ import (
 )
 
 var templates = map[string]string{
-	"utils.SingleVersionPackageDiffResult":    SingleVersionDiffOutput,
-	"utils.MultiVersionPackageDiffResult":     MultiVersionDiffOutput,
-	"utils.HistDiffResult":                    HistoryDiffOutput,
-	"utils.DirDiffResult":                     FSDiffOutput,
-	"utils.ListAnalyzeResult":                 ListAnalysisOutput,
-	"utils.FileAnalyzeResult":                 FileAnalysisOutput,
-	"utils.MultiVersionPackageAnalyzeResult":  MultiVersionPackageOutput,
-	"utils.SingleVersionPackageAnalyzeResult": SingleVersionPackageOutput,
+	"SingleVersionPackageDiff":    SingleVersionDiffOutput,
+	"MultiVersionPackageDiff":     MultiVersionDiffOutput,
+	"HistDiff":                    HistoryDiffOutput,
+	"DirDiff":                     FSDiffOutput,
+	"ListAnalyze":                 ListAnalysisOutput,
+	"FileAnalyze":                 FileAnalysisOutput,
+	"MultiVersionPackageAnalyze":  MultiVersionPackageOutput,
+	"SingleVersionPackageAnalyze": SingleVersionPackageOutput,
 }
 
 func JSONify(diff interface{}) error {
@@ -35,16 +34,15 @@ func JSONify(diff interface{}) error {
 	return nil
 }
 
-func getTemplate(diff interface{}) (string, error) {
-	diffType := reflect.TypeOf(diff).String()
-	if template, ok := templates[diffType]; ok {
+func getTemplate(templateType string) (string, error) {
+	if template, ok := templates[templateType]; ok {
 		return template, nil
 	}
 	return "", errors.New("No available template")
 }
 
-func TemplateOutput(diff interface{}) error {
-	outputTmpl, err := getTemplate(diff)
+func TemplateOutput(diff interface{}, templateType string) error {
+	outputTmpl, err := getTemplate(templateType)
 	if err != nil {
 		glog.Error(err)
 

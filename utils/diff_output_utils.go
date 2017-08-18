@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"code.cloudfoundry.org/bytefmt"
+)
+
 type DiffResult interface {
 	GetStruct() DiffResult
 	OutputText(diffType string) error
@@ -17,7 +21,7 @@ func (r MultiVersionPackageDiffResult) GetStruct() DiffResult {
 }
 
 func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
-	return TemplateOutput(r)
+	return TemplateOutput(r, "MultiVersionPackageDiff")
 }
 
 type SingleVersionPackageDiffResult struct {
@@ -32,7 +36,7 @@ func (r SingleVersionPackageDiffResult) GetStruct() DiffResult {
 }
 
 func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
-	return TemplateOutput(r)
+	return TemplateOutput(r, "SingleVersionPackageDiff")
 }
 
 type HistDiffResult struct {
@@ -47,7 +51,7 @@ func (r HistDiffResult) GetStruct() DiffResult {
 }
 
 func (r HistDiffResult) OutputText(diffType string) error {
-	return TemplateOutput(r)
+	return TemplateOutput(r, "HistDiff")
 }
 
 type DirDiffResult struct {
@@ -62,5 +66,58 @@ func (r DirDiffResult) GetStruct() DiffResult {
 }
 
 func (r DirDiffResult) OutputText(diffType string) error {
-	return TemplateOutput(r)
+	diff := r.Diff
+
+	strAdds := stringifyDirectoryEntries(diff.Adds)
+	strDels := stringifyDirectoryEntries(diff.Dels)
+	strMods := stringifyEntryDiffs(diff.Mods)
+
+	type StrDiff struct {
+		Adds []StrDirectoryEntry
+		Dels []StrDirectoryEntry
+		Mods []StrEntryDiff
+	}
+	
+	strResult := struct {
+		Image1 string
+		Image2 string
+		DiffType string
+		Diff StrDiff
+	}{
+		Image1: r.Image1,
+		Image2: r.Image2,
+		DiffType: r.DiffType,
+		Diff: StrDiff{
+			Adds: strAdds,
+			Dels: strDels,
+			Mods: strMods,
+		},
+	}
+	return TemplateOutput(strResult, "DirDiff")
+}
+
+type StrEntryDiff struct {
+	Name string
+	Size1 string
+	Size2 string
+}
+
+func stringifyEntryDiffs(entries []EntryDiff) (strEntries []StrEntryDiff) {
+	for _, entry := range entries {
+		size1 := entry.Size1
+		strSize1 := "unknown"
+		if size1 != -1 {
+			strSize1 = bytefmt.ByteSize(uint64(size1))
+		}
+
+		size2 := entry.Size2
+		strSize2 := "unknown"
+		if size2 != -1 {
+			strSize2 = bytefmt.ByteSize(uint64(size2))
+		}
+
+		strEntry := StrEntryDiff{Name: entry.Name, Size1: strSize1, Size2: strSize2}
+		strEntries = append(strEntries, strEntry)
+	}
+	return
 }

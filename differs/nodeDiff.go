@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/utils"
@@ -55,8 +54,7 @@ func (a NodeAnalyzer) getPackages(image utils.Image) (map[string]map[string]util
 			var currInfo utils.PackageInfo
 			currInfo.Version = packageJSON.Version
 			packagePath := strings.TrimSuffix(currPackage, "package.json")
-			size := utils.GetSize(packagePath)
-			currInfo.Size = strconv.FormatInt(size, 10)
+			currInfo.Size = utils.GetSize(packagePath)
 			mapPath := strings.Replace(packagePath, path, "", 1)
 			// Check if other package version already recorded
 			if _, ok := packages[packageJSON.Name]; !ok {

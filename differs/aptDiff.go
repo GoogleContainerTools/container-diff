@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/utils"
@@ -81,7 +82,15 @@ func parseLine(text string, currPackage string, packages map[string]utils.Packag
 			if !ok {
 				currPackageInfo = utils.PackageInfo{}
 			}
-			currPackageInfo.Size = value
+			var size int64
+			var err error
+			size, err = strconv.ParseInt(value, 10, 64)
+			if err != nil {
+				glog.Errorf("Could not get size for %s: %s", currPackage, err)
+				size = -1
+			}
+			// Installed-Size is in KB, so we convert it to bytes to keep consistent with the tool's size units
+			currPackageInfo.Size = size * 1024 
 			packages[currPackage] = currPackageInfo
 			return currPackage
 		default:

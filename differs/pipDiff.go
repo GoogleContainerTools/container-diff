@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/utils"
@@ -66,13 +65,12 @@ func (a PipAnalyzer) getPackages(image utils.Image) (map[string]map[string]utils
 
 				// Retrieves size for actual package/script corresponding to each dist-info metadata directory
 				// by taking the file entry alphabetically before it (for a package) or after it (for a script)
-				var size string
+				var size int64
 				if i-1 >= 0 && contents[i-1].Name() == packageName {
 					packagePath := filepath.Join(pythonPath, packageName)
-					intSize := utils.GetSize(packagePath)
-					size = strconv.FormatInt(intSize, 10)
+					size = utils.GetSize(packagePath)
 				} else if i+1 < len(contents) && contents[i+1].Name() == packageName+".py" {
-					size = strconv.FormatInt(contents[i+1].Size(), 10)
+					size = contents[i+1].Size()
 
 				} else {
 					glog.Errorf("Could not find Python package %s for corresponding metadata info", packageName)

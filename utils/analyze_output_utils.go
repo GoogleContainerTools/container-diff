@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"code.cloudfoundry.org/bytefmt"
+)
+
 type AnalyzeResult interface {
 	GetStruct() AnalyzeResult
 	OutputText(analyzeType string) error
@@ -16,7 +20,7 @@ func (r ListAnalyzeResult) GetStruct() AnalyzeResult {
 }
 
 func (r ListAnalyzeResult) OutputText(analyzeType string) error {
-	return TemplateOutput(r)
+	return TemplateOutput(r, "ListAnalyze")
 }
 
 type MultiVersionPackageAnalyzeResult struct {
@@ -30,7 +34,7 @@ func (r MultiVersionPackageAnalyzeResult) GetStruct() AnalyzeResult {
 }
 
 func (r MultiVersionPackageAnalyzeResult) OutputText(analyzeType string) error {
-	return TemplateOutput(r)
+	return TemplateOutput(r, "MultiVersionPackageAnalyze")
 }
 
 type SingleVersionPackageAnalyzeResult struct {
@@ -44,7 +48,7 @@ func (r SingleVersionPackageAnalyzeResult) GetStruct() AnalyzeResult {
 }
 
 func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string) error {
-	return TemplateOutput(r)
+	return TemplateOutput(r, "SingleVersionPackageAnalyze")
 }
 
 type FileAnalyzeResult struct {
@@ -58,5 +62,36 @@ func (r FileAnalyzeResult) GetStruct() AnalyzeResult {
 }
 
 func (r FileAnalyzeResult) OutputText(analyzeType string) error {
-	return TemplateOutput(r)
+	analysis := r.Analysis
+	strAnalysis := stringifyDirectoryEntries(analysis)
+
+	strResult := struct {
+		Image string
+		AnalyzeType string
+		Analysis []StrDirectoryEntry
+	}{
+		Image: r.Image,
+		AnalyzeType: r.AnalyzeType,
+		Analysis: strAnalysis,
+	}
+	return TemplateOutput(strResult, "FileAnalyze")
+}
+
+type StrDirectoryEntry struct {
+	Name string
+	Size string
+}
+
+func stringifyDirectoryEntries(entries []DirectoryEntry) (strEntries []StrDirectoryEntry) {
+	for _, entry := range entries {
+		size := entry.Size
+		strSize := "unknown"
+		if size != -1 {
+			strSize = bytefmt.ByteSize(uint64(size))
+		}
+
+		strEntry := StrDirectoryEntry{Name: entry.Name, Size: strSize}
+		strEntries = append(strEntries, strEntry)
+	}
+	return
 }
