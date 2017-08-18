@@ -192,7 +192,27 @@ Version differences: None
 
 ```
 ## Example Run with json post-processing
-The following example demonstrates how one might selectively display the output of their diff, such that version differences are ignored and only package absence/presence is displayed and the packages present in only one image are sorted by size in descending order.
+The following example demonstrates how one might selectively display the output of their diff, such that version differences are ignored and only package absence/presence is displayed and the packages present in only one image are sorted by size in descending order.  A small piece of the json being post-processed can be seen below:
+```
+[
+  {
+    "DiffType": "AptDiffer",
+    "Diff": {
+      "Image1": "gcr.io/gcp-runtimes/multi-base",
+      "Packages1": {},
+      "Image2": "gcr.io/gcp-runtimes/multi-modified",
+      "Packages2": {
+        "dh-python": {
+          "Version": "1.20141111-2",
+          "Size": "277"
+        },
+        "libmpdec2": {
+          "Version": "2.4.1-1",
+          "Size": "275"
+        },
+        ...
+```
+The post-processing script used for this example is below:
 
 ```import sys, json
 
