@@ -55,11 +55,7 @@ func (a NodeAnalyzer) getPackages(image utils.Image) (map[string]map[string]util
 			var currInfo utils.PackageInfo
 			currInfo.Version = packageJSON.Version
 			packagePath := strings.TrimSuffix(currPackage, "package.json")
-			size, err := utils.GetDirectorySize(packagePath)
-			if err != nil {
-				glog.Warningf("Error getting package size at %s: %s\n", currPackage, err)
-				return packages, err
-			}
+			size := utils.GetSize(packagePath)
 			currInfo.Size = strconv.FormatInt(size, 10)
 			mapPath := strings.Replace(packagePath, path, "", 1)
 			// Check if other package version already recorded

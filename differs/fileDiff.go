@@ -1,8 +1,6 @@
 package differs
 
 import (
-	"sort"
-
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 )
 
@@ -21,7 +19,7 @@ func (a FileAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error)
 }
 
 func (a FileAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {
-	var result utils.ListAnalyzeResult
+	var result utils.FileAnalyzeResult
 
 	imgDir, err := utils.GetDirectory(image.FSPath, true)
 	if err != nil {
@@ -30,7 +28,7 @@ func (a FileAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {
 
 	result.Image = image.Source
 	result.AnalyzeType = "File"
-	result.Analysis = imgDir.Content
+	result.Analysis = utils.GetDirectoryEntries(imgDir)
 	return &result, err
 }
 
@@ -49,15 +47,6 @@ func diffImageFiles(image1, image2 utils.Image) (utils.DirDiff, error) {
 		return diff, err
 	}
 
-	adds := utils.GetAddedEntries(img1Dir, img2Dir)
-	sort.Strings(adds)
-	dels := utils.GetDeletedEntries(img1Dir, img2Dir)
-	sort.Strings(dels)
-
-	diff = utils.DirDiff{
-		Adds: adds,
-		Dels: dels,
-		Mods: []string{},
-	}
+	diff, _ = utils.DiffDirectory(img1Dir, img2Dir)
 	return diff, nil
 }

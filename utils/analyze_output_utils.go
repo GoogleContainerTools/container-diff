@@ -46,3 +46,17 @@ func (r SingleVersionPackageAnalyzeResult) GetStruct() AnalyzeResult {
 func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string) error {
 	return TemplateOutput(r)
 }
+
+type FileAnalyzeResult struct {
+	Image       string
+	AnalyzeType string
+	Analysis    []DirectoryEntry
+}
+
+func (r FileAnalyzeResult) GetStruct() AnalyzeResult {
+	return r
+}
+
+func (r FileAnalyzeResult) OutputText(analyzeType string) error {
+	return TemplateOutput(r)
+}
