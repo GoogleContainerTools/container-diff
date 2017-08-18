@@ -104,7 +104,7 @@ func TestGetAptPackages(t *testing.T) {
 		},
 	}
 	for _, test := range testCases {
-		d := AptDiffer{}
+		d := AptAnalyzer{}
 		image := utils.Image{FSPath: test.path}
 		packages, err := d.getPackages(image)
 		if err != nil && !test.err {

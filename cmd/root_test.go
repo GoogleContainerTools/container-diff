@@ -11,7 +11,7 @@ type testpair struct {
 
 var argNumTests = []testpair{
 	{[]string{}, false},
-	{[]string{"one"}, false},
+	{[]string{"one"}, true},
 	{[]string{"one", "two"}, true},
 	{[]string{"one", "two", "three"}, false},
 }
