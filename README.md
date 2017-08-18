@@ -241,9 +241,84 @@ Packages found only in gcr.io/google-appengine/python:2017-06-29-190410: None
 Version differences: None
 
 ```
+## Example Run with json post-processing
+The following example demonstrates how one might selectively display the output of their diff, such that version differences are ignored and only package absence/presence is displayed and the packages present in only one image are sorted by size in descending order.  A small piece of the json being post-processed can be seen below:
+```
+[
+  {
+    "DiffType": "AptDiffer",
+    "Diff": {
+      "Image1": "gcr.io/gcp-runtimes/multi-base",
+      "Packages1": {},
+      "Image2": "gcr.io/gcp-runtimes/multi-modified",
+      "Packages2": {
+        "dh-python": {
+          "Version": "1.20141111-2",
+          "Size": "277"
+        },
+        "libmpdec2": {
+          "Version": "2.4.1-1",
+          "Size": "275"
+        },
+        ...
+```
+The post-processing script used for this example is below:
+
+```import sys, json
+
+def main():
+  data = json.loads(sys.stdin.read())
+  img1packages = []
+  img2packages = []
+  for differ in data:
+    diff = differ['Diff']
+
+    if len(diff['Packages1']) > 0:
+      for package in diff['Packages1']:
+        Size = diff['Packages1'][package]['Size']
+        img1packages.append((str(package), int(str(Size))))
+
+    if len(diff['Packages2']) > 0:
+      for package in diff['Packages2']:
+        Size = diff['Packages2'][package]['Size']
+        img2packages.append((str(package), int(str(Size))))
+    
+    img1packages = reversed(sorted(img1packages, key=lambda x: x[1]))
+    img2packages = reversed(sorted(img2packages, key=lambda x: x[1]))
 
 
-## Make your own analyzer
+    print "Only in image1\n"
+    for pkg in img1packages:
+      print pkg
+    print "Only in image2\n"
+    for pkg in img2packages:
+      print pkg
+    print
+
+if __name__ == "__main__":
+  main()
+```
+
+Given the above python script to postprocess json output, you can produce the following behavior:
+```
+container-diff gcr.io/gcp-runtimes/multi-base gcr.io/gcp-runtimes/multi-modified -a -j | python pyscript.py
+
+Only in image1
+
+Only in image2
+
+('libpython3.4-stdlib', 9484)
+('python3.4-minimal', 4506)
+('libpython3.4-minimal', 3310)
+('python3.4', 336)
+('dh-python', 277)
+('libmpdec2', 275)
+('python3-minimal', 96)
+('python3', 36)
+('libpython3-stdlib', 28)
+
+```
+## Make your own differ
 
 Feel free to develop your own analyzer leveraging the utils currently available.  PRs are welcome.
 
