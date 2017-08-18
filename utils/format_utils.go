@@ -19,6 +19,7 @@ var templates = map[string]string{
 	"utils.HistDiffResult":                    HistoryDiffOutput,
 	"utils.DirDiffResult":                     FSDiffOutput,
 	"utils.ListAnalyzeResult":                 ListAnalysisOutput,
+	"utils.FileAnalyzeResult":                 FileAnalysisOutput,
 	"utils.MultiVersionPackageAnalyzeResult":  MultiVersionPackageOutput,
 	"utils.SingleVersionPackageAnalyzeResult": SingleVersionPackageOutput,
 }

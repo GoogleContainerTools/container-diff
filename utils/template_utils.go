@@ -4,16 +4,16 @@ const FSDiffOutput = `
 -----{{.DiffType}}-----
 
 These entries have been added to {{.Image1}}:{{if not .Diff.Adds}} None{{else}}
-	{{range .Diff.Adds}}{{print .}}
-	{{end}}{{end}}
+FILE	SIZE{{range .Diff.Adds}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}
+{{end}}
 
 These entries have been deleted from {{.Image1}}:{{if not .Diff.Dels}} None{{else}}
-	{{range .Diff.Dels}}{{print .}}
-	{{end}}{{end}}
+FILE	SIZE{{range .Diff.Dels}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}
+{{end}}
 
 These entries have been changed between {{.Image1}} and {{.Image2}}:{{if not .Diff.Mods}} None{{else}}
-	{{range .Diff.Mods}}{{print .}}
-	{{end}}{{end}}
+FILE	SIZE1	SIZE2{{range .Diff.Mods}}{{"\n"}}{{.Name}}	{{.Size1}}	{{.Size2}}{{end}}
+{{end}}
 `
 
 const SingleVersionDiffOutput = `
@@ -54,6 +54,14 @@ const ListAnalysisOutput = `
 -----{{.AnalyzeType}}-----
 
 Analysis for {{.Image}}:{{if not .Analysis}} None{{else}}{{block "list" .Analysis}}{{"\n"}}{{range .}}{{print "-" .}}{{"\n"}}{{end}}{{end}}{{end}}
+`
+
+const FileAnalysisOutput = `
+-----{{.AnalyzeType}}-----
+
+Analysis for {{.Image}}:{{if not .Analysis}} None{{else}}
+FILE	SIZE{{range .Analysis}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}
+{{end}}
 `
 
 const MultiVersionPackageOutput = `

@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/golang/glog"
-	"code.cloudfoundry.org/bytefmt"
 )
 
 // Directory stores a representaiton of a file directory.
@@ -20,18 +20,29 @@ type Directory struct {
 
 type DirectoryEntry struct {
 	Name string
-	Size string
+	Size int64
 }
 
-func GetSize(path string) (int64, error) {
+type EntryDiff struct {
+	Name  string
+	Size1 int64
+	Size2 int64
+}
+
+func GetSize(path string) int64 {
 	stat, err := os.Stat(path)
 	if err != nil {
-		return -1, errors.Errorf("Could not get size for %s: %s", path, err)
+		glog.Errorf("Could not obtain size for %s: %s", path, err)
+		return -1
 	}
 	if stat.IsDir() {
-		return getDirectorySize(path)
+		size, err := getDirectorySize(path)
+		if err != nil {
+			glog.Errorf("Could not obtain directory size for %s: %s", path, err)
+		}
+		return size
 	}
-	return stat.Size(), nil
+	return stat.Size()
 }
 
 func getDirectorySize(path string) (int64, error) {
@@ -130,21 +141,41 @@ func GetDeletedEntries(d1, d2 Directory) []string {
 }
 
 type DirDiff struct {
-	Adds   []DirectoryEntry
-	Dels   []DirectoryEntry
-	Mods   []DirectoryEntry
+	Adds []DirectoryEntry
+	Dels []DirectoryEntry
+	Mods []EntryDiff
 }
 
-func createDirectoryEntries(entryNames []string) (entries []DirectoryEntry) {
+func GetDirectoryEntries(d Directory) []DirectoryEntry {
+	return createDirectoryEntries(d.Root, d.Content)
+}
+
+func createDirectoryEntries(root string, entryNames []string) (entries []DirectoryEntry) {
 	for _, name := range entryNames {
-		strSize := ""
-		size, err := GetSize(name)
-		if err == nil {
-			strSize = bytefmt.ByteSize(size)
-		}
+		entryPath := filepath.Join(root, name)
+		size := GetSize(entryPath)
+
 		entry := DirectoryEntry{
 			Name: name,
-			Size: strSize,
+			Size: size,
+		}
+		entries = append(entries, entry)
+	}
+	return entries
+}
+
+func createEntryDiffs(root1, root2 string, entryNames []string) (entries []EntryDiff) {
+	for _, name := range entryNames {
+		entryPath1 := filepath.Join(root1, name)
+		size1 := GetSize(entryPath1)
+
+		entryPath2 := filepath.Join(root2, name)
+		size2 := GetSize(entryPath2)
+
+		entry := EntryDiff{
+			Name:  name,
+			Size1: size1,
+			Size2: size2,
 		}
 		entries = append(entries, entry)
 	}
@@ -154,8 +185,16 @@ func createDirectoryEntries(entryNames []string) (entries []DirectoryEntry) {
 // DiffDirectory takes the diff of two directories, assuming both are completely unpacked
 func DiffDirectory(d1, d2 Directory) (DirDiff, bool) {
 	adds := GetAddedEntries(d1, d2)
+	sort.Strings(adds)
+	addedEntries := createDirectoryEntries(d2.Root, adds)
+
 	dels := GetDeletedEntries(d1, d2)
+	sort.Strings(dels)
+	deletedEntries := createDirectoryEntries(d1.Root, dels)
+
 	mods := GetModifiedEntries(d1, d2)
+	sort.Strings(mods)
+	modifiedEntries := createEntryDiffs(d1.Root, d2.Root, mods)
 
 	var same bool
 	if len(adds) == 0 && len(dels) == 0 && len(mods) == 0 {
@@ -164,7 +203,7 @@ func DiffDirectory(d1, d2 Directory) (DirDiff, bool) {
 		same = false
 	}
 
-	return DirDiff{adds, dels, mods}, same
+	return DirDiff{addedEntries, deletedEntries, modifiedEntries}, same
 }
 
 func checkSameFile(f1name, f2name string) (bool, error) {
