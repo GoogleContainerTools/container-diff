@@ -3,7 +3,7 @@ package utils
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"html/template"
 	"os"
 	"reflect"
@@ -14,10 +14,13 @@ import (
 )
 
 var templates = map[string]string{
-	"utils.PackageDiffResult":             SingleVersionOutput,
-	"utils.MultiVersionPackageDiffResult": MultiVersionOutput,
-	"utils.HistDiffResult":                HistoryOutput,
-	"utils.DirDiffResult":                 FSOutput,
+	"utils.SingleVersionPackageDiffResult":    SingleVersionDiffOutput,
+	"utils.MultiVersionPackageDiffResult":     MultiVersionDiffOutput,
+	"utils.HistDiffResult":                    HistoryDiffOutput,
+	"utils.DirDiffResult":                     FSDiffOutput,
+	"utils.ListAnalyzeResult":                 ListAnalysisOutput,
+	"utils.MultiVersionPackageAnalyzeResult":  MultiVersionPackageOutput,
+	"utils.SingleVersionPackageAnalyzeResult": SingleVersionPackageOutput,
 }
 
 func JSONify(diff interface{}) error {
@@ -36,7 +39,7 @@ func getTemplate(diff interface{}) (string, error) {
 	if template, ok := templates[diffType]; ok {
 		return template, nil
 	}
-	return "", fmt.Errorf("No available template")
+	return "", errors.New("No available template")
 }
 
 func TemplateOutput(diff interface{}) error {

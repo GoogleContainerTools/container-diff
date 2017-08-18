@@ -1,9 +1,9 @@
 [
   {
-    "DiffType": "HistoryDiffer",
+    "Image1": "gcr.io/gcp-runtimes/diff-base",
+    "Image2": "gcr.io/gcp-runtimes/diff-modified",
+    "DiffType": "History",
     "Diff": {
-      "Image1": "gcr.io/gcp-runtimes/diff-base",
-      "Image2": "gcr.io/gcp-runtimes/diff-modified",
       "Adds": [
         "/bin/sh -c #(nop) ADD file:aa56bc8f2fea9c0c81ca085bfa273ad1a3b0d46f51b8c9c61b483340c902024f in /"
       ],

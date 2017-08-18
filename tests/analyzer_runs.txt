@@ -1,0 +1,3 @@
+-p pip gcr.io/gcp-runtimes/pip-modified tests/pip_analysis_actual.json
+-a apt gcr.io/gcp-runtimes/apt-modified tests/apt_analysis_actual.json
+-n node gcr.io/gcp-runtimes/node-modified tests/node_analysis_actual.json

@@ -134,7 +134,7 @@ func TestGetPythonPackages(t *testing.T) {
 		},
 	}
 	for _, test := range testCases {
-		d := PipDiffer{}
+		d := PipAnalyzer{}
 		packages, _ := d.getPackages(test.image)
 		if !reflect.DeepEqual(packages, test.expectedPackages) {
 			t.Errorf("%s\nExpected: %s\nGot: %s", test.descrip, test.expectedPackages, packages)

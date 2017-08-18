@@ -10,16 +10,21 @@ import (
 	"github.com/golang/glog"
 )
 
-type AptDiffer struct {
+type AptAnalyzer struct {
 }
 
 // AptDiff compares the packages installed by apt-get.
-func (d AptDiffer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
-	diff, err := singleVersionDiff(image1, image2, d)
+func (a AptAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
+	diff, err := singleVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func (d AptDiffer) getPackages(image utils.Image) (map[string]utils.PackageInfo, error) {
+func (a AptAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {
+	analysis, err := singleVersionAnalysis(image, a)
+	return analysis, err
+}
+
+func (a AptAnalyzer) getPackages(image utils.Image) (map[string]utils.PackageInfo, error) {
 	path := image.FSPath
 	packages := make(map[string]utils.PackageInfo)
 	if _, err := os.Stat(path); err != nil {
