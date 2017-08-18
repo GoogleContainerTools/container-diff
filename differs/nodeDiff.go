@@ -12,22 +12,21 @@ import (
 	"github.com/golang/glog"
 )
 
-type NodeDiffer struct {
+type NodeAnalyzer struct {
 }
 
 // NodeDiff compares the packages installed by apt-get.
-func (d NodeDiffer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
-	diff, err := multiVersionDiff(image1, image2, d)
+func (a NodeAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
+	diff, err := multiVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func buildNodePaths(path string) ([]string, error) {
-	globalPaths := filepath.Join(path, "node_modules")
-	localPath := filepath.Join(path, "usr/local/lib/node_modules")
-	return []string{globalPaths, localPath}, nil
+func (a NodeAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {
+	analysis, err := multiVersionAnalysis(image, a)
+	return analysis, err
 }
 
-func (d NodeDiffer) getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error) {
+func (a NodeAnalyzer) getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error) {
 	path := image.FSPath
 	packages := make(map[string]map[string]utils.PackageInfo)
 	if _, err := os.Stat(path); err != nil {
@@ -81,6 +80,12 @@ func (d NodeDiffer) getPackages(image utils.Image) (map[string]map[string]utils.
 type nodePackage struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
+}
+
+func buildNodePaths(path string) ([]string, error) {
+	globalPaths := filepath.Join(path, "node_modules")
+	localPath := filepath.Join(path, "usr/local/lib/node_modules")
+	return []string{globalPaths, localPath}, nil
 }
 
 func readPackageJSON(path string) (nodePackage, error) {

@@ -45,7 +45,7 @@ func TestGetNodePackages(t *testing.T) {
 
 	for _, test := range testCases {
 		image := utils.Image{FSPath: test.path}
-		d := NodeDiffer{}
+		d := NodeAnalyzer{}
 		packages, err := d.getPackages(image)
 		if err != nil && !test.err {
 			t.Errorf("Got unexpected error: %s", err)

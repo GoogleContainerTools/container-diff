@@ -130,8 +130,6 @@ func GetDeletedEntries(d1, d2 Directory) []string {
 }
 
 type DirDiff struct {
-	Image1 string
-	Image2 string
 	Adds   []DirectoryEntry
 	Dels   []DirectoryEntry
 	Mods   []DirectoryEntry
@@ -166,7 +164,7 @@ func DiffDirectory(d1, d2 Directory) (DirDiff, bool) {
 		same = false
 	}
 
-	return DirDiff{d1.Root, d2.Root, adds, dels, mods}, same
+	return DirDiff{adds, dels, mods}, same
 }
 
 func checkSameFile(f1name, f2name string) (bool, error) {

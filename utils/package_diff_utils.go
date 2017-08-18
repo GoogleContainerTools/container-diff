@@ -11,9 +11,7 @@ import (
 
 // MultiVersionPackageDiff stores the difference information between two images which could have multi-version packages.
 type MultiVersionPackageDiff struct {
-	Image1    string
 	Packages1 map[string]map[string]PackageInfo
-	Image2    string
 	Packages2 map[string]map[string]PackageInfo
 	InfoDiff  []MultiVersionInfo
 }
@@ -27,9 +25,7 @@ type MultiVersionInfo struct {
 
 // PackageDiff stores the difference information between two images.
 type PackageDiff struct {
-	Image1    string
 	Packages1 map[string]PackageInfo
-	Image2    string
 	Packages2 map[string]PackageInfo
 	InfoDiff  []Info
 }
@@ -95,24 +91,20 @@ func checkPackageMapType(map1, map2 interface{}) (reflect.Type, bool, error) {
 
 // GetMapDiff determines the differences between maps of package names to PackageInfo structs
 // This getter supports only single version packages.
-func GetMapDiff(map1, map2 map[string]PackageInfo, img1, img2 string) PackageDiffResult {
+func GetMapDiff(map1, map2 map[string]PackageInfo) PackageDiff {
 	diff := diffMaps(map1, map2)
 	diffVal := reflect.ValueOf(diff)
 	packDiff := diffVal.Interface().(PackageDiff)
-	packDiff.Image1 = img1
-	packDiff.Image2 = img2
-	return PackageDiffResult{Diff: packDiff}
+	return packDiff
 }
 
 // GetMultiVersionMapDiff determines the differences between two image package maps with multi-version packages
 // This getter supports multi version packages.
-func GetMultiVersionMapDiff(map1, map2 map[string]map[string]PackageInfo, img1, img2 string) MultiVersionPackageDiffResult {
+func GetMultiVersionMapDiff(map1, map2 map[string]map[string]PackageInfo) MultiVersionPackageDiff {
 	diff := diffMaps(map1, map2)
 	diffVal := reflect.ValueOf(diff)
 	packDiff := diffVal.Interface().(MultiVersionPackageDiff)
-	packDiff.Image1 = img1
-	packDiff.Image2 = img2
-	return MultiVersionPackageDiffResult{Diff: packDiff}
+	return packDiff
 }
 
 // DiffMaps determines the differences between maps of package names to PackageInfo structs

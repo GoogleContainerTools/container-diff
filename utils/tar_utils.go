@@ -10,12 +10,6 @@ import (
 	"github.com/golang/glog"
 )
 
-// Directory stores a representaiton of a file directory.
-type Directory struct {
-	Root    string
-	Content []string
-}
-
 func unpackTar(tr *tar.Reader, path string) error {
 	for {
 		header, err := tr.Next()
