@@ -7,73 +7,73 @@
       "Packages1": {
         "dh-python": {
           "Version": "2.20170125",
-          "Size": "402"
+          "Size": 411648
         },
         "libmpdec2": {
           "Version": "2.4.2-1",
-          "Size": "254"
+          "Size": 260096
         },
         "libpython3-stdlib": {
           "Version": "3.5.3-1",
-          "Size": "36"
+          "Size": 36864
         },
         "libpython3.5-minimal": {
           "Version": "3.5.3-1",
-          "Size": "3747"
+          "Size": 3836928
         },
         "libpython3.5-stdlib": {
           "Version": "3.5.3-1",
-          "Size": "9896"
+          "Size": 10133504
         },
         "python3": {
           "Version": "3.5.3-1",
-          "Size": "67"
+          "Size": 68608
         },
         "python3-minimal": {
           "Version": "3.5.3-1",
-          "Size": "120"
+          "Size": 122880
         },
         "python3.5": {
           "Version": "3.5.3-1",
-          "Size": "319"
+          "Size": 326656
         },
         "python3.5-minimal": {
           "Version": "3.5.3-1",
-          "Size": "9411"
+          "Size": 9636864
         }
       },
       "Packages2": {
         "libffi6": {
           "Version": "3.2.1-6",
-          "Size": "56"
+          "Size": 57344
         },
         "libpython-stdlib": {
           "Version": "2.7.13-2",
-          "Size": "37"
+          "Size": 37888
         },
         "libpython2.7-minimal": {
           "Version": "2.7.13-2",
-          "Size": "2767"
+          "Size": 2833408
         },
         "libpython2.7-stdlib": {
           "Version": "2.7.13-2",
-          "Size": "8550"
+          "Size": 8755200
         },
         "python": {
           "Version": "2.7.13-2",
-          "Size": "648"
+          "Size": 663552
         },
         "python-minimal": {
           "Version": "2.7.13-2",
-          "Size": "145"
+          "Size": 148480
         },
         "python2.7": {
           "Version": "2.7.13-2",
-          "Size": "359"
+          "Size": 367616
         },
         "python2.7-minimal": {
           "Version": "2.7.13-2",
-          "Size": "3820"
+          "Size": 3911680
         }
       },
       "InfoDiff": []

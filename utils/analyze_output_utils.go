@@ -34,7 +34,27 @@ func (r MultiVersionPackageAnalyzeResult) GetStruct() AnalyzeResult {
 }
 
 func (r MultiVersionPackageAnalyzeResult) OutputText(analyzeType string) error {
-	return TemplateOutput(r, "MultiVersionPackageAnalyze")
+	analysis := r.Analysis
+	strAnalysis := stringifyMultiVersionPackages(analysis)
+
+	strResult := struct {
+		Image       string
+		AnalyzeType string
+		Analysis    map[string]map[string]StrPackageInfo
+	}{
+		Image:       r.Image,
+		AnalyzeType: r.AnalyzeType,
+		Analysis:    strAnalysis,
+	}
+	return TemplateOutput(strResult, "MultiVersionPackageAnalyze")
+}
+
+func stringifyMultiVersionPackages(packages map[string]map[string]PackageInfo) map[string]map[string]StrPackageInfo {
+	strPackages := map[string]map[string]StrPackageInfo{}
+	for pack, versionMap := range packages {
+		strPackages[pack] = stringifyPackages(versionMap)
+	}
+	return strPackages
 }
 
 type SingleVersionPackageAnalyzeResult struct {
@@ -48,7 +68,45 @@ func (r SingleVersionPackageAnalyzeResult) GetStruct() AnalyzeResult {
 }
 
 func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string) error {
-	return TemplateOutput(r, "SingleVersionPackageAnalyze")
+	analysis := r.Analysis
+	strAnalysis := stringifyPackages(analysis)
+
+	strResult := struct {
+		Image       string
+		AnalyzeType string
+		Analysis    map[string]StrPackageInfo
+	}{
+		Image:       r.Image,
+		AnalyzeType: r.AnalyzeType,
+		Analysis:    strAnalysis,
+	}
+	return TemplateOutput(strResult, "SingleVersionPackageAnalyze")
+}
+
+type StrPackageInfo struct {
+	Version string
+	Size    string
+}
+
+func stringifyPackageInfo(info PackageInfo) StrPackageInfo {
+	return StrPackageInfo{Version: info.Version, Size: stringifySize(info.Size)}
+}
+
+func stringifySize(size int64) string {
+	strSize := "unknown"
+	if size != -1 {
+		strSize = bytefmt.ByteSize(uint64(size))
+	}
+	return strSize
+}
+
+func stringifyPackages(packages map[string]PackageInfo) map[string]StrPackageInfo {
+	strPackages := map[string]StrPackageInfo{}
+	for pack, info := range packages {
+		strInfo := stringifyPackageInfo(info)
+		strPackages[pack] = strInfo
+	}
+	return strPackages
 }
 
 type FileAnalyzeResult struct {
@@ -66,13 +124,13 @@ func (r FileAnalyzeResult) OutputText(analyzeType string) error {
 	strAnalysis := stringifyDirectoryEntries(analysis)
 
 	strResult := struct {
-		Image string
+		Image       string
 		AnalyzeType string
-		Analysis []StrDirectoryEntry
+		Analysis    []StrDirectoryEntry
 	}{
-		Image: r.Image,
+		Image:       r.Image,
 		AnalyzeType: r.AnalyzeType,
-		Analysis: strAnalysis,
+		Analysis:    strAnalysis,
 	}
 	return TemplateOutput(strResult, "FileAnalyze")
 }
@@ -84,13 +142,7 @@ type StrDirectoryEntry struct {
 
 func stringifyDirectoryEntries(entries []DirectoryEntry) (strEntries []StrDirectoryEntry) {
 	for _, entry := range entries {
-		size := entry.Size
-		strSize := "unknown"
-		if size != -1 {
-			strSize = bytefmt.ByteSize(uint64(size))
-		}
-
-		strEntry := StrDirectoryEntry{Name: entry.Name, Size: strSize}
+		strEntry := StrDirectoryEntry{Name: entry.Name, Size: stringifySize(entry.Size)}
 		strEntries = append(strEntries, strEntry)
 	}
 	return

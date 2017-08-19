@@ -1,9 +1,5 @@
 package utils
 
-import (
-	"code.cloudfoundry.org/bytefmt"
-)
-
 type DiffResult interface {
 	GetStruct() DiffResult
 	OutputText(diffType string) error
@@ -21,7 +17,58 @@ func (r MultiVersionPackageDiffResult) GetStruct() DiffResult {
 }
 
 func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
-	return TemplateOutput(r, "MultiVersionPackageDiff")
+	diff := r.Diff
+
+	strPackages1 := stringifyMultiVersionPackages(diff.Packages1)
+	strPackages2 := stringifyMultiVersionPackages(diff.Packages2)
+	strInfoDiff := stringifyMultiVersionPackageDiff(diff.InfoDiff)
+
+	type StrDiff struct {
+		Packages1 map[string]map[string]StrPackageInfo
+		Packages2 map[string]map[string]StrPackageInfo
+		InfoDiff  []StrMultiVersionInfo
+	}
+
+	strResult := struct {
+		Image1   string
+		Image2   string
+		DiffType string
+		Diff     StrDiff
+	}{
+		Image1:   r.Image1,
+		Image2:   r.Image2,
+		DiffType: r.DiffType,
+		Diff: StrDiff{
+			Packages1: strPackages1,
+			Packages2: strPackages2,
+			InfoDiff:  strInfoDiff,
+		},
+	}
+	return TemplateOutput(strResult, "MultiVersionPackageDiff")
+}
+
+type StrMultiVersionInfo struct {
+	Package string
+	Info1   []StrPackageInfo
+	Info2   []StrPackageInfo
+}
+
+func stringifyMultiVersionPackageDiff(infoDiff []MultiVersionInfo) (strInfoDiff []StrMultiVersionInfo) {
+	for _, diff := range infoDiff {
+		strInfos1 := []StrPackageInfo{}
+		for _, info := range diff.Info1 {
+			strInfos1 = append(strInfos1, stringifyPackageInfo(info))
+		}
+
+		strInfos2 := []StrPackageInfo{}
+		for _, info := range diff.Info2 {
+			strInfos2 = append(strInfos2, stringifyPackageInfo(info))
+		}
+
+		strDiff := StrMultiVersionInfo{Package: diff.Package, Info1: strInfos1, Info2: strInfos2}
+		strInfoDiff = append(strInfoDiff, strDiff)
+	}
+	return
 }
 
 type SingleVersionPackageDiffResult struct {
@@ -36,7 +83,51 @@ func (r SingleVersionPackageDiffResult) GetStruct() DiffResult {
 }
 
 func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
-	return TemplateOutput(r, "SingleVersionPackageDiff")
+	diff := r.Diff
+
+	strPackages1 := stringifyPackages(diff.Packages1)
+	strPackages2 := stringifyPackages(diff.Packages2)
+	strInfoDiff := stringifyPackageDiff(diff.InfoDiff)
+
+	type StrDiff struct {
+		Packages1 map[string]StrPackageInfo
+		Packages2 map[string]StrPackageInfo
+		InfoDiff  []StrInfo
+	}
+
+	strResult := struct {
+		Image1   string
+		Image2   string
+		DiffType string
+		Diff     StrDiff
+	}{
+		Image1:   r.Image1,
+		Image2:   r.Image2,
+		DiffType: r.DiffType,
+		Diff: StrDiff{
+			Packages1: strPackages1,
+			Packages2: strPackages2,
+			InfoDiff:  strInfoDiff,
+		},
+	}
+	return TemplateOutput(strResult, "SingleVersionPackageDiff")
+}
+
+type StrInfo struct {
+	Package string
+	Info1   StrPackageInfo
+	Info2   StrPackageInfo
+}
+
+func stringifyPackageDiff(infoDiff []Info) (strInfoDiff []StrInfo) {
+	for _, diff := range infoDiff {
+		strInfo1 := stringifyPackageInfo(diff.Info1)
+		strInfo2 := stringifyPackageInfo(diff.Info2)
+
+		strDiff := StrInfo{Package: diff.Package, Info1: strInfo1, Info2: strInfo2}
+		strInfoDiff = append(strInfoDiff, strDiff)
+	}
+	return
 }
 
 type HistDiffResult struct {
@@ -77,15 +168,15 @@ func (r DirDiffResult) OutputText(diffType string) error {
 		Dels []StrDirectoryEntry
 		Mods []StrEntryDiff
 	}
-	
+
 	strResult := struct {
-		Image1 string
-		Image2 string
+		Image1   string
+		Image2   string
 		DiffType string
-		Diff StrDiff
+		Diff     StrDiff
 	}{
-		Image1: r.Image1,
-		Image2: r.Image2,
+		Image1:   r.Image1,
+		Image2:   r.Image2,
 		DiffType: r.DiffType,
 		Diff: StrDiff{
 			Adds: strAdds,
@@ -97,26 +188,14 @@ func (r DirDiffResult) OutputText(diffType string) error {
 }
 
 type StrEntryDiff struct {
-	Name string
+	Name  string
 	Size1 string
 	Size2 string
 }
 
 func stringifyEntryDiffs(entries []EntryDiff) (strEntries []StrEntryDiff) {
 	for _, entry := range entries {
-		size1 := entry.Size1
-		strSize1 := "unknown"
-		if size1 != -1 {
-			strSize1 = bytefmt.ByteSize(uint64(size1))
-		}
-
-		size2 := entry.Size2
-		strSize2 := "unknown"
-		if size2 != -1 {
-			strSize2 = bytefmt.ByteSize(uint64(size2))
-		}
-
-		strEntry := StrEntryDiff{Name: entry.Name, Size1: strSize1, Size2: strSize2}
+		strEntry := StrEntryDiff{Name: entry.Name, Size1: stringifySize(entry.Size1), Size2: stringifySize(entry.Size2)}
 		strEntries = append(strEntries, strEntry)
 	}
 	return

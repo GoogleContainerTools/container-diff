@@ -90,7 +90,7 @@ func parseLine(text string, currPackage string, packages map[string]utils.Packag
 				size = -1
 			}
 			// Installed-Size is in KB, so we convert it to bytes to keep consistent with the tool's size units
-			currPackageInfo.Size = size * 1024 
+			currPackageInfo.Size = size * 1024
 			packages[currPackage] = currPackageInfo
 			return currPackage
 		default:
