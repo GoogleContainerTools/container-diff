@@ -27,6 +27,12 @@ curl -LO container-diff https://storage.googleapis.com/container-diff/v0.2.0/con
 curl -LO https://storage.googleapis.com/container-diff/v0.2.0/container-diff-linux-amd64 && chmod +x container-diff-linux-amd64 && sudo mv container-diff-linux-amd64 /usr/local/bin/
 ```
 
+OR, if you want to avoid using sudo:
+
+```shell
+curl -LO https://storage.googleapis.com/container-diff/v0.2.0/container-diff-linux-amd64 && chmod +x container-diff-linux-amd64 && mkdir $HOME/bin && export PATH=$PATH:$HOME/bin && mv container-diff-linux-amd64 $HOME/bin
+```
+
 ### Windows
 Download the [container-diff-windows-amd64.exe](https://storage.googleapis.com/container-diff/v0.2.0/container-diff-windows-amd64.exe) file, rename it to `container-diff.exe` and add it to your path
 
