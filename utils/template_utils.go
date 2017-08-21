@@ -20,26 +20,28 @@ const SingleVersionDiffOutput = `
 -----{{.DiffType}}-----
 
 Packages found only in {{.Image1}}:{{if not .Diff.Packages1}} None{{else}}
-NAME	VERSION	SIZE{{range $name, $value := .Diff.Packages1}}{{"\n"}}{{print "-"}}{{$name}}	{{$value.Version}}	{{$value.Size}}B{{end}}{{end}}
+NAME	VERSION	SIZE{{range $name, $value := .Diff.Packages1}}{{"\n"}}{{print "-"}}{{$name}}	{{$value.Version}}	{{$value.Size}}{{end}}{{end}}
 
 Packages found only in {{.Image2}}:{{if not .Diff.Packages2}} None{{else}}
-NAME	VERSION	SIZE{{range $name, $value := .Diff.Packages2}}{{"\n"}}{{print "-"}}{{$name}}	{{$value.Version}}	{{$value.Size}}B{{end}}{{end}}
+NAME	VERSION	SIZE{{range $name, $value := .Diff.Packages2}}{{"\n"}}{{print "-"}}{{$name}}	{{$value.Version}}	{{$value.Size}}{{end}}{{end}}
 
 Version differences:{{if not .Diff.InfoDiff}} None{{else}}
-PACKAGE	IMAGE1 ({{.Image1}})	IMAGE2 ({{.Image2}}){{range .Diff.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{.Info1.Version}}, {{.Info1.Size}}B	{{.Info2.Version}}, {{.Info2.Size}}B{{end}}{{end}}
+PACKAGE	IMAGE1 ({{.Image1}})	IMAGE2 ({{.Image2}}){{range .Diff.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{.Info1.Version}}, {{.Info1.Size}}	{{.Info2.Version}}, {{.Info2.Size}}{{end}}
+{{end}}
 `
 
 const MultiVersionDiffOutput = `
 -----{{.DiffType}}-----
 
 Packages found only in {{.Image1}}:{{if not .Diff.Packages1}} None{{else}}
-NAME	VERSION	SIZE{{range $name, $value := .Diff.Packages1}}{{"\n"}}{{print "-"}}{{$name}}	{{range $key, $info := $value}}{{$info.Version}}	{{$info.Size}}B{{end}}{{end}}{{end}}
+NAME	VERSION	SIZE{{range $name, $value := .Diff.Packages1}}{{"\n"}}{{print "-"}}{{$name}}	{{range $key, $info := $value}}{{$info.Version}}	{{$info.Size}}{{end}}{{end}}{{end}}
 
 Packages found only in {{.Image2}}:{{if not .Diff.Packages2}} None{{else}}
-NAME	VERSION	SIZE{{range $name, $value := .Diff.Packages2}}{{"\n"}}{{print "-"}}{{$name}}	{{range $key, $info := $value}}{{$info.Version}}	{{$info.Size}}B{{end}}{{end}}{{end}}
+NAME	VERSION	SIZE{{range $name, $value := .Diff.Packages2}}{{"\n"}}{{print "-"}}{{$name}}	{{range $key, $info := $value}}{{$info.Version}}	{{$info.Size}}{{end}}{{end}}{{end}}
 
 Version differences:{{if not .Diff.InfoDiff}} None{{else}}
-PACKAGE	IMAGE1 ({{.Image1}})	IMAGE2 ({{.Image2}}){{range .Diff.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{range .Info1}}{{.Version}}, {{.Size}}B{{end}}	{{range .Info2}}{{.Version}}, {{.Size}}B{{end}}{{end}}{{end}}
+PACKAGE	IMAGE1 ({{.Image1}})	IMAGE2 ({{.Image2}}){{range .Diff.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{range .Info1}}{{.Version}}, {{.Size}}{{end}}	{{range .Info2}}{{.Version}}, {{.Size}}{{end}}{{end}}
+{{end}}
 `
 
 const HistoryDiffOutput = `
@@ -68,12 +70,12 @@ const MultiVersionPackageOutput = `
 -----{{.AnalyzeType}}-----
 
 Packages found in {{.Image}}:{{if not .Analysis}} None{{else}}
-NAME	VERSION	SIZE{{range $name, $value := .Analysis}}{{"\n"}}{{print "-"}}{{$name}}	{{range $key, $info := $value}}{{$info.Version}}	{{$info.Size}}B{{end}}{{end}}{{end}}
+NAME	VERSION	SIZE{{range $name, $value := .Analysis}}{{"\n"}}{{print "-"}}{{$name}}	{{range $key, $info := $value}}{{$info.Version}}	{{$info.Size}}{{end}}{{end}}{{end}}
 `
 
 const SingleVersionPackageOutput = `
 -----{{.AnalyzeType}}-----
 
 Packages found in {{.Image}}:{{if not .Analysis}} None{{else}}
-NAME	VERSION	SIZE{{range $name, $value := .Analysis}}{{"\n"}}{{print "-"}}{{$name}}	{{$value.Version}}	{{$value.Size}}B{{end}}{{end}}
+NAME	VERSION	SIZE{{range $name, $value := .Analysis}}{{"\n"}}{{print "-"}}{{$name}}	{{$value.Version}}	{{$value.Size}}{{end}}{{end}}
 `

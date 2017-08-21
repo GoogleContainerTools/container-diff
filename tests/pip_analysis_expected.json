@@ -6,37 +6,37 @@
       "mock": {
         "/usr/local/lib/python3.6/site-packages": {
           "Version": "2.0.0",
-          "Size": "504226"
+          "Size": 504226
         }
       },
       "pbr": {
         "/usr/local/lib/python3.6/site-packages": {
           "Version": "3.1.1",
-          "Size": "447110"
+          "Size": 447110
         }
       },
       "pip": {
         "/usr/local/lib/python3.6/site-packages": {
           "Version": "9.0.1",
-          "Size": "5289421"
+          "Size": 5289421
         }
       },
       "setuptools": {
         "/usr/local/lib/python3.6/site-packages": {
           "Version": "36.0.1",
-          "Size": "837337"
+          "Size": 837337
         }
       },
       "six": {
         "/usr/local/lib/python3.6/site-packages": {
           "Version": "1.10.0",
-          "Size": "30098"
+          "Size": 30098
         }
       },
       "wheel": {
         "/usr/local/lib/python3.6/site-packages": {
           "Version": "0.29.0",
-          "Size": "103509"
+          "Size": 103509
         }
       }
     }

@@ -5,403 +5,403 @@
     "Analysis": {
       "adduser": {
         "Version": "3.115",
-        "Size": "849"
+        "Size": 869376
       },
       "apt": {
         "Version": "1.4.6",
-        "Size": "3538"
+        "Size": 3622912
       },
       "base-files": {
         "Version": "9.9",
-        "Size": "333"
+        "Size": 340992
       },
       "base-passwd": {
         "Version": "3.5.43",
-        "Size": "229"
+        "Size": 234496
       },
       "bash": {
         "Version": "4.4-5",
-        "Size": "5798"
+        "Size": 5937152
       },
       "bsdutils": {
         "Version": "1:2.29.2-1",
-        "Size": "238"
+        "Size": 243712
       },
       "bzip2": {
         "Version": "1.0.6-8.1",
-        "Size": "184"
+        "Size": 188416
       },
       "coreutils": {
         "Version": "8.26-3",
-        "Size": "15103"
+        "Size": 15465472
       },
       "dash": {
         "Version": "0.5.8-2.4",
-        "Size": "204"
+        "Size": 208896
       },
       "debconf": {
         "Version": "1.5.61",
-        "Size": "558"
+        "Size": 571392
       },
       "debian-archive-keyring": {
         "Version": "2017.5",
-        "Size": "118"
+        "Size": 120832
       },
       "debianutils": {
         "Version": "4.8.1.1",
-        "Size": "213"
+        "Size": 218112
       },
       "diffutils": {
         "Version": "1:3.5-3",
-        "Size": "1327"
+        "Size": 1358848
       },
       "dpkg": {
         "Version": "1.18.24",
-        "Size": "6745"
+        "Size": 6906880
       },
       "e2fslibs": {
         "Version": "1.43.4-2",
-        "Size": "449"
+        "Size": 459776
       },
       "e2fsprogs": {
         "Version": "1.43.4-2",
-        "Size": "4022"
+        "Size": 4118528
       },
       "file": {
         "Version": "1:5.30-1",
-        "Size": "96"
+        "Size": 98304
       },
       "findutils": {
         "Version": "4.6.0 git+20161106-2",
-        "Size": "1854"
+        "Size": 1898496
       },
       "gcc-6-base": {
         "Version": "6.3.0-18",
-        "Size": "209"
+        "Size": 214016
       },
       "gpgv": {
         "Version": "2.1.18-6",
-        "Size": "721"
+        "Size": 738304
       },
       "grep": {
         "Version": "2.27-2",
-        "Size": "1131"
+        "Size": 1158144
       },
       "gzip": {
         "Version": "1.6-5 b1",
-        "Size": "231"
+        "Size": 236544
       },
       "hostname": {
         "Version": "3.18 b1",
-        "Size": "47"
+        "Size": 48128
       },
       "inetutils-ping": {
         "Version": "2:1.9.4-2 b1",
-        "Size": "337"
+        "Size": 345088
       },
       "init-system-helpers": {
         "Version": "1.48",
-        "Size": "131"
+        "Size": 134144
       },
       "iproute2": {
         "Version": "4.9.0-1",
-        "Size": "1753"
+        "Size": 1795072
       },
       "libacl1": {
         "Version": "2.2.52-3 b1",
-        "Size": "62"
+        "Size": 63488
       },
       "libapt-pkg5.0": {
         "Version": "1.4.6",
-        "Size": "3055"
+        "Size": 3128320
       },
       "libattr1": {
         "Version": "1:2.4.47-2 b2",
-        "Size": "42"
+        "Size": 43008
       },
       "libaudit-common": {
         "Version": "1:2.6.7-2",
-        "Size": "30"
+        "Size": 30720
       },
       "libaudit1": {
         "Version": "1:2.6.7-2",
-        "Size": "150"
+        "Size": 153600
       },
       "libblkid1": {
         "Version": "2.29.2-1",
-        "Size": "367"
+        "Size": 375808
       },
       "libbz2-1.0": {
         "Version": "1.0.6-8.1",
-        "Size": "96"
+        "Size": 98304
       },
       "libc-bin": {
         "Version": "2.24-11 deb9u1",
-        "Size": "3365"
+        "Size": 3445760
       },
       "libc6": {
         "Version": "2.24-11 deb9u1",
-        "Size": "10684"
+        "Size": 10940416
       },
       "libcap-ng0": {
         "Version": "0.7.7-3 b1",
-        "Size": "43"
+        "Size": 44032
       },
       "libcomerr2": {
         "Version": "1.43.4-2",
-        "Size": "83"
+        "Size": 84992
       },
       "libdb5.3": {
         "Version": "5.3.28-12 b1",
-        "Size": "1815"
+        "Size": 1858560
       },
       "libdebconfclient0": {
         "Version": "0.227",
-        "Size": "67"
+        "Size": 68608
       },
       "libelf1": {
         "Version": "0.168-1",
-        "Size": "934"
+        "Size": 956416
       },
       "libexpat1": {
         "Version": "2.2.0-2 deb9u1",
-        "Size": "369"
+        "Size": 377856
       },
       "libfdisk1": {
         "Version": "2.29.2-1",
-        "Size": "469"
+        "Size": 480256
       },
       "libffi6": {
         "Version": "3.2.1-6",
-        "Size": "56"
+        "Size": 57344
       },
       "libgcc1": {
         "Version": "1:6.3.0-18",
-        "Size": "108"
+        "Size": 110592
       },
       "libgcrypt20": {
         "Version": "1.7.6-2",
-        "Size": "1262"
+        "Size": 1292288
       },
       "libgpg-error0": {
         "Version": "1.26-2",
-        "Size": "572"
+        "Size": 585728
       },
       "liblz4-1": {
         "Version": "0.0~r131-2 b1",
-        "Size": "93"
+        "Size": 95232
       },
       "liblzma5": {
         "Version": "5.2.2-1.2 b1",
-        "Size": "339"
+        "Size": 347136
       },
       "libmagic-mgc": {
         "Version": "1:5.30-1",
-        "Size": "4832"
+        "Size": 4947968
       },
       "libmagic1": {
         "Version": "1:5.30-1",
-        "Size": "214"
+        "Size": 219136
       },
       "libmnl0": {
         "Version": "1.0.4-2",
-        "Size": "46"
+        "Size": 47104
       },
       "libmount1": {
         "Version": "2.29.2-1",
-        "Size": "403"
+        "Size": 412672
       },
       "libncursesw5": {
         "Version": "6.0 20161126-1",
-        "Size": "347"
+        "Size": 355328
       },
       "libpam-modules": {
         "Version": "1.1.8-3.6",
-        "Size": "874"
+        "Size": 894976
       },
       "libpam-modules-bin": {
         "Version": "1.1.8-3.6",
-        "Size": "220"
+        "Size": 225280
       },
       "libpam-runtime": {
         "Version": "1.1.8-3.6",
-        "Size": "1016"
+        "Size": 1040384
       },
       "libpam0g": {
         "Version": "1.1.8-3.6",
-        "Size": "229"
+        "Size": 234496
       },
       "libpcre3": {
         "Version": "2:8.39-3",
-        "Size": "668"
+        "Size": 684032
       },
       "libpython-stdlib": {
         "Version": "2.7.13-2",
-        "Size": "37"
+        "Size": 37888
       },
       "libpython2.7-minimal": {
         "Version": "2.7.13-2",
-        "Size": "2767"
+        "Size": 2833408
       },
       "libpython2.7-stdlib": {
         "Version": "2.7.13-2",
-        "Size": "8550"
+        "Size": 8755200
       },
       "libreadline7": {
         "Version": "7.0-3",
-        "Size": "416"
+        "Size": 425984
       },
       "libselinux1": {
         "Version": "2.6-3 b1",
-        "Size": "209"
+        "Size": 214016
       },
       "libsemanage-common": {
         "Version": "2.6-2",
-        "Size": "39"
+        "Size": 39936
       },
       "libsemanage1": {
         "Version": "2.6-2",
-        "Size": "291"
+        "Size": 297984
       },
       "libsepol1": {
         "Version": "2.6-2",
-        "Size": "653"
+        "Size": 668672
       },
       "libsmartcols1": {
         "Version": "2.29.2-1",
-        "Size": "257"
+        "Size": 263168
       },
       "libsqlite3-0": {
         "Version": "3.16.2-5",
-        "Size": "1162"
+        "Size": 1189888
       },
       "libss2": {
         "Version": "1.43.4-2",
-        "Size": "95"
+        "Size": 97280
       },
       "libssl1.1": {
         "Version": "1.1.0f-3",
-        "Size": "3524"
+        "Size": 3608576
       },
       "libstdc++6": {
         "Version": "6.3.0-18",
-        "Size": "1998"
+        "Size": 2045952
       },
       "libsystemd0": {
         "Version": "232-25",
-        "Size": "652"
+        "Size": 667648
       },
       "libtinfo5": {
         "Version": "6.0 20161126-1",
-        "Size": "478"
+        "Size": 489472
       },
       "libudev1": {
         "Version": "232-25",
-        "Size": "222"
+        "Size": 227328
       },
       "libustr-1.0-1": {
         "Version": "1.0.4-6",
-        "Size": "258"
+        "Size": 264192
       },
       "libuuid1": {
         "Version": "2.29.2-1",
-        "Size": "107"
+        "Size": 109568
       },
       "login": {
         "Version": "1:4.4-4.1",
-        "Size": "2747"
+        "Size": 2812928
       },
       "lsb-base": {
         "Version": "9.20161125",
-        "Size": "49"
+        "Size": 50176
       },
       "mawk": {
         "Version": "1.3.3-17 b3",
-        "Size": "183"
+        "Size": 187392
       },
       "mime-support": {
         "Version": "3.60",
-        "Size": "110"
+        "Size": 112640
       },
       "mount": {
         "Version": "2.29.2-1",
-        "Size": "444"
+        "Size": 454656
       },
       "multiarch-support": {
         "Version": "2.24-11 deb9u1",
-        "Size": "220"
+        "Size": 225280
       },
       "ncurses-base": {
         "Version": "6.0 20161126-1",
-        "Size": "340"
+        "Size": 348160
       },
       "ncurses-bin": {
         "Version": "6.0 20161126-1",
-        "Size": "532"
+        "Size": 544768
       },
       "netbase": {
         "Version": "5.4",
-        "Size": "44"
+        "Size": 45056
       },
       "passwd": {
         "Version": "1:4.4-4.1",
-        "Size": "2478"
+        "Size": 2537472
       },
       "perl-base": {
         "Version": "5.24.1-3",
-        "Size": "7539"
+        "Size": 7719936
       },
       "python": {
         "Version": "2.7.13-2",
-        "Size": "648"
+        "Size": 663552
       },
       "python-minimal": {
         "Version": "2.7.13-2",
-        "Size": "145"
+        "Size": 148480
       },
       "python2.7": {
         "Version": "2.7.13-2",
-        "Size": "359"
+        "Size": 367616
       },
       "python2.7-minimal": {
         "Version": "2.7.13-2",
-        "Size": "3820"
+        "Size": 3911680
       },
       "readline-common": {
         "Version": "7.0-3",
-        "Size": "89"
+        "Size": 91136
       },
       "sed": {
         "Version": "4.4-1",
-        "Size": "799"
+        "Size": 818176
       },
       "sensible-utils": {
         "Version": "0.0.9",
-        "Size": "110"
+        "Size": 112640
       },
       "sysvinit-utils": {
         "Version": "2.88dsf-59.9",
-        "Size": "110"
+        "Size": 112640
       },
       "tar": {
         "Version": "1.29b-1.1",
-        "Size": "2770"
+        "Size": 2836480
       },
       "tzdata": {
         "Version": "2017b-1",
-        "Size": "3010"
+        "Size": 3082240
       },
       "util-linux": {
         "Version": "2.29.2-1",
-        "Size": "3558"
+        "Size": 3643392
       },
       "xz-utils": {
         "Version": "5.2.2-1.2 b1",
-        "Size": "516"
+        "Size": 528384
       },
       "zlib1g": {
         "Version": "1:1.2.8.dfsg-5",
-        "Size": "156"
+        "Size": 159744
       }
     }
   }

@@ -1,152 +1,152 @@
 [
-    {
-        "Image2": "gcr.io/gcp-runtimes/multi-modified", 
-        "Image1": "gcr.io/gcp-runtimes/multi-base", 
-        "DiffType": "Apt", 
-        "Diff": {
-            "Packages1": {}, 
-            "Packages2": {
-                "libmpdec2": {
-                    "Version": "2.4.1-1", 
-                    "Size": "275"
-                }, 
-                "python3.4-minimal": {
-                    "Version": "3.4.2-1", 
-                    "Size": "4506"
-                }, 
-                "libpython3-stdlib": {
-                    "Version": "3.4.2-2", 
-                    "Size": "28"
-                }, 
-                "python3-minimal": {
-                    "Version": "3.4.2-2", 
-                    "Size": "96"
-                }, 
-                "python3.4": {
-                    "Version": "3.4.2-1", 
-                    "Size": "336"
-                }, 
-                "dh-python": {
-                    "Version": "1.20141111-2", 
-                    "Size": "277"
-                }, 
-                "libpython3.4-minimal": {
-                    "Version": "3.4.2-1", 
-                    "Size": "3310"
-                }, 
-                "libpython3.4-stdlib": {
-                    "Version": "3.4.2-1", 
-                    "Size": "9484"
-                }, 
-                "python3": {
-                    "Version": "3.4.2-2", 
-                    "Size": "36"
-                }
-            }, 
-            "InfoDiff": []
+  {
+    "Image1": "gcr.io/gcp-runtimes/multi-base",
+    "Image2": "gcr.io/gcp-runtimes/multi-modified",
+    "DiffType": "Apt",
+    "Diff": {
+      "Packages1": {},
+      "Packages2": {
+        "dh-python": {
+          "Version": "1.20141111-2",
+          "Size": 283648
+        },
+        "libmpdec2": {
+          "Version": "2.4.1-1",
+          "Size": 281600
+        },
+        "libpython3-stdlib": {
+          "Version": "3.4.2-2",
+          "Size": 28672
+        },
+        "libpython3.4-minimal": {
+          "Version": "3.4.2-1",
+          "Size": 3389440
+        },
+        "libpython3.4-stdlib": {
+          "Version": "3.4.2-1",
+          "Size": 9711616
+        },
+        "python3": {
+          "Version": "3.4.2-2",
+          "Size": 36864
+        },
+        "python3-minimal": {
+          "Version": "3.4.2-2",
+          "Size": 98304
+        },
+        "python3.4": {
+          "Version": "3.4.2-1",
+          "Size": 344064
+        },
+        "python3.4-minimal": {
+          "Version": "3.4.2-1",
+          "Size": 4614144
         }
-    }, 
-    {
-        "Image2": "gcr.io/gcp-runtimes/multi-modified", 
-        "Image1": "gcr.io/gcp-runtimes/multi-base", 
-        "DiffType": "Node", 
-        "Diff": {
-            "Packages1": {}, 
-            "Packages2": {
-                "pax": {
-                    "/node_modules/pax/": {
-                        "Version": "0.2.1", 
-                        "Size": "11998"
-                    }
-                }
-            }, 
-            "InfoDiff": [
-                {
-                    "Info1": [
-                        {
-                            "Version": "1.2.4", 
-                            "Size": "56382"
-                        }
-                    ], 
-                    "Info2": [
-                        {
-                            "Version": "0.1.1", 
-                            "Size": "127107"
-                        }
-                    ], 
-                    "Package": "sax"
-                }
-            ]
-        }
-    }, 
-    {
-        "Image2": "gcr.io/gcp-runtimes/multi-modified", 
-        "Image1": "gcr.io/gcp-runtimes/multi-base", 
-        "DiffType": "Pip", 
-        "Diff": {
-            "Packages1": {
-                "pbr": {
-                    "/usr/local/lib/python3.6/site-packages": {
-                        "Version": "3.1.1", 
-                        "Size": "447110"
-                    }
-                }
-            }, 
-            "Packages2": {
-                "retrying": {
-                    "/usr/local/lib/python3.6/site-packages": {
-                        "Version": "1.3.3", 
-                        "Size": "9955"
-                    }
-                }
-            }, 
-            "InfoDiff": [
-                {
-                    "Info1": [
-                        {
-                            "Version": "36.2.2", 
-                            "Size": "839895"
-                        }
-                    ], 
-                    "Info2": [
-                        {
-                            "Version": "36.2.2", 
-                            "Size": "1157078"
-                        }
-                    ], 
-                    "Package": "setuptools"
-                }, 
-                {
-                    "Info1": [
-                        {
-                            "Version": "0.29.0", 
-                            "Size": "103509"
-                        }
-                    ], 
-                    "Info2": [
-                        {
-                            "Version": "0.29.0", 
-                            "Size": "137451"
-                        }
-                    ], 
-                    "Package": "wheel"
-                }, 
-                {
-                    "Info1": [
-                        {
-                            "Version": "2.0.0", 
-                            "Size": "504226"
-                        }
-                    ], 
-                    "Info2": [
-                        {
-                            "Version": "0.8.0", 
-                            "Size": "73348"
-                        }
-                    ], 
-                    "Package": "mock"
-                }
-            ]
-        }
+      },
+      "InfoDiff": []
     }
+  },
+  {
+    "Image1": "gcr.io/gcp-runtimes/multi-base",
+    "Image2": "gcr.io/gcp-runtimes/multi-modified",
+    "DiffType": "Node",
+    "Diff": {
+      "Packages1": {},
+      "Packages2": {
+        "pax": {
+          "/node_modules/pax/": {
+            "Version": "0.2.1",
+            "Size": 11998
+          }
+        }
+      },
+      "InfoDiff": [
+        {
+          "Package": "sax",
+          "Info1": [
+            {
+              "Version": "1.2.4",
+              "Size": 56382
+            }
+          ],
+          "Info2": [
+            {
+              "Version": "0.1.1",
+              "Size": 127107
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "Image1": "gcr.io/gcp-runtimes/multi-base",
+    "Image2": "gcr.io/gcp-runtimes/multi-modified",
+    "DiffType": "Pip",
+    "Diff": {
+      "Packages1": {
+        "pbr": {
+          "/usr/local/lib/python3.6/site-packages": {
+            "Version": "3.1.1",
+            "Size": 447110
+          }
+        }
+      },
+      "Packages2": {
+        "retrying": {
+          "/usr/local/lib/python3.6/site-packages": {
+            "Version": "1.3.3",
+            "Size": 9955
+          }
+        }
+      },
+      "InfoDiff": [
+        {
+          "Package": "mock",
+          "Info1": [
+            {
+              "Version": "2.0.0",
+              "Size": 504226
+            }
+          ],
+          "Info2": [
+            {
+              "Version": "0.8.0",
+              "Size": 73348
+            }
+          ]
+        },
+        {
+          "Package": "setuptools",
+          "Info1": [
+            {
+              "Version": "36.2.2",
+              "Size": 839895
+            }
+          ],
+          "Info2": [
+            {
+              "Version": "36.2.2",
+              "Size": 1157078
+            }
+          ]
+        },
+        {
+          "Package": "wheel",
+          "Info1": [
+            {
+              "Version": "0.29.0",
+              "Size": 103509
+            }
+          ],
+          "Info2": [
+            {
+              "Version": "0.29.0",
+              "Size": 137451
+            }
+          ]
+        }
+      ]
+    }
+  }
 ]

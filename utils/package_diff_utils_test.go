@@ -34,46 +34,46 @@ func TestDiffMaps(t *testing.T) {
 		{
 			descrip: "Missing Packages.",
 			map1: map[string]PackageInfo{
-				"pac1": {"1.0", "40"},
-				"pac3": {"3.0", "60"}},
+				"pac1": {"1.0", 40},
+				"pac3": {"3.0", 60}},
 			map2: map[string]PackageInfo{
-				"pac4": {"4.0", "70"},
-				"pac5": {"5.0", "80"}},
+				"pac4": {"4.0", 70},
+				"pac5": {"5.0", 80}},
 			expected: PackageDiff{
 				Packages1: map[string]PackageInfo{
-					"pac1": {"1.0", "40"},
-					"pac3": {"3.0", "60"}},
+					"pac1": {"1.0", 40},
+					"pac3": {"3.0", 60}},
 				Packages2: map[string]PackageInfo{
-					"pac4": {"4.0", "70"},
-					"pac5": {"5.0", "80"}},
+					"pac4": {"4.0", 70},
+					"pac5": {"5.0", 80}},
 				InfoDiff: []Info{}},
 		},
 		{
 			descrip: "Different Versions and Sizes.",
 			map1: map[string]PackageInfo{
-				"pac2": {"2.0", "50"},
-				"pac3": {"3.0", "60"}},
+				"pac2": {"2.0", 50},
+				"pac3": {"3.0", 60}},
 			map2: map[string]PackageInfo{
-				"pac2": {"2.0", "45"},
-				"pac3": {"4.0", "60"}},
+				"pac2": {"2.0", 45},
+				"pac3": {"4.0", 60}},
 			expected: PackageDiff{
 				Packages1: map[string]PackageInfo{},
 				Packages2: map[string]PackageInfo{},
 				InfoDiff: []Info{
-					{"pac2", PackageInfo{"2.0", "50"}, PackageInfo{"2.0", "45"}},
-					{"pac3", PackageInfo{"3.0", "60"}, PackageInfo{"4.0", "60"}}},
+					{"pac2", PackageInfo{"2.0", 50}, PackageInfo{"2.0", 45}},
+					{"pac3", PackageInfo{"3.0", 60}, PackageInfo{"4.0", 60}}},
 			},
 		},
 		{
 			descrip: "Identical packages, versions, and sizes",
 			map1: map[string]PackageInfo{
-				"pac1": {"1.0", "40"},
-				"pac2": {"2.0", "50"},
-				"pac3": {"3.0", "60"}},
+				"pac1": {"1.0", 40},
+				"pac2": {"2.0", 50},
+				"pac3": {"3.0", 60}},
 			map2: map[string]PackageInfo{
-				"pac1": {"1.0", "40"},
-				"pac2": {"2.0", "50"},
-				"pac3": {"3.0", "60"}},
+				"pac1": {"1.0", 40},
+				"pac2": {"2.0", 50},
+				"pac3": {"3.0", 60}},
 			expected: PackageDiff{
 				Packages1: map[string]PackageInfo{},
 				Packages2: map[string]PackageInfo{},
@@ -82,13 +82,13 @@ func TestDiffMaps(t *testing.T) {
 		{
 			descrip: "MultiVersion call with identical Packages in different layers",
 			map1: map[string]map[string]PackageInfo{
-				"pac5": {"globalPath": {"version", "size"}},
-				"pac3": {"notquite/localPath": {"version", "size"}},
-				"pac4": {"globalPath": {"version", "size"}}},
+				"pac5": {"globalPath": {"version", 0}},
+				"pac3": {"notquite/localPath": {"version", 0}},
+				"pac4": {"globalPath": {"version", 0}}},
 			map2: map[string]map[string]PackageInfo{
-				"pac5": {"globalPath": {"version", "size"}},
-				"pac3": {"notquite/localPath": {"version", "size"}},
-				"pac4": {"globalPath": {"version", "size"}}},
+				"pac5": {"globalPath": {"version", 0}},
+				"pac3": {"notquite/localPath": {"version", 0}},
+				"pac4": {"globalPath": {"version", 0}}},
 			expected: MultiVersionPackageDiff{
 				Packages1: map[string]map[string]PackageInfo{},
 				Packages2: map[string]map[string]PackageInfo{},
@@ -98,33 +98,33 @@ func TestDiffMaps(t *testing.T) {
 		{
 			descrip: "MultiVersion Packages",
 			map1: map[string]map[string]PackageInfo{
-				"pac5": {"onlyImg1": {"version", "size"}},
-				"pac4": {"samePlace": {"version", "size"}},
-				"pac1": {"node_modules/pac1": {"1.0", "40"}},
-				"pac2": {"usr/local/lib/node_modules/pac2": {"2.0", "50"},
-					"node_modules/pac2": {"3.0", "50"}}},
+				"pac5": {"onlyImg1": {"version", 0}},
+				"pac4": {"samePlace": {"version", 0}},
+				"pac1": {"node_modules/pac1": {"1.0", 40}},
+				"pac2": {"usr/local/lib/node_modules/pac2": {"2.0", 50},
+					"node_modules/pac2": {"3.0", 50}}},
 			map2: map[string]map[string]PackageInfo{
-				"pac4": {"samePlace": {"version", "size"}},
-				"pac1": {"node_modules/pac1": {"2.0", "40"}},
-				"pac2": {"usr/local/lib/node_modules/pac2": {"4.0", "50"}},
-				"pac3": {"usr/local/lib/node_modules/pac3": {"5.0", "100"}}},
+				"pac4": {"samePlace": {"version", 0}},
+				"pac1": {"node_modules/pac1": {"2.0", 40}},
+				"pac2": {"usr/local/lib/node_modules/pac2": {"4.0", 50}},
+				"pac3": {"usr/local/lib/node_modules/pac3": {"5.0", 100}}},
 			expected: MultiVersionPackageDiff{
 				Packages1: map[string]map[string]PackageInfo{
-					"pac5": {"onlyImg1": {"version", "size"}},
+					"pac5": {"onlyImg1": {"version", 0}},
 				},
 				Packages2: map[string]map[string]PackageInfo{
-					"pac3": {"usr/local/lib/node_modules/pac3": {"5.0", "100"}},
+					"pac3": {"usr/local/lib/node_modules/pac3": {"5.0", 100}},
 				},
 				InfoDiff: []MultiVersionInfo{
 					{
 						Package: "pac1",
-						Info1:   []PackageInfo{{"1.0", "40"}},
-						Info2:   []PackageInfo{{"2.0", "40"}},
+						Info1:   []PackageInfo{{"1.0", 40}},
+						Info2:   []PackageInfo{{"2.0", 40}},
 					},
 					{
 						Package: "pac2",
-						Info1:   []PackageInfo{{"2.0", "50"}, {"3.0", "50"}},
-						Info2:   []PackageInfo{{"4.0", "50"}},
+						Info1:   []PackageInfo{{"2.0", 50}, {"3.0", 50}},
+						Info2:   []PackageInfo{{"4.0", 50}},
 					},
 				},
 			},

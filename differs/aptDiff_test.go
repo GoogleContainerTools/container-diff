@@ -49,19 +49,19 @@ func TestParseLine(t *testing.T) {
 		},
 		{
 			descrip:     "Size line",
-			line:        "Installed-Size: 12floz",
+			line:        "Installed-Size: 12",
 			packages:    map[string]utils.PackageInfo{},
 			currPackage: "La-Croix",
 			expPackage:  "La-Croix",
-			expected:    map[string]utils.PackageInfo{"La-Croix": {Size: "12floz"}},
+			expected:    map[string]utils.PackageInfo{"La-Croix": {Size: 12288}},
 		},
 		{
 			descrip:     "Pre-existing PackageInfo struct",
-			line:        "Installed-Size: 12floz",
+			line:        "Installed-Size: 12",
 			packages:    map[string]utils.PackageInfo{"La-Croix": {Version: "Lime"}},
 			currPackage: "La-Croix",
 			expPackage:  "La-Croix",
-			expected:    map[string]utils.PackageInfo{"La-Croix": {Version: "Lime", Size: "12floz"}},
+			expected:    map[string]utils.PackageInfo{"La-Croix": {Version: "Lime", Size: 12288}},
 		},
 	}
 
