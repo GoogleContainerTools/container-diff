@@ -129,29 +129,36 @@ func diffMaps(map1, map2 interface{}) interface{} {
 	for _, pack := range map1Value.MapKeys() {
 		packageEntry1 := map1Value.MapIndex(pack)
 		packageEntry2 := map2Value.MapIndex(pack)
+		// If the package does not exist in Image2's map of packages, add it to the collection of unique packages in Image1
 		if !packageEntry2.IsValid() {
 			diff1.SetMapIndex(pack, packageEntry1)
+			// If the package exists in Image2's map of packages but the package information differs between images, add it to
+			// the difference.  Otherwise, if the information is consistent across images, delete it from the Image2's map of packages.
 		} else {
 			if multiV {
 				if !reflect.DeepEqual(packageEntry2.Interface(), packageEntry1.Interface()) {
 					multiInfoDiff = multiVersionDiff(multiInfoDiff, pack.String(),
-							packageEntry1.Interface().(map[string]PackageInfo),
-							packageEntry2.Interface().(map[string]PackageInfo))
+						packageEntry1.Interface().(map[string]PackageInfo),
+						packageEntry2.Interface().(map[string]PackageInfo))
 				}
 			} else {
 				packageInfo1 := packageEntry1.Interface().(PackageInfo)
 				packageInfo2 := packageEntry2.Interface().(PackageInfo)
-				if packageInfo2.Version != packageInfo2.Version {
+				// If two instances of the same package don't have the same version, then they are considered to be different
+				if packageInfo1.Version != packageInfo2.Version {
 					infoDiff = append(infoDiff, Info{pack.String(), packageInfo1, packageInfo2})
 				}
 			}
 			map2Value.SetMapIndex(pack, reflect.Value{})
 		}
 	}
+
+	// The packages remaining in Image2's map of images are those that exist uniquely in Image2
 	for _, key2 := range map2Value.MapKeys() {
 		packageEntry2 := map2Value.MapIndex(key2)
 		diff2.SetMapIndex(key2, packageEntry2)
 	}
+
 	if multiV {
 		return MultiVersionPackageDiff{Packages1: diff1.Interface().(map[string]map[string]PackageInfo),
 			Packages2: diff2.Interface().(map[string]map[string]PackageInfo), InfoDiff: multiInfoDiff}

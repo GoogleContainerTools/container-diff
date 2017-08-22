@@ -60,7 +60,6 @@ func TestDiffMaps(t *testing.T) {
 				Packages1: map[string]PackageInfo{},
 				Packages2: map[string]PackageInfo{},
 				InfoDiff: []Info{
-					{"pac2", PackageInfo{"2.0", 50}, PackageInfo{"2.0", 45}},
 					{"pac3", PackageInfo{"3.0", 60}, PackageInfo{"4.0", 60}}},
 			},
 		},
@@ -141,7 +140,7 @@ func TestDiffMaps(t *testing.T) {
 			sort.Sort(ByPackage(expected.InfoDiff))
 			sort.Sort(ByPackage(actual.InfoDiff))
 			if !reflect.DeepEqual(expected, actual) {
-				t.Errorf("expected Diff to be: %s but got:%s", expected, actual)
+				t.Errorf("expected Diff to be: %v but got:%v", expected, actual)
 				return
 			}
 		case MultiVersionPackageDiff:
@@ -158,7 +157,7 @@ func TestDiffMaps(t *testing.T) {
 				sort.Sort(ByPackageInfo(pack2.Info2))
 			}
 			if !reflect.DeepEqual(expected, actual) {
-				t.Errorf("expected Diff to be: %s but got:%s", expected, actual)
+				t.Errorf("expected Diff to be: %v but got:%v", expected, actual)
 				return
 			}
 		}
