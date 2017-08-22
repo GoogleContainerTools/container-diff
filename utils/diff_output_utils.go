@@ -1,5 +1,12 @@
 package utils
 
+import (
+	"errors"
+	"fmt"
+
+	"github.com/golang/glog"
+)
+
 type DiffResult struct {
 	Image1   string
 	Image2   string
@@ -10,7 +17,12 @@ type DiffResult struct {
 type MultiVersionPackageDiffResult DiffResult
 
 func (r MultiVersionPackageDiffResult) OutputStruct() interface{} {
-	diff := r.Diff.(MultiVersionPackageDiff)
+	diff, valid := r.Diff.(MultiVersionPackageDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
+		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+	}
+
 	diffOutput := struct {
 		Packages1 []PackageOutput
 		Packages2 []PackageOutput
@@ -25,7 +37,11 @@ func (r MultiVersionPackageDiffResult) OutputStruct() interface{} {
 }
 
 func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
-	diff := r.Diff.(MultiVersionPackageDiff)
+	diff, valid := r.Diff.(MultiVersionPackageDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
+		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+	}
 
 	strPackages1 := stringifyPackages(getMultiVersionPackageOutput(diff.Packages1))
 	strPackages2 := stringifyPackages(getMultiVersionPackageOutput(diff.Packages2))
@@ -67,7 +83,12 @@ func getMultiVersionInfoDiffOutput(infoDiff []MultiVersionInfo) []MultiVersionIn
 type SingleVersionPackageDiffResult DiffResult
 
 func (r SingleVersionPackageDiffResult) OutputStruct() interface{} {
-	diff := r.Diff.(PackageDiff)
+	diff, valid := r.Diff.(PackageDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
+		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+	}
+
 	diffOutput := struct {
 		Packages1 []PackageOutput
 		Packages2 []PackageOutput
@@ -82,7 +103,11 @@ func (r SingleVersionPackageDiffResult) OutputStruct() interface{} {
 }
 
 func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
-	diff := r.Diff.(PackageDiff)
+	diff, valid := r.Diff.(PackageDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
+		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+	}
 
 	strPackages1 := stringifyPackages(getSingleVersionPackageOutput(diff.Packages1))
 	strPackages2 := stringifyPackages(getSingleVersionPackageOutput(diff.Packages2))
@@ -134,12 +159,23 @@ func (r HistDiffResult) OutputText(diffType string) error {
 type DirDiffResult DiffResult
 
 func (r DirDiffResult) OutputStruct() interface{} {
-	r.Diff = sortDirDiff(r.Diff.(DirDiff))
+	diff, valid := r.Diff.(DirDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the DirDiff struct")
+		return errors.New("Could not output FileAnalyzer diff result")
+	}
+
+	r.Diff = sortDirDiff(diff)
 	return r
 }
 
 func (r DirDiffResult) OutputText(diffType string) error {
-	diff := sortDirDiff(r.Diff.(DirDiff))
+	diff, valid := r.Diff.(DirDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the DirDiff struct")
+		return errors.New("Could not output FileAnalyzer diff result")
+	}
+	diff = sortDirDiff(diff)
 
 	strAdds := stringifyDirectoryEntries(diff.Adds)
 	strDels := stringifyDirectoryEntries(diff.Dels)

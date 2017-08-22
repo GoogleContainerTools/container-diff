@@ -1,5 +1,12 @@
 package utils
 
+import (
+	"errors"
+	"fmt"
+
+	"github.com/golang/glog"
+)
+
 type Result interface {
 	OutputStruct() interface{}
 	OutputText(resultType string) error
@@ -18,14 +25,24 @@ func (r ListAnalyzeResult) OutputStruct() interface{} {
 }
 
 func (r ListAnalyzeResult) OutputText(resultType string) error {
-	r.Analysis = r.Analysis.([]string)
+	analysis, valid := r.Analysis.([]string)
+	if !valid {
+		glog.Error("Unexpected structure of Analysis.  Should be of type []string")
+		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+	}
+	r.Analysis = analysis
+
 	return TemplateOutput(r, "ListAnalyze")
 }
 
 type MultiVersionPackageAnalyzeResult AnalyzeResult
 
 func (r MultiVersionPackageAnalyzeResult) OutputStruct() interface{} {
-	analysis := r.Analysis.(map[string]map[string]PackageInfo)
+	analysis, valid := r.Analysis.(map[string]map[string]PackageInfo)
+	if !valid {
+		glog.Error("Unexpected structure of Analysis.  Should be of type map[string]map[string]PackageInfo")
+		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+	}
 	analysisOutput := getMultiVersionPackageOutput(analysis)
 	output := struct {
 		Image       string
@@ -40,7 +57,11 @@ func (r MultiVersionPackageAnalyzeResult) OutputStruct() interface{} {
 }
 
 func (r MultiVersionPackageAnalyzeResult) OutputText(resultType string) error {
-	analysis := r.Analysis.(map[string]map[string]PackageInfo)
+	analysis, valid := r.Analysis.(map[string]map[string]PackageInfo)
+	if !valid {
+		glog.Error("Unexpected structure of Analysis.  Should be of type map[string]map[string]PackageInfo")
+		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+	}
 	analysisOutput := getMultiVersionPackageOutput(analysis)
 
 	strAnalysis := stringifyPackages(analysisOutput)
@@ -59,7 +80,11 @@ func (r MultiVersionPackageAnalyzeResult) OutputText(resultType string) error {
 type SingleVersionPackageAnalyzeResult AnalyzeResult
 
 func (r SingleVersionPackageAnalyzeResult) OutputStruct() interface{} {
-	analysis := r.Analysis.(map[string]PackageInfo)
+	analysis, valid := r.Analysis.(map[string]PackageInfo)
+	if !valid {
+		glog.Error("Unexpected structure of Analysis.  Should be of type map[string]PackageInfo")
+		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+	}
 	analysisOutput := getSingleVersionPackageOutput(analysis)
 	output := struct {
 		Image       string
@@ -74,7 +99,11 @@ func (r SingleVersionPackageAnalyzeResult) OutputStruct() interface{} {
 }
 
 func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string) error {
-	analysis := r.Analysis.(map[string]PackageInfo)
+	analysis, valid := r.Analysis.(map[string]PackageInfo)
+	if !valid {
+		glog.Error("Unexpected structure of Analysis.  Should be of type map[string]PackageInfo")
+		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+	}
 	analysisOutput := getSingleVersionPackageOutput(analysis)
 
 	strAnalysis := stringifyPackages(analysisOutput)
@@ -130,7 +159,12 @@ func getMultiVersionPackageOutput(packageMap map[string]map[string]PackageInfo) 
 type FileAnalyzeResult AnalyzeResult
 
 func (r FileAnalyzeResult) OutputStruct() interface{} {
-	analysis := r.Analysis.([]DirectoryEntry)
+	analysis, valid := r.Analysis.([]DirectoryEntry)
+	if !valid {
+		glog.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
+		return errors.New("Could not output FileAnalyzer analysis result")
+	}
+
 	if SortSize {
 		directoryBy(directorySizeSort).Sort(analysis)
 	} else {
@@ -141,7 +175,12 @@ func (r FileAnalyzeResult) OutputStruct() interface{} {
 }
 
 func (r FileAnalyzeResult) OutputText(analyzeType string) error {
-	analysis := r.Analysis.([]DirectoryEntry)
+	analysis, valid := r.Analysis.([]DirectoryEntry)
+	if !valid {
+		glog.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
+		return errors.New("Could not output FileAnalyzer analysis result")
+	}
+
 	if SortSize {
 		directoryBy(directorySizeSort).Sort(analysis)
 	} else {

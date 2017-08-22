@@ -80,7 +80,7 @@ func (s *singleVersionInfoSorter) Less(i, j int) bool {
 }
 
 func (s *singleVersionInfoSorter) Swap(i, j int) {
-	s.packageDiffs[i], s.packageDiffs[j] = s.packageDiffs[i], s.packageDiffs[j]
+	s.packageDiffs[i], s.packageDiffs[j] = s.packageDiffs[j], s.packageDiffs[i]
 }
 
 var singleInfoNameSort = func(a, b *Info) bool {
@@ -89,11 +89,7 @@ var singleInfoNameSort = func(a, b *Info) bool {
 
 // Sorts MultiVersionInfos by package instance with the largest size in the first image, in descending order
 var singleInfoSizeSort = func(a, b *Info) bool {
-	aInfo1 := a.Info1
-	bInfo1 := b.Info1
-
-	// Compares the sizes of the packages in the first image
-	return aInfo1.Size > bInfo1.Size
+	return a.Info1.Size > b.Info1.Size
 }
 
 type multiInfoBy func(a, b *MultiVersionInfo) bool
@@ -120,7 +116,7 @@ func (s *multiVersionInfoSorter) Less(i, j int) bool {
 }
 
 func (s *multiVersionInfoSorter) Swap(i, j int) {
-	s.packageDiffs[i], s.packageDiffs[j] = s.packageDiffs[i], s.packageDiffs[j]
+	s.packageDiffs[i], s.packageDiffs[j] = s.packageDiffs[j], s.packageDiffs[i]
 }
 
 var multiInfoNameSort = func(a, b *MultiVersionInfo) bool {
@@ -250,7 +246,7 @@ func (s *entryDiffSorter) Less(i, j int) bool {
 }
 
 func (s *entryDiffSorter) Swap(i, j int) {
-	s.entryDiffs[i], s.entryDiffs[j] = s.entryDiffs[i], s.entryDiffs[j]
+	s.entryDiffs[i], s.entryDiffs[j] = s.entryDiffs[j], s.entryDiffs[i]
 }
 
 var entryDiffNameSort = func(a, b *EntryDiff) bool {
