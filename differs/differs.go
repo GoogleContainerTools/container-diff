@@ -21,8 +21,8 @@ type SingleRequest struct {
 }
 
 type Analyzer interface {
-	Diff(image1, image2 utils.Image) (utils.DiffResult, error)
-	Analyze(image utils.Image) (utils.AnalyzeResult, error)
+	Diff(image1, image2 utils.Image) (utils.Result, error)
+	Analyze(image utils.Image) (utils.Result, error)
 }
 
 var analyzers = map[string]Analyzer{
@@ -33,12 +33,20 @@ var analyzers = map[string]Analyzer{
 	"node":    NodeAnalyzer{},
 }
 
-func (req DiffRequest) GetDiff() (map[string]utils.DiffResult, error) {
+/*var diffResultMap = map[string]utils.DiffResult{
+	"HistoryAnalyzer": utils.HistDiffResult,
+	"FileAnalyzer":    utils.DirDiffResult,
+	"AptAnalyzer":     utils.SingleVersionPackageDiffResult,
+	"PipAnalyzer":     utils.MultiVersionPackageDiffResult,
+	"NodeAnalyzer":    utils.MultiVersionPackageDiffResult,
+}*/
+
+func (req DiffRequest) GetDiff() (map[string]utils.Result, error) {
 	img1 := req.Image1
 	img2 := req.Image2
 	diffs := req.DiffTypes
 
-	results := map[string]utils.DiffResult{}
+	results := map[string]utils.Result{}
 	for _, differ := range diffs {
 		differName := reflect.TypeOf(differ).Name()
 		if diff, err := differ.Diff(img1, img2); err == nil {
@@ -58,11 +66,11 @@ func (req DiffRequest) GetDiff() (map[string]utils.DiffResult, error) {
 	return results, err
 }
 
-func (req SingleRequest) GetAnalysis() (map[string]utils.AnalyzeResult, error) {
+func (req SingleRequest) GetAnalysis() (map[string]utils.Result, error) {
 	img := req.Image
 	analyses := req.AnalyzeTypes
 
-	results := map[string]utils.AnalyzeResult{}
+	results := map[string]utils.Result{}
 	for _, analyzer := range analyses {
 		analyzeName := reflect.TypeOf(analyzer).Name()
 		if analysis, err := analyzer.Analyze(img); err == nil {

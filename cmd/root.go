@@ -123,11 +123,11 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		}
 		sort.Strings(sortedTypes)
 		glog.Info("Retrieving diffs")
-		diffResults := []utils.DiffResult{}
+		diffResults := []utils.Result{}
 		for _, diffType := range sortedTypes {
 			diff := diffs[diffType]
 			if json {
-				diffResults = append(diffResults, diff.GetStruct())
+				diffResults = append(diffResults, diff.GetStruct().(utils.Result))
 			} else {
 				err = diff.OutputText(diffType)
 				if err != nil {
@@ -182,11 +182,11 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 		}
 		sort.Strings(sortedTypes)
 		glog.Info("Retrieving diffs")
-		analyzeResults := []utils.AnalyzeResult{}
+		analyzeResults := []utils.Result{}
 		for _, analyzeType := range sortedTypes {
 			analysis := analyses[analyzeType]
 			if json {
-				analyzeResults = append(analyzeResults, analysis.GetStruct())
+				analyzeResults = append(analyzeResults, analysis.GetStruct().(utils.Result))
 			} else {
 				err = analysis.OutputText(analyzeType)
 				if err != nil {
@@ -313,4 +313,5 @@ func init() {
 	RootCmd.Flags().BoolVarP(&file, "file", "f", false, "Set this flag to use the file differ.")
 	RootCmd.Flags().BoolVarP(&history, "history", "d", false, "Set this flag to use the dockerfile history differ.")
 	RootCmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
+	RootCmd.Flags().BoolVarP(&utils.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 }

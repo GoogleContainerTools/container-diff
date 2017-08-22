@@ -1,31 +1,43 @@
 package utils
 
-type DiffResult interface {
-	GetStruct() DiffResult
-	OutputText(diffType string) error
-}
+import (
+	"sort"
+) 
 
-type MultiVersionPackageDiffResult struct {
-	Image1   string
-	Image2   string
+type DiffResult struct {
+	Image1 string
+	Image2 string
 	DiffType string
-	Diff     MultiVersionPackageDiff
+	Diff interface{}
 }
 
-func (r MultiVersionPackageDiffResult) GetStruct() DiffResult {
+type MultiVersionPackageDiffResult DiffResult
+
+func (r MultiVersionPackageDiffResult) GetStruct() interface{} {
+	diff := r.Diff.(MultiVersionPackageDiff)
+	diffOutput := struct {
+		Packages1 []PackageOutput
+		Packages2 []PackageOutput
+		InfoDiff []MultiVersionInfo
+	}{
+		Packages1: getMultiVersionPackageOutput(diff.Packages1),
+		Packages2: getMultiVersionPackageOutput(diff.Packages2),
+		InfoDiff: getMultiVersionInfoDiffOutput(diff.InfoDiff),
+	}
+	r.Diff = diffOutput
 	return r
 }
 
 func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
-	diff := r.Diff
+	diff := r.Diff.(MultiVersionPackageDiff)
 
-	strPackages1 := stringifyMultiVersionPackages(diff.Packages1)
-	strPackages2 := stringifyMultiVersionPackages(diff.Packages2)
-	strInfoDiff := stringifyMultiVersionPackageDiff(diff.InfoDiff)
+	strPackages1 := stringifyPackages(getMultiVersionPackageOutput(diff.Packages1))
+	strPackages2 := stringifyPackages(getMultiVersionPackageOutput(diff.Packages2))
+	strInfoDiff := stringifyMultiVersionPackageDiff(getMultiVersionInfoDiffOutput(diff.InfoDiff))
 
 	type StrDiff struct {
-		Packages1 map[string]map[string]StrPackageInfo
-		Packages2 map[string]map[string]StrPackageInfo
+		Packages1 []StrPackageOutput
+		Packages2 []StrPackageOutput
 		InfoDiff  []StrMultiVersionInfo
 	}
 
@@ -47,10 +59,105 @@ func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
 	return TemplateOutput(strResult, "MultiVersionPackageDiff")
 }
 
+func getMultiVersionInfoDiffOutput(infoDiff []MultiVersionInfo) []MultiVersionInfo {
+	if SortSize {
+		multiInfoBy(multiInfoSizeSort).Sort(infoDiff)
+	} else {
+		multiInfoBy(multiInfoNameSort).Sort(infoDiff)
+	}
+	return infoDiff
+}
+
+type multiInfoBy func(a, b *MultiVersionInfo) bool
+
+func (by multiInfoBy) Sort(packageDiffs []MultiVersionInfo) {
+	ms := &multiVersionInfoSorter{
+		packageDiffs: packageDiffs,
+		by: by,
+	}
+	sort.Sort(ms)
+}
+
+type multiVersionInfoSorter struct {
+	packageDiffs []MultiVersionInfo
+	by func(a, b *MultiVersionInfo) bool
+}
+
+func (s *multiVersionInfoSorter) Len() int {
+	return len(s.packageDiffs)
+}
+
+func (s *multiVersionInfoSorter) Less(i, j int) bool {
+	return s.by(&s.packageDiffs[i], &s.packageDiffs[j])
+}
+
+func (s *multiVersionInfoSorter) Swap(i, j int) {
+	s.packageDiffs[i], s.packageDiffs[j] = s.packageDiffs[i], s.packageDiffs[j]
+}
+
+var multiInfoNameSort = func(a, b *MultiVersionInfo) bool {
+	return a.Package < b.Package
+}
+
+// Sorts MultiVersionInfos by package instance with the largest size in the first image, in descending order
+var multiInfoSizeSort = func(a, b *MultiVersionInfo) bool {
+	aInfo1 := a.Info1
+	bInfo1 := b.Info1
+	
+	// For each package, sorts the infos of the first image's instances of that package in descending order 
+	sort.Sort(packageInfoBySize(aInfo1))
+	sort.Sort(packageInfoBySize(bInfo1))
+	// Compares the largest size instances of each package in the first image
+	return aInfo1[0].Size > bInfo1[0].Size
+}
+
+type packageInfoBySize []PackageInfo
+
+func (infos packageInfoBySize) Len() int {
+	return len(infos)
+}
+
+func (infos packageInfoBySize) Swap(i, j int) {
+	infos[i], infos[j] = infos[j], infos[i]
+}
+
+func (infos packageInfoBySize) Less(i, j int) bool {
+	if infos[i].Size == infos[j].Size {
+		return infos[i].Version < infos[j].Version
+	}
+	return infos[i].Size > infos[j].Size
+}
+
+type packageInfoByVersion []PackageInfo 
+
+func (infos packageInfoByVersion) Len() int {
+	return len(infos)
+}
+
+func (infos packageInfoByVersion) Swap(i, j int) {
+	infos[i], infos[j] = infos[j], infos[i]
+}
+
+func (infos packageInfoByVersion) Less(i, j int) bool {
+	if infos[i].Version == infos[j].Version {
+		return infos[i].Size > infos[j].Size
+	}
+	return infos[i].Version < infos[j].Version
+}
+
 type StrMultiVersionInfo struct {
 	Package string
 	Info1   []StrPackageInfo
 	Info2   []StrPackageInfo
+}
+
+type StrPackageInfo struct {
+	Version string
+	Size string
+}
+
+func stringifyPackageInfo(info PackageInfo) StrPackageInfo {
+	return StrPackageInfo{Version: info.Version, Size: stringifySize(info.Size)}
 }
 
 func stringifyMultiVersionPackageDiff(infoDiff []MultiVersionInfo) (strInfoDiff []StrMultiVersionInfo) {
@@ -71,27 +178,33 @@ func stringifyMultiVersionPackageDiff(infoDiff []MultiVersionInfo) (strInfoDiff 
 	return
 }
 
-type SingleVersionPackageDiffResult struct {
-	Image1   string
-	Image2   string
-	DiffType string
-	Diff     PackageDiff
-}
+type SingleVersionPackageDiffResult DiffResult
 
-func (r SingleVersionPackageDiffResult) GetStruct() DiffResult {
+func (r SingleVersionPackageDiffResult) GetStruct() interface{} {
+	diff := r.Diff.(PackageDiff)
+	diffOutput := struct {
+		Packages1 []PackageOutput
+		Packages2 []PackageOutput
+		InfoDiff []Info
+	}{
+		Packages1: getSingleVersionPackageOutput(diff.Packages1),
+		Packages2: getSingleVersionPackageOutput(diff.Packages2),
+		InfoDiff: getSingleVersionInfoDiffOutput(diff.InfoDiff),
+	}
+	r.Diff = diffOutput
 	return r
 }
 
 func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
-	diff := r.Diff
+	diff := r.Diff.(PackageDiff)
 
-	strPackages1 := stringifyPackages(diff.Packages1)
-	strPackages2 := stringifyPackages(diff.Packages2)
-	strInfoDiff := stringifyPackageDiff(diff.InfoDiff)
+	strPackages1 := stringifyPackages(getSingleVersionPackageOutput(diff.Packages1))
+	strPackages2 := stringifyPackages(getSingleVersionPackageOutput(diff.Packages2))
+	strInfoDiff := stringifyPackageDiff(getSingleVersionInfoDiffOutput(diff.InfoDiff))
 
 	type StrDiff struct {
-		Packages1 map[string]StrPackageInfo
-		Packages2 map[string]StrPackageInfo
+		Packages1 []StrPackageOutput
+		Packages2 []StrPackageOutput
 		InfoDiff  []StrInfo
 	}
 
@@ -113,6 +226,55 @@ func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
 	return TemplateOutput(strResult, "SingleVersionPackageDiff")
 }
 
+func getSingleVersionInfoDiffOutput(infoDiff []Info) []Info {
+	if SortSize {
+		singleInfoBy(singleInfoSizeSort).Sort(infoDiff)
+	} else {
+		singleInfoBy(singleInfoNameSort).Sort(infoDiff)
+	}
+	return infoDiff
+}
+
+type singleInfoBy func(a, b *Info) bool
+
+func (by singleInfoBy) Sort(packageDiffs []Info) {
+	ss := &singleVersionInfoSorter{
+		packageDiffs: packageDiffs,
+		by: by,
+	}
+	sort.Sort(ss)
+}
+
+type singleVersionInfoSorter struct {
+	packageDiffs []Info
+	by func(a, b *Info) bool
+}
+
+func (s *singleVersionInfoSorter) Len() int {
+	return len(s.packageDiffs)
+}
+
+func (s *singleVersionInfoSorter) Less(i, j int) bool {
+	return s.by(&s.packageDiffs[i], &s.packageDiffs[j])
+}
+
+func (s *singleVersionInfoSorter) Swap(i, j int) {
+	s.packageDiffs[i], s.packageDiffs[j] = s.packageDiffs[i], s.packageDiffs[j]
+}
+
+var singleInfoNameSort = func(a, b *Info) bool {
+	return a.Package < b.Package
+}
+
+// Sorts MultiVersionInfos by package instance with the largest size in the first image, in descending order
+var singleInfoSizeSort = func(a, b *Info) bool {
+	aInfo1 := a.Info1
+	bInfo1 := b.Info1
+	
+	// Compares the sizes of the packages in the first image
+	return aInfo1.Size > bInfo1.Size
+}
+
 type StrInfo struct {
 	Package string
 	Info1   StrPackageInfo
@@ -130,14 +292,9 @@ func stringifyPackageDiff(infoDiff []Info) (strInfoDiff []StrInfo) {
 	return
 }
 
-type HistDiffResult struct {
-	Image1   string
-	Image2   string
-	DiffType string
-	Diff     HistDiff
-}
+type HistDiffResult DiffResult
 
-func (r HistDiffResult) GetStruct() DiffResult {
+func (r HistDiffResult) GetStruct() interface{} {
 	return r
 }
 
@@ -145,19 +302,14 @@ func (r HistDiffResult) OutputText(diffType string) error {
 	return TemplateOutput(r, "HistDiff")
 }
 
-type DirDiffResult struct {
-	Image1   string
-	Image2   string
-	DiffType string
-	Diff     DirDiff
-}
+type DirDiffResult DiffResult
 
-func (r DirDiffResult) GetStruct() DiffResult {
+func (r DirDiffResult) GetStruct() interface{} {
 	return r
 }
 
 func (r DirDiffResult) OutputText(diffType string) error {
-	diff := r.Diff
+	diff := r.Diff.(DirDiff)
 
 	strAdds := stringifyDirectoryEntries(diff.Adds)
 	strDels := stringifyDirectoryEntries(diff.Dels)

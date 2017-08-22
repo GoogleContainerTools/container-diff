@@ -15,12 +15,12 @@ type AptAnalyzer struct {
 }
 
 // AptDiff compares the packages installed by apt-get.
-func (a AptAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
+func (a AptAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
 	diff, err := singleVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func (a AptAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {
+func (a AptAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
 	analysis, err := singleVersionAnalysis(image, a)
 	return analysis, err
 }
