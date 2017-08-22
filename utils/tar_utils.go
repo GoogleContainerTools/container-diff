@@ -18,7 +18,7 @@ func unpackTar(tr *tar.Reader, path string) error {
 			break
 		}
 		if err != nil {
-			glog.Fatalf(err.Error())
+			glog.Error("Error getting next tar header")
 			return err
 		}
 
@@ -44,6 +44,7 @@ func unpackTar(tr *tar.Reader, path string) error {
 		case tar.TypeDir:
 			if _, err := os.Stat(target); err != nil {
 				if err := os.MkdirAll(target, mode); err != nil {
+					glog.Errorf("Error creating directory %s while untarring", target)
 					return err
 				}
 				continue
@@ -54,13 +55,14 @@ func unpackTar(tr *tar.Reader, path string) error {
 
 			currFile, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
 			if err != nil {
+				glog.Errorf("Error opening file %s", target)
 				return err
 			}
-			defer currFile.Close()
 			_, err = io.Copy(currFile, tr)
 			if err != nil {
 				return err
 			}
+			currFile.Close()
 		}
 
 	}

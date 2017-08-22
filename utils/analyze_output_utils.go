@@ -14,9 +14,9 @@ type Result interface {
 }
 
 type AnalyzeResult struct {
-	Image string
+	Image       string
 	AnalyzeType string
-	Analysis interface{}
+	Analysis    interface{}
 }
 
 type ListAnalyzeResult AnalyzeResult
@@ -40,9 +40,9 @@ func (r MultiVersionPackageAnalyzeResult) GetStruct() interface{} {
 		AnalyzeType string
 		Analysis    []PackageOutput
 	}{
-		Image: r.Image,
+		Image:       r.Image,
 		AnalyzeType: r.AnalyzeType,
-		Analysis: analysisOutput,
+		Analysis:    analysisOutput,
 	}
 	return output
 }
@@ -74,9 +74,9 @@ func (r SingleVersionPackageAnalyzeResult) GetStruct() interface{} {
 		AnalyzeType string
 		Analysis    []PackageOutput
 	}{
-		Image: r.Image,
+		Image:       r.Image,
 		AnalyzeType: r.AnalyzeType,
-		Analysis: analysisOutput,
+		Analysis:    analysisOutput,
 	}
 	return output
 }
@@ -99,10 +99,10 @@ func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string) error {
 }
 
 type PackageOutput struct {
-	Name string
-	Path string `json: ",omitempty"`
+	Name    string
+	Path    string `json:",omitempty"`
 	Version string
-	Size int64
+	Size    int64
 }
 
 type packageBy func(p1, p2 *PackageOutput) bool
@@ -110,14 +110,14 @@ type packageBy func(p1, p2 *PackageOutput) bool
 func (by packageBy) Sort(packages []PackageOutput) {
 	ps := &packageSorter{
 		packages: packages,
-		by: by,
+		by:       by,
 	}
 	sort.Sort(ps)
 }
 
 type packageSorter struct {
 	packages []PackageOutput
-	by func(p1, p2 *PackageOutput) bool
+	by       func(p1, p2 *PackageOutput) bool
 }
 
 func (s *packageSorter) Len() int {
@@ -129,17 +129,29 @@ func (s *packageSorter) Less(i, j int) bool {
 }
 
 func (s *packageSorter) Swap(i, j int) {
-	s.packages[i], s.packages[j] = s.packages[i], s.packages[j]
+	s.packages[i], s.packages[j] = s.packages[j], s.packages[i]
 }
 
+// If packages have the same name, means they exist where multiple version of the same package are allowed,
+// so sort by version.  If they have the same version, then sort by size.
 var packageNameSort = func(p1, p2 *PackageOutput) bool {
 	if p1.Name == p2.Name {
-		return p1.Path < p2.Path
+		if p1.Version == p2.Version {
+			return p1.Size > p2.Size
+		}
+		return p1.Version < p2.Version
 	}
 	return p1.Name < p2.Name
 }
 
+// If packages have the same size, sort by name.  If they are two versions of the same package, sort by version.
 var packageSizeSort = func(p1, p2 *PackageOutput) bool {
+	if p1.Size == p2.Size {
+		if p1.Name == p2.Name {
+			return p1.Version < p2.Version
+		}
+		return p1.Name < p2.Name
+	}
 	return p1.Size > p2.Size
 }
 
@@ -174,8 +186,8 @@ func getMultiVersionPackageOutput(packageMap map[string]map[string]PackageInfo) 
 }
 
 type StrPackageOutput struct {
-	Name string
-	Path string
+	Name    string
+	Path    string
 	Version string
 	Size    string
 }
@@ -200,11 +212,23 @@ func stringifyPackages(packages []PackageOutput) []StrPackageOutput {
 type FileAnalyzeResult AnalyzeResult
 
 func (r FileAnalyzeResult) GetStruct() interface{} {
+	analysis := r.Analysis.([]DirectoryEntry)
+	if SortSize {
+		directoryBy(directorySizeSort).Sort(analysis)
+	} else {
+		directoryBy(directoryNameSort).Sort(analysis)
+	}
+	r.Analysis = analysis
 	return r
 }
 
 func (r FileAnalyzeResult) OutputText(analyzeType string) error {
 	analysis := r.Analysis.([]DirectoryEntry)
+	if SortSize {
+		directoryBy(directorySizeSort).Sort(analysis)
+	} else {
+		directoryBy(directoryNameSort).Sort(analysis)
+	}
 	strAnalysis := stringifyDirectoryEntries(analysis)
 
 	strResult := struct {
@@ -217,6 +241,47 @@ func (r FileAnalyzeResult) OutputText(analyzeType string) error {
 		Analysis:    strAnalysis,
 	}
 	return TemplateOutput(strResult, "FileAnalyze")
+}
+
+type directoryBy func(e1, e2 *DirectoryEntry) bool
+
+func (by directoryBy) Sort(entries []DirectoryEntry) {
+	ds := &directorySorter{
+		entries: entries,
+		by:      by,
+	}
+	sort.Sort(ds)
+}
+
+type directorySorter struct {
+	entries []DirectoryEntry
+	by      func(p1, p2 *DirectoryEntry) bool
+}
+
+func (s *directorySorter) Len() int {
+	return len(s.entries)
+}
+
+func (s *directorySorter) Less(i, j int) bool {
+	return s.by(&s.entries[i], &s.entries[j])
+}
+
+func (s *directorySorter) Swap(i, j int) {
+	s.entries[i], s.entries[j] = s.entries[j], s.entries[i]
+}
+
+// If packages have the same name, means they exist where multiple version of the same package are allowed,
+// so sort by version.  If they have the same version, then sort by size.
+var directoryNameSort = func(e1, e2 *DirectoryEntry) bool {
+	return e1.Name < e2.Name
+}
+
+// If packages have the same size, sort by name.  If they are two versions of the same package, sort by version.
+var directorySizeSort = func(e1, e2 *DirectoryEntry) bool {
+	if e1.Size == e2.Size {
+		return e1.Name < e2.Name
+	}
+	return e1.Size > e2.Size
 }
 
 type StrDirectoryEntry struct {

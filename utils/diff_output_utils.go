@@ -2,13 +2,13 @@ package utils
 
 import (
 	"sort"
-) 
+)
 
 type DiffResult struct {
-	Image1 string
-	Image2 string
+	Image1   string
+	Image2   string
 	DiffType string
-	Diff interface{}
+	Diff     interface{}
 }
 
 type MultiVersionPackageDiffResult DiffResult
@@ -18,11 +18,11 @@ func (r MultiVersionPackageDiffResult) GetStruct() interface{} {
 	diffOutput := struct {
 		Packages1 []PackageOutput
 		Packages2 []PackageOutput
-		InfoDiff []MultiVersionInfo
+		InfoDiff  []MultiVersionInfo
 	}{
 		Packages1: getMultiVersionPackageOutput(diff.Packages1),
 		Packages2: getMultiVersionPackageOutput(diff.Packages2),
-		InfoDiff: getMultiVersionInfoDiffOutput(diff.InfoDiff),
+		InfoDiff:  getMultiVersionInfoDiffOutput(diff.InfoDiff),
 	}
 	r.Diff = diffOutput
 	return r
@@ -73,14 +73,14 @@ type multiInfoBy func(a, b *MultiVersionInfo) bool
 func (by multiInfoBy) Sort(packageDiffs []MultiVersionInfo) {
 	ms := &multiVersionInfoSorter{
 		packageDiffs: packageDiffs,
-		by: by,
+		by:           by,
 	}
 	sort.Sort(ms)
 }
 
 type multiVersionInfoSorter struct {
 	packageDiffs []MultiVersionInfo
-	by func(a, b *MultiVersionInfo) bool
+	by           func(a, b *MultiVersionInfo) bool
 }
 
 func (s *multiVersionInfoSorter) Len() int {
@@ -103,8 +103,8 @@ var multiInfoNameSort = func(a, b *MultiVersionInfo) bool {
 var multiInfoSizeSort = func(a, b *MultiVersionInfo) bool {
 	aInfo1 := a.Info1
 	bInfo1 := b.Info1
-	
-	// For each package, sorts the infos of the first image's instances of that package in descending order 
+
+	// For each package, sorts the infos of the first image's instances of that package in descending order
 	sort.Sort(packageInfoBySize(aInfo1))
 	sort.Sort(packageInfoBySize(bInfo1))
 	// Compares the largest size instances of each package in the first image
@@ -128,7 +128,7 @@ func (infos packageInfoBySize) Less(i, j int) bool {
 	return infos[i].Size > infos[j].Size
 }
 
-type packageInfoByVersion []PackageInfo 
+type packageInfoByVersion []PackageInfo
 
 func (infos packageInfoByVersion) Len() int {
 	return len(infos)
@@ -153,7 +153,7 @@ type StrMultiVersionInfo struct {
 
 type StrPackageInfo struct {
 	Version string
-	Size string
+	Size    string
 }
 
 func stringifyPackageInfo(info PackageInfo) StrPackageInfo {
@@ -185,11 +185,11 @@ func (r SingleVersionPackageDiffResult) GetStruct() interface{} {
 	diffOutput := struct {
 		Packages1 []PackageOutput
 		Packages2 []PackageOutput
-		InfoDiff []Info
+		InfoDiff  []Info
 	}{
 		Packages1: getSingleVersionPackageOutput(diff.Packages1),
 		Packages2: getSingleVersionPackageOutput(diff.Packages2),
-		InfoDiff: getSingleVersionInfoDiffOutput(diff.InfoDiff),
+		InfoDiff:  getSingleVersionInfoDiffOutput(diff.InfoDiff),
 	}
 	r.Diff = diffOutput
 	return r
@@ -240,14 +240,14 @@ type singleInfoBy func(a, b *Info) bool
 func (by singleInfoBy) Sort(packageDiffs []Info) {
 	ss := &singleVersionInfoSorter{
 		packageDiffs: packageDiffs,
-		by: by,
+		by:           by,
 	}
 	sort.Sort(ss)
 }
 
 type singleVersionInfoSorter struct {
 	packageDiffs []Info
-	by func(a, b *Info) bool
+	by           func(a, b *Info) bool
 }
 
 func (s *singleVersionInfoSorter) Len() int {
@@ -270,7 +270,7 @@ var singleInfoNameSort = func(a, b *Info) bool {
 var singleInfoSizeSort = func(a, b *Info) bool {
 	aInfo1 := a.Info1
 	bInfo1 := b.Info1
-	
+
 	// Compares the sizes of the packages in the first image
 	return aInfo1.Size > bInfo1.Size
 }
@@ -305,11 +305,12 @@ func (r HistDiffResult) OutputText(diffType string) error {
 type DirDiffResult DiffResult
 
 func (r DirDiffResult) GetStruct() interface{} {
+	r.Diff = sortDirDiff(r.Diff.(DirDiff))
 	return r
 }
 
 func (r DirDiffResult) OutputText(diffType string) error {
-	diff := r.Diff.(DirDiff)
+	diff := sortDirDiff(r.Diff.(DirDiff))
 
 	strAdds := stringifyDirectoryEntries(diff.Adds)
 	strDels := stringifyDirectoryEntries(diff.Dels)
@@ -337,6 +338,56 @@ func (r DirDiffResult) OutputText(diffType string) error {
 		},
 	}
 	return TemplateOutput(strResult, "DirDiff")
+}
+
+func sortDirDiff(diff DirDiff) DirDiff {
+	adds, dels, mods := diff.Adds, diff.Dels, diff.Mods
+	if SortSize {
+		directoryBy(directorySizeSort).Sort(adds)
+		directoryBy(directorySizeSort).Sort(dels)
+		entryDiffBy(entryDiffSizeSort).Sort(mods)
+	} else {
+		directoryBy(directoryNameSort).Sort(adds)
+		directoryBy(directoryNameSort).Sort(dels)
+		entryDiffBy(entryDiffSizeSort).Sort(mods)
+	}
+	return DirDiff{adds, dels, mods}
+}
+
+type entryDiffBy func(a, b *EntryDiff) bool
+
+func (by entryDiffBy) Sort(entryDiffs []EntryDiff) {
+	ds := &entryDiffSorter{
+		entryDiffs: entryDiffs,
+		by:         by,
+	}
+	sort.Sort(ds)
+}
+
+type entryDiffSorter struct {
+	entryDiffs []EntryDiff
+	by         func(a, b *EntryDiff) bool
+}
+
+func (s *entryDiffSorter) Len() int {
+	return len(s.entryDiffs)
+}
+
+func (s *entryDiffSorter) Less(i, j int) bool {
+	return s.by(&s.entryDiffs[i], &s.entryDiffs[j])
+}
+
+func (s *entryDiffSorter) Swap(i, j int) {
+	s.entryDiffs[i], s.entryDiffs[j] = s.entryDiffs[i], s.entryDiffs[j]
+}
+
+var entryDiffNameSort = func(a, b *EntryDiff) bool {
+	return a.Name < b.Name
+}
+
+// Sorts by size of the files in the first image, in descending order
+var entryDiffSizeSort = func(a, b *EntryDiff) bool {
+	return a.Size1 > b.Size1
 }
 
 type StrEntryDiff struct {

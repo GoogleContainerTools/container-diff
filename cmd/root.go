@@ -123,11 +123,11 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		}
 		sort.Strings(sortedTypes)
 		glog.Info("Retrieving diffs")
-		diffResults := []utils.Result{}
-		for _, diffType := range sortedTypes {
+		diffResults := make([]interface{}, len(diffs))
+		for i, diffType := range sortedTypes {
 			diff := diffs[diffType]
 			if json {
-				diffResults = append(diffResults, diff.GetStruct().(utils.Result))
+				diffResults[i] = diff.GetStruct()
 			} else {
 				err = diff.OutputText(diffType)
 				if err != nil {
@@ -182,11 +182,11 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 		}
 		sort.Strings(sortedTypes)
 		glog.Info("Retrieving diffs")
-		analyzeResults := []utils.Result{}
-		for _, analyzeType := range sortedTypes {
+		analyzeResults := make([]interface{}, len(analyses))
+		for i, analyzeType := range sortedTypes {
 			analysis := analyses[analyzeType]
 			if json {
-				analyzeResults = append(analyzeResults, analysis.GetStruct().(utils.Result))
+				analyzeResults[i] = analysis.GetStruct()
 			} else {
 				err = analysis.OutputText(analyzeType)
 				if err != nil {
