@@ -52,7 +52,9 @@ func multiVersionDiff(infoDiff []MultiVersionInfo, packageName string, map1, map
 			diff1 = append(diff1, packInfo1)
 			continue
 		} else {
-			if reflect.DeepEqual(packInfo1, packInfo2) {
+			// If a package instance is installed in the same place in Image1 and Image2 with the same version,
+			// then they are the same package and should not be included in the diff
+			if packInfo1.Version == packInfo2.Version {
 				delete(map2, path)
 			} else {
 				diff1 = append(diff1, packInfo1)
@@ -129,16 +131,20 @@ func diffMaps(map1, map2 interface{}) interface{} {
 		packageEntry2 := map2Value.MapIndex(pack)
 		if !packageEntry2.IsValid() {
 			diff1.SetMapIndex(pack, packageEntry1)
-		} else if !reflect.DeepEqual(packageEntry2.Interface(), packageEntry1.Interface()) {
-			if multiV {
-				multiInfoDiff = multiVersionDiff(multiInfoDiff, pack.String(),
-					packageEntry1.Interface().(map[string]PackageInfo), packageEntry2.Interface().(map[string]PackageInfo))
-			} else {
-				infoDiff = append(infoDiff, Info{pack.String(), packageEntry1.Interface().(PackageInfo),
-					packageEntry2.Interface().(PackageInfo)})
-			}
-			map2Value.SetMapIndex(pack, reflect.Value{})
 		} else {
+			if multiV {
+				if !reflect.DeepEqual(packageEntry2.Interface(), packageEntry1.Interface()) {
+					multiInfoDiff = multiVersionDiff(multiInfoDiff, pack.String(),
+							packageEntry1.Interface().(map[string]PackageInfo),
+							packageEntry2.Interface().(map[string]PackageInfo))
+				}
+			} else {
+				packageInfo1 := packageEntry1.Interface().(PackageInfo)
+				packageInfo2 := packageEntry2.Interface().(PackageInfo)
+				if packageInfo2.Version != packageInfo2.Version {
+					infoDiff = append(infoDiff, Info{pack.String(), packageInfo1, packageInfo2})
+				}
+			}
 			map2Value.SetMapIndex(pack, reflect.Value{})
 		}
 	}
