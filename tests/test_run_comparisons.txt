@@ -6,3 +6,5 @@ history diff tests/hist_diff_actual.json tests/hist_diff_expected.json
 pip analysis tests/pip_analysis_actual.json tests/pip_analysis_expected.json
 apt analysis tests/apt_analysis_actual.json tests/apt_analysis_expected.json
 node analysis tests/node_analysis_actual.json tests/node_analysis_expected.json
+aptSort diff tests/apt_sorted_diff_actual.json tests/apt_sorted_diff_expected.json
+fileSort analyis tests/file_sorted_analysis_actual.json tests/file_sorted_analysis_expected.json

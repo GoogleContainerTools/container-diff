@@ -5,7 +5,7 @@ while IFS=$' \n\r' read -r flag differ image1 image2 file; do
     echo "container-diff" "$differ" "differ failed"
     exit 1
   fi
-done < tests/differ_runs.txt
+done < tests/test_differ_runs.txt
 
 while IFS=$' \n\r' read -r flag analyzer image file; do
   go run main.go $image $flag -j > $file
@@ -13,7 +13,7 @@ while IFS=$' \n\r' read -r flag analyzer image file; do
     echo "container-diff" "$analyzer" "analyzer failed"
     exit 1
   fi
-done < tests/analyzer_runs.txt
+done < tests/test_analyzer_runs.txt
 
 success=0
 while IFS=$' \n\r' read -r type analyzer actual expected; do
@@ -22,7 +22,7 @@ while IFS=$' \n\r' read -r type analyzer actual expected; do
     echo "container-diff" "$analyzer" "$type" "output is not as expected"
     success=1
   fi
-done < tests/diff_comparisons.txt
+done < tests/test_run_comparisons.txt
 if [[ "$success" -ne 0 ]]; then
   exit 1
 fi
