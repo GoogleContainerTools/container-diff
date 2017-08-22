@@ -70,7 +70,7 @@ All of the analyzer flags with their long versions can be seen below:
 
 | Differ                    | Short flag | Long Flag  |
 | ------------------------- |:----------:| ----------:|
-| File System diff          | -f         | --file     |
+| File system diff          | -f         | --file     |
 | History                   | -d 	 | --history  |
 | npm installed packages    | -n 	 | --node     |
 | pip installed packages    | -p 	 | --pip      |
@@ -89,6 +89,11 @@ To use the docker client instead of shelling out to your local docker daemon, ad
 
 ```container-diff <img1> <img2> -e```
 
+To order files and packages by size (in descending order) when performing file system or package analyses/diffs, add a `-o` or `--order` flag.
+
+```container-diff <img1> <img2> -o```
+
+
 ## Analysis Result Format
 
 The JSONs for analysis results are in the following format:
@@ -105,31 +110,34 @@ The possible structures of the `Analysis` field are detailed below.
 
 The history analyzer outputs a list of strings representing descriptions of how an image layer was created.
 
-### Filesystem Analysis
+### File System Analysis
 
-The filesystem analyzer outputs a list of strings representing filesystem contents.
+The file system analyzer outputs a list of strings representing file system contents.
 
 ### Package Analysis
 
-Package analyzers such as pip, apt, and node inspect the packages installed within the image provided.  All package analyses leverage the PackageInfo struct, which contains the  version and size for a given package instance, as detailed below:
+Package analyzers such as pip, apt, and node inspect the packages installed within the image provided.  All package analyses leverage the PackageOutput struct, which contains the version and size for a given package instance (and a potential installation path for a specific instance of a package where multiple versions are allowed to be installed), as detailed below:
 ```
-type PackageInfo struct {
+type PackageOutput struct {
+	Name	string
+	Path	string
 	Version string
-	Size    string
+	Size    int64
 }
 ```
 
 #### Single Version Package Analysis
 
-Single version package analyzers (apt) have the following output structure: `map[string]PackageInfo`
+Single version package analyzers (apt) have the following output structure: `[]PackageOutput`
 
-In this mapping scheme, each package name is mapped to its PackageInfo as described above.
+Here, the `Path` field is omitted because there is only one instance of each package.
+
 
 #### Multi Version Package Analysis
 
-Multi version package analyzers (pip, node) have the following output structure: `map[string]map[string]PackageInfo`
+Multi version package analyzers (pip, node) have the following output structure: `[]PackageOutput`
 
-In this mapping scheme, each package name corresponds to another map where the filesystem path to each unique instance of the package (i.e. unique version and/or size info) is mapped to that package instance's PackageInfo.
+Here, the `Path` field is included because there may be more than one instance of each package, and thus the path exists to pinpoint where the package exists in case additional investigation into the package instance is desired.
 
 
 ## Diff Result Format
@@ -156,9 +164,9 @@ type HistDiff struct {
 }
 ```
 
-### Filesystem Diff
+### File System Diff
 
-The filesystem differ has the following json output structure: 
+The file system differ has the following json output structure: 
 
 ```
 type DirDiff struct {
@@ -170,7 +178,13 @@ type DirDiff struct {
 
 ### Package Diffs
 
-Package differs such as pip, apt, and node inspect the packages contained within the images provided.  All packages differs currently leverage the PackageInfo struct which contains the version and size for a given package instance.
+Package differs such as pip, apt, and node inspect the packages contained within the images provided.  All packages differs currently leverage the PackageInfo struct which contains the version and size for a given package instance, as detailed below:
+```
+type PackageInfo struct {
+	Version string
+	Size    string
+}
+```
 
 #### Single Version Package Diffs
 
@@ -178,13 +192,13 @@ Single version differs (apt) have the following json output structure:
 
 ```
 type PackageDiff struct {
-	Packages1 map[string]PackageInfo
-	Packages2 map[string]PackageInfo
+	Packages1 []PackageOutput
+	Packages2 []PackageOutput
 	InfoDiff  []Info
 }
 ```
 
-Packages1 and Packages2 map package names to PackageInfo structs which contain the version and size of the package.  InfoDiff contains a list of Info structs, each of which contains the package name (which occurred in both images but had a difference in size or version), and the PackageInfo struct for each package instance. 
+Packages1 and Packages2 detail which packages exist uniquely in Image1 and Image2, respectively, with package name, version and size info.  InfoDiff contains a list of Info structs, each of which contains the package name (which occurred in both images but had a difference in size or version), and the PackageInfo struct for each package instance. 
 
 #### Multi Version Package Diffs
 
@@ -192,13 +206,13 @@ The multi version differs (pip, node) support processing images which may have m
 
 ```
 type MultiVersionPackageDiff struct {
-	Packages1 map[string]map[string]PackageInfo
-	Packages2 map[string]map[string]PackageInfo
+	Packages1 []PackageOutput
+	Packages2 []PackageOutput
 	InfoDiff  []MultiVersionInfo
 }
 ```
 
-Packages1 and Packages2 map package name to path where the package was found to PackageInfo struct (version and size of that package instance).  InfoDiff here is exanded to allow for multiple versions to be associated with a single package.
+Packages1 and Packages2 detail which packages exist uniquely in Image1 and Image2, respectively, with package name, installation path, version and size info.  InfoDiff here is exanded to allow for multiple versions to be associated with a single package.  In this case, a package of the same name is considered to differ between two images when there exist one or more instances of it installed in one image but not the other (i.e. have a unique version and/or size).
 
 ```
 type MultiVersionInfo struct {
@@ -228,7 +242,7 @@ Packages found only in gcr.io/google-appengine/python:2017-06-29-190410: None
 
 Version differences:
 PACKAGE             IMAGE1 (gcr.io/google-appengine/python:2017-07-21-123058)        IMAGE2 (gcr.io/google-appengine/python:2017-06-29-190410)
--libgcrypt20        1.6.3-2 deb8u4, 998B                                             1.6.3-2 deb8u3, 1002B
+-libgcrypt20        1.6.3-2 deb8u4, 998K                                             1.6.3-2 deb8u3, 1002K
 
 -----NodeDiffer-----
 
@@ -281,12 +295,12 @@ def main():
 
     if len(diff['Packages1']) > 0:
       for package in diff['Packages1']:
-        Size = diff['Packages1'][package]['Size']
+        Size = package['Size']
         img1packages.append((str(package), int(str(Size))))
 
     if len(diff['Packages2']) > 0:
       for package in diff['Packages2']:
-        Size = diff['Packages2'][package]['Size']
+        Size = package['Size']
         img2packages.append((str(package), int(str(Size))))
     
     img1packages = reversed(sorted(img1packages, key=lambda x: x[1]))
@@ -340,21 +354,21 @@ In order to quickly make your own analyzer, follow these steps:
         -  No: Implement `getPackages` to collect all versions of all packages within an image in a `map[string]PackageInfo`. Use `GetMapDiff` to diff map objects.  See [aptDiff.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/aptDiff.go#L29). 
     - No: Look to [History](https://github.com/GoogleCloudPlatform/container-diff/blob/ReadMe/differs/historyDiff.go) and [File System](https://github.com/GoogleCloudPlatform/container-diff/blob/ReadMe/differs/fileDiff.go) differs as models for diffing.
 
-3. Write your analyzer driver in the `differs` directory, such that you have a struct for your analyzer type and two method for that differ: `Analyze` for single image analysis and `Diff` for comparison between two images:
+3. Write your analyzer driver in the `differs` directory, such that you have a struct for your analyzer type and two methods for that analyzer: `Analyze` for single image analysis and `Diff` for comparison between two images:
 
 ```
 type YourAnalyzer struct {}
 
-func (a YourAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {...}
-func (a YourAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {...}
+func (a YourAnalyzer) Analyze(image utils.Image) (utils.Result, error) {...}
+func (a YourAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {...}
 ```
 The image arguments passed to your analyzer contain the path to the unpacked tar representation of the image, as well as certain configuration information (e.g. environment variables upon image creation and image history).
 
-If using existing package differ tools, you should create the appropriate structs to analyze or diff.  Otherwise, create your own analyzer which should yield information to fill an AnalyzeResult or DiffResult in the next step.
+If using existing package tools, you should create the appropriate structs (e.g. `SingleVersionPackageAnalyzeResult` or `SingleVersionPackageDiffResult`) to analyze or diff.  Otherwise, create your own structs which should yield information to fill an AnalyzeResult or DiffResult as the return type for Analyze() and Diff(), respectively, and should implement the `Result` interface, as in the next step.
 
-4. Create a result struct following either the AnalyzeResult or DiffResult interface by implementing the following two methods.
+4. Create a struct following the `Result` interface by implementing the following two methods.
 ```
-      GetStruct() DiffResult
+      GetStruct() interface{}
       OutputText(diffType string) error
 ```
 
