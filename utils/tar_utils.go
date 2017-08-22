@@ -56,11 +56,11 @@ func unpackTar(tr *tar.Reader, path string) error {
 			if err != nil {
 				return err
 			}
-			defer currFile.Close()
 			_, err = io.Copy(currFile, tr)
 			if err != nil {
 				return err
 			}
+			currFile.Close()
 		}
 
 	}
