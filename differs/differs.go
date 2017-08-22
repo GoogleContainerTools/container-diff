@@ -33,14 +33,6 @@ var analyzers = map[string]Analyzer{
 	"node":    NodeAnalyzer{},
 }
 
-/*var diffResultMap = map[string]utils.DiffResult{
-	"HistoryAnalyzer": utils.HistDiffResult,
-	"FileAnalyzer":    utils.DirDiffResult,
-	"AptAnalyzer":     utils.SingleVersionPackageDiffResult,
-	"PipAnalyzer":     utils.MultiVersionPackageDiffResult,
-	"NodeAnalyzer":    utils.MultiVersionPackageDiffResult,
-}*/
-
 func (req DiffRequest) GetDiff() (map[string]utils.Result, error) {
 	img1 := req.Image1
 	img2 := req.Image2
