@@ -116,31 +116,8 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 
 	req := differs.DiffRequest{image1, image2, diffTypes}
 	if diffs, err := req.GetDiff(); err == nil {
-		// Outputs diff results in alphabetical order by differ name
-		sortedTypes := []string{}
-		for name := range diffs {
-			sortedTypes = append(sortedTypes, name)
-		}
-		sort.Strings(sortedTypes)
 		glog.Info("Retrieving diffs")
-		diffResults := make([]interface{}, len(diffs))
-		for i, diffType := range sortedTypes {
-			diff := diffs[diffType]
-			if json {
-				diffResults[i] = diff.GetStruct()
-			} else {
-				err = diff.OutputText(diffType)
-				if err != nil {
-					glog.Error(err)
-				}
-			}
-		}
-		if json {
-			err = utils.JSONify(diffResults)
-			if err != nil {
-				glog.Error(err)
-			}
-		}
+		outputResults(diffs)
 		if !save {
 			cleanupImage(image1)
 			cleanupImage(image2)
@@ -175,31 +152,8 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 
 	req := differs.SingleRequest{image, analyzeTypes}
 	if analyses, err := req.GetAnalysis(); err == nil {
-		// Outputs analysis results in alphabetical order by differ name
-		sortedTypes := []string{}
-		for name := range analyses {
-			sortedTypes = append(sortedTypes, name)
-		}
-		sort.Strings(sortedTypes)
-		glog.Info("Retrieving diffs")
-		analyzeResults := make([]interface{}, len(analyses))
-		for i, analyzeType := range sortedTypes {
-			analysis := analyses[analyzeType]
-			if json {
-				analyzeResults[i] = analysis.GetStruct()
-			} else {
-				err = analysis.OutputText(analyzeType)
-				if err != nil {
-					glog.Error(err)
-				}
-			}
-		}
-		if json {
-			err = utils.JSONify(analyzeResults)
-			if err != nil {
-				glog.Error(err)
-			}
-		}
+		glog.Info("Retrieving analyses")
+		outputResults(analyses)
 		if !save {
 			cleanupImage(image)
 		} else {
@@ -213,6 +167,34 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 	}
 
 	return nil
+}
+
+func outputResults(resultMap map[string]utils.Result) {
+	// Outputs diff/analysis results in alphabetical order by analyzer name
+	sortedTypes := []string{}
+	for analyzerType := range resultMap {
+		sortedTypes = append(sortedTypes, analyzerType)
+	}
+	sort.Strings(sortedTypes)
+
+	results := make([]interface{}, len(resultMap))
+	for i, analyzerType := range sortedTypes {
+		result := resultMap[analyzerType]
+		if json {
+			results[i] = result.OutputStruct()
+		} else {
+			err := result.OutputText(analyzerType)
+			if err != nil {
+				glog.Error(err)
+			}
+		}
+	}
+	if json {
+		err := utils.JSONify(results)
+		if err != nil {
+			glog.Error(err)
+		}
+	}
 }
 
 func cleanupImage(image utils.Image) {
