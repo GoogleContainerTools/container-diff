@@ -124,36 +124,6 @@
               "Size": 73348
             }
           ]
-        },
-        {
-          "Package": "setuptools",
-          "Info1": [
-            {
-              "Version": "36.2.2",
-              "Size": 839895
-            }
-          ],
-          "Info2": [
-            {
-              "Version": "36.2.2",
-              "Size": 1157078
-            }
-          ]
-        },
-        {
-          "Package": "wheel",
-          "Info1": [
-            {
-              "Version": "0.29.0",
-              "Size": 103509
-            }
-          ],
-          "Info2": [
-            {
-              "Version": "0.29.0",
-              "Size": 137451
-            }
-          ]
         }
       ]
     }
