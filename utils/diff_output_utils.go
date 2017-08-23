@@ -1,31 +1,55 @@
 package utils
 
-type DiffResult interface {
-	GetStruct() DiffResult
-	OutputText(diffType string) error
-}
+import (
+	"errors"
+	"fmt"
 
-type MultiVersionPackageDiffResult struct {
+	"github.com/golang/glog"
+)
+
+type DiffResult struct {
 	Image1   string
 	Image2   string
 	DiffType string
-	Diff     MultiVersionPackageDiff
+	Diff     interface{}
 }
 
-func (r MultiVersionPackageDiffResult) GetStruct() DiffResult {
+type MultiVersionPackageDiffResult DiffResult
+
+func (r MultiVersionPackageDiffResult) OutputStruct() interface{} {
+	diff, valid := r.Diff.(MultiVersionPackageDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
+		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+	}
+
+	diffOutput := struct {
+		Packages1 []PackageOutput
+		Packages2 []PackageOutput
+		InfoDiff  []MultiVersionInfo
+	}{
+		Packages1: getMultiVersionPackageOutput(diff.Packages1),
+		Packages2: getMultiVersionPackageOutput(diff.Packages2),
+		InfoDiff:  getMultiVersionInfoDiffOutput(diff.InfoDiff),
+	}
+	r.Diff = diffOutput
 	return r
 }
 
 func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
-	diff := r.Diff
+	diff, valid := r.Diff.(MultiVersionPackageDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
+		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+	}
 
-	strPackages1 := stringifyMultiVersionPackages(diff.Packages1)
-	strPackages2 := stringifyMultiVersionPackages(diff.Packages2)
-	strInfoDiff := stringifyMultiVersionPackageDiff(diff.InfoDiff)
+	strPackages1 := stringifyPackages(getMultiVersionPackageOutput(diff.Packages1))
+	strPackages2 := stringifyPackages(getMultiVersionPackageOutput(diff.Packages2))
+	strInfoDiff := stringifyMultiVersionPackageDiff(getMultiVersionInfoDiffOutput(diff.InfoDiff))
 
 	type StrDiff struct {
-		Packages1 map[string]map[string]StrPackageInfo
-		Packages2 map[string]map[string]StrPackageInfo
+		Packages1 []StrPackageOutput
+		Packages2 []StrPackageOutput
 		InfoDiff  []StrMultiVersionInfo
 	}
 
@@ -47,51 +71,51 @@ func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
 	return TemplateOutput(strResult, "MultiVersionPackageDiff")
 }
 
-type StrMultiVersionInfo struct {
-	Package string
-	Info1   []StrPackageInfo
-	Info2   []StrPackageInfo
-}
-
-func stringifyMultiVersionPackageDiff(infoDiff []MultiVersionInfo) (strInfoDiff []StrMultiVersionInfo) {
-	for _, diff := range infoDiff {
-		strInfos1 := []StrPackageInfo{}
-		for _, info := range diff.Info1 {
-			strInfos1 = append(strInfos1, stringifyPackageInfo(info))
-		}
-
-		strInfos2 := []StrPackageInfo{}
-		for _, info := range diff.Info2 {
-			strInfos2 = append(strInfos2, stringifyPackageInfo(info))
-		}
-
-		strDiff := StrMultiVersionInfo{Package: diff.Package, Info1: strInfos1, Info2: strInfos2}
-		strInfoDiff = append(strInfoDiff, strDiff)
+func getMultiVersionInfoDiffOutput(infoDiff []MultiVersionInfo) []MultiVersionInfo {
+	if SortSize {
+		multiInfoBy(multiInfoSizeSort).Sort(infoDiff)
+	} else {
+		multiInfoBy(multiInfoNameSort).Sort(infoDiff)
 	}
-	return
+	return infoDiff
 }
 
-type SingleVersionPackageDiffResult struct {
-	Image1   string
-	Image2   string
-	DiffType string
-	Diff     PackageDiff
-}
+type SingleVersionPackageDiffResult DiffResult
 
-func (r SingleVersionPackageDiffResult) GetStruct() DiffResult {
+func (r SingleVersionPackageDiffResult) OutputStruct() interface{} {
+	diff, valid := r.Diff.(PackageDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
+		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+	}
+
+	diffOutput := struct {
+		Packages1 []PackageOutput
+		Packages2 []PackageOutput
+		InfoDiff  []Info
+	}{
+		Packages1: getSingleVersionPackageOutput(diff.Packages1),
+		Packages2: getSingleVersionPackageOutput(diff.Packages2),
+		InfoDiff:  getSingleVersionInfoDiffOutput(diff.InfoDiff),
+	}
+	r.Diff = diffOutput
 	return r
 }
 
 func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
-	diff := r.Diff
+	diff, valid := r.Diff.(PackageDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
+		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+	}
 
-	strPackages1 := stringifyPackages(diff.Packages1)
-	strPackages2 := stringifyPackages(diff.Packages2)
-	strInfoDiff := stringifyPackageDiff(diff.InfoDiff)
+	strPackages1 := stringifyPackages(getSingleVersionPackageOutput(diff.Packages1))
+	strPackages2 := stringifyPackages(getSingleVersionPackageOutput(diff.Packages2))
+	strInfoDiff := stringifyPackageDiff(getSingleVersionInfoDiffOutput(diff.InfoDiff))
 
 	type StrDiff struct {
-		Packages1 map[string]StrPackageInfo
-		Packages2 map[string]StrPackageInfo
+		Packages1 []StrPackageOutput
+		Packages2 []StrPackageOutput
 		InfoDiff  []StrInfo
 	}
 
@@ -113,31 +137,18 @@ func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
 	return TemplateOutput(strResult, "SingleVersionPackageDiff")
 }
 
-type StrInfo struct {
-	Package string
-	Info1   StrPackageInfo
-	Info2   StrPackageInfo
-}
-
-func stringifyPackageDiff(infoDiff []Info) (strInfoDiff []StrInfo) {
-	for _, diff := range infoDiff {
-		strInfo1 := stringifyPackageInfo(diff.Info1)
-		strInfo2 := stringifyPackageInfo(diff.Info2)
-
-		strDiff := StrInfo{Package: diff.Package, Info1: strInfo1, Info2: strInfo2}
-		strInfoDiff = append(strInfoDiff, strDiff)
+func getSingleVersionInfoDiffOutput(infoDiff []Info) []Info {
+	if SortSize {
+		singleInfoBy(singleInfoSizeSort).Sort(infoDiff)
+	} else {
+		singleInfoBy(singleInfoNameSort).Sort(infoDiff)
 	}
-	return
+	return infoDiff
 }
 
-type HistDiffResult struct {
-	Image1   string
-	Image2   string
-	DiffType string
-	Diff     HistDiff
-}
+type HistDiffResult DiffResult
 
-func (r HistDiffResult) GetStruct() DiffResult {
+func (r HistDiffResult) OutputStruct() interface{} {
 	return r
 }
 
@@ -145,19 +156,26 @@ func (r HistDiffResult) OutputText(diffType string) error {
 	return TemplateOutput(r, "HistDiff")
 }
 
-type DirDiffResult struct {
-	Image1   string
-	Image2   string
-	DiffType string
-	Diff     DirDiff
-}
+type DirDiffResult DiffResult
 
-func (r DirDiffResult) GetStruct() DiffResult {
+func (r DirDiffResult) OutputStruct() interface{} {
+	diff, valid := r.Diff.(DirDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the DirDiff struct")
+		return errors.New("Could not output FileAnalyzer diff result")
+	}
+
+	r.Diff = sortDirDiff(diff)
 	return r
 }
 
 func (r DirDiffResult) OutputText(diffType string) error {
-	diff := r.Diff
+	diff, valid := r.Diff.(DirDiff)
+	if !valid {
+		glog.Error("Unexpected structure of Diff.  Should follow the DirDiff struct")
+		return errors.New("Could not output FileAnalyzer diff result")
+	}
+	diff = sortDirDiff(diff)
 
 	strAdds := stringifyDirectoryEntries(diff.Adds)
 	strDels := stringifyDirectoryEntries(diff.Dels)
@@ -185,18 +203,4 @@ func (r DirDiffResult) OutputText(diffType string) error {
 		},
 	}
 	return TemplateOutput(strResult, "DirDiff")
-}
-
-type StrEntryDiff struct {
-	Name  string
-	Size1 string
-	Size2 string
-}
-
-func stringifyEntryDiffs(entries []EntryDiff) (strEntries []StrEntryDiff) {
-	for _, entry := range entries {
-		strEntry := StrEntryDiff{Name: entry.Name, Size1: stringifySize(entry.Size1), Size2: stringifySize(entry.Size2)}
-		strEntries = append(strEntries, strEntry)
-	}
-	return
 }

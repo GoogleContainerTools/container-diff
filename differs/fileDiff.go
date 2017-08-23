@@ -8,7 +8,7 @@ type FileAnalyzer struct {
 }
 
 // FileDiff diffs two packages and compares their contents
-func (a FileAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
+func (a FileAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
 	diff, err := diffImageFiles(image1, image2)
 	return &utils.DirDiffResult{
 		Image1:   image1.Source,
@@ -18,7 +18,7 @@ func (a FileAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error)
 	}, err
 }
 
-func (a FileAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {
+func (a FileAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
 	var result utils.FileAnalyzeResult
 
 	imgDir, err := utils.GetDirectory(image.FSPath, true)

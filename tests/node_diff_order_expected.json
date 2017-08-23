@@ -4,15 +4,15 @@
     "Image2": "gcr.io/gcp-runtimes/node-modified",
     "DiffType": "Node",
     "Diff": {
-      "Packages1": {},
-      "Packages2": {
-        "pax": {
-          "/node_modules/pax/": {
-            "Version": "0.2.1",
-            "Size": 11365
-          }
+      "Packages1": [],
+      "Packages2": [
+        {
+          "Name": "pax",
+          "Path": "/node_modules/pax/",
+          "Version": "0.2.1",
+          "Size": 11365
         }
-      },
+      ],
       "InfoDiff": []
     }
   }

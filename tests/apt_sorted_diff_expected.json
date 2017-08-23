@@ -6,19 +6,14 @@
     "Diff": {
       "Packages1": [
         {
-          "Name": "dh-python",
-          "Version": "2.20170125",
-          "Size": 411648
-        },
-        {
-          "Name": "libmpdec2",
-          "Version": "2.4.2-1",
-          "Size": 260096
-        },
-        {
-          "Name": "libpython3-stdlib",
+          "Name": "libpython3.5-stdlib",
           "Version": "3.5.3-1",
-          "Size": 36864
+          "Size": 10133504
+        },
+        {
+          "Name": "python3.5-minimal",
+          "Version": "3.5.3-1",
+          "Size": 9636864
         },
         {
           "Name": "libpython3.5-minimal",
@@ -26,19 +21,9 @@
           "Size": 3836928
         },
         {
-          "Name": "libpython3.5-stdlib",
-          "Version": "3.5.3-1",
-          "Size": 10133504
-        },
-        {
-          "Name": "python3",
-          "Version": "3.5.3-1",
-          "Size": 68608
-        },
-        {
-          "Name": "python3-minimal",
-          "Version": "3.5.3-1",
-          "Size": 122880
+          "Name": "dh-python",
+          "Version": "2.20170125",
+          "Size": 411648
         },
         {
           "Name": "python3.5",
@@ -46,12 +31,57 @@
           "Size": 326656
         },
         {
-          "Name": "python3.5-minimal",
+          "Name": "libmpdec2",
+          "Version": "2.4.2-1",
+          "Size": 260096
+        },
+        {
+          "Name": "python3-minimal",
           "Version": "3.5.3-1",
-          "Size": 9636864
+          "Size": 122880
+        },
+        {
+          "Name": "python3",
+          "Version": "3.5.3-1",
+          "Size": 68608
+        },
+        {
+          "Name": "libpython3-stdlib",
+          "Version": "3.5.3-1",
+          "Size": 36864
         }
       ],
       "Packages2": [
+        {
+          "Name": "libpython2.7-stdlib",
+          "Version": "2.7.13-2",
+          "Size": 8755200
+        },
+        {
+          "Name": "python2.7-minimal",
+          "Version": "2.7.13-2",
+          "Size": 3911680
+        },
+        {
+          "Name": "libpython2.7-minimal",
+          "Version": "2.7.13-2",
+          "Size": 2833408
+        },
+        {
+          "Name": "python",
+          "Version": "2.7.13-2",
+          "Size": 663552
+        },
+        {
+          "Name": "python2.7",
+          "Version": "2.7.13-2",
+          "Size": 367616
+        },
+        {
+          "Name": "python-minimal",
+          "Version": "2.7.13-2",
+          "Size": 148480
+        },
         {
           "Name": "libffi6",
           "Version": "3.2.1-6",
@@ -61,36 +91,6 @@
           "Name": "libpython-stdlib",
           "Version": "2.7.13-2",
           "Size": 37888
-        },
-        {
-          "Name": "libpython2.7-minimal",
-          "Version": "2.7.13-2",
-          "Size": 2833408
-        },
-        {
-          "Name": "libpython2.7-stdlib",
-          "Version": "2.7.13-2",
-          "Size": 8755200
-        },
-        {
-          "Name": "python",
-          "Version": "2.7.13-2",
-          "Size": 663552
-        },
-        {
-          "Name": "python-minimal",
-          "Version": "2.7.13-2",
-          "Size": 148480
-        },
-        {
-          "Name": "python2.7",
-          "Version": "2.7.13-2",
-          "Size": 367616
-        },
-        {
-          "Name": "python2.7-minimal",
-          "Version": "2.7.13-2",
-          "Size": 3911680
         }
       ],
       "InfoDiff": []

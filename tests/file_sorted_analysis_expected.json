@@ -1,0 +1,80 @@
+[
+  {
+    "Image": "gcr.io/gcp-runtimes/diff-modified",
+    "AnalyzeType": "File",
+    "Analysis": [
+      {
+        "Name": "/bin",
+        "Size": 1105296
+      },
+      {
+        "Name": "/bin/[",
+        "Size": 1026712
+      },
+      {
+        "Name": "/bin/getconf",
+        "Size": 78584
+      },
+      {
+        "Name": "/etc",
+        "Size": 1008
+      },
+      {
+        "Name": "/etc/passwd",
+        "Size": 340
+      },
+      {
+        "Name": "/etc/group",
+        "Size": 307
+      },
+      {
+        "Name": "/etc/shadow",
+        "Size": 243
+      },
+      {
+        "Name": "/etc/localtime",
+        "Size": 118
+      },
+      {
+        "Name": "/dev",
+        "Size": 0
+      },
+      {
+        "Name": "/home",
+        "Size": 0
+      },
+      {
+        "Name": "/root",
+        "Size": 0
+      },
+      {
+        "Name": "/tmp",
+        "Size": 0
+      },
+      {
+        "Name": "/usr",
+        "Size": 0
+      },
+      {
+        "Name": "/usr/sbin",
+        "Size": 0
+      },
+      {
+        "Name": "/var",
+        "Size": 0
+      },
+      {
+        "Name": "/var/spool",
+        "Size": 0
+      },
+      {
+        "Name": "/var/spool/mail",
+        "Size": 0
+      },
+      {
+        "Name": "/var/www",
+        "Size": 0
+      }
+    ]
+  }
+]

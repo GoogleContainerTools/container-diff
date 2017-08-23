@@ -2,25 +2,25 @@
   {
     "Image": "gcr.io/gcp-runtimes/node-modified",
     "AnalyzeType": "Node",
-    "Analysis": {
-      "npm": {
-        "/usr/local/lib/node_modules/npm/": {
-          "Version": "5.0.3",
-          "Size": 13830218
-        }
+    "Analysis": [
+      {
+        "Name": "npm",
+        "Path": "/usr/local/lib/node_modules/npm/",
+        "Version": "5.0.3",
+        "Size": 13830218
       },
-      "pax": {
-        "/node_modules/pax/": {
-          "Version": "0.2.1",
-          "Size": 11365
-        }
+      {
+        "Name": "pax",
+        "Path": "/node_modules/pax/",
+        "Version": "0.2.1",
+        "Size": 11365
       },
-      "sax": {
-        "/node_modules/sax/": {
-          "Version": "0.1.1",
-          "Size": 127390
-        }
+      {
+        "Name": "sax",
+        "Path": "/node_modules/sax/",
+        "Version": "0.1.1",
+        "Size": 127390
       }
-    }
+    ]
   }
 ]

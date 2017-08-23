@@ -9,7 +9,7 @@ import (
 type HistoryAnalyzer struct {
 }
 
-func (a HistoryAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
+func (a HistoryAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
 	diff, err := getHistoryDiff(image1, image2)
 	return &utils.HistDiffResult{
 		Image1:   image1.Source,
@@ -19,7 +19,7 @@ func (a HistoryAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, err
 	}, err
 }
 
-func (a HistoryAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {
+func (a HistoryAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
 	history := getHistoryList(image.Config.History)
 	result := utils.ListAnalyzeResult{
 		Image:       image.Source,

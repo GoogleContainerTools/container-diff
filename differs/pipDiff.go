@@ -15,12 +15,12 @@ type PipAnalyzer struct {
 }
 
 // PipDiff compares pip-installed Python packages between layers of two different images.
-func (a PipAnalyzer) Diff(image1, image2 utils.Image) (utils.DiffResult, error) {
+func (a PipAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
 	diff, err := multiVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func (a PipAnalyzer) Analyze(image utils.Image) (utils.AnalyzeResult, error) {
+func (a PipAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
 	analysis, err := multiVersionAnalysis(image, a)
 	return analysis, err
 }
