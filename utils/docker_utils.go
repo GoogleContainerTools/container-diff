@@ -12,11 +12,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"syscall"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	img "github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
@@ -39,74 +37,6 @@ func ValidDockerVersion() (bool, error) {
 		return true, nil
 	}
 	return false, nil
-}
-
-func getImagePullResponse(image string, response []Event) (string, error) {
-	var imageDigest string
-	for _, event := range response {
-		if event.Error != "" {
-			err := fmt.Errorf("Error pulling image %s: %s", image, event.Error)
-			return "", err
-		}
-		digestPattern := regexp.MustCompile("^Digest: (sha256:[a-z|0-9]{64})$")
-		digestMatch := digestPattern.FindStringSubmatch(event.Status)
-		if len(digestMatch) != 0 {
-			imageDigest = digestMatch[1]
-			return imageDigest, nil
-		}
-	}
-	err := fmt.Errorf("Could not pull image %s", image)
-	return "", err
-}
-
-func processImagePullEvents(image string, events []Event) (string, string, error) {
-	imageDigest, err := getImagePullResponse(image, events)
-	if err != nil {
-		return "", "", err
-	}
-
-	URLPattern := regexp.MustCompile("^.+/(.+(:.+){0,1})$")
-	URLMatch := URLPattern.FindStringSubmatch(image)
-	imageName := strings.Replace(URLMatch[1], ":", "", -1)
-	imageURL := strings.TrimSuffix(image, URLMatch[2])
-	imageID := imageURL + "@" + imageDigest
-
-	return imageID, imageName, nil
-}
-
-type Event struct {
-	Status         string `json:"status"`
-	Error          string `json:"error"`
-	Progress       string `json:"progress"`
-	ProgressDetail struct {
-		Current int `json:"current"`
-		Total   int `json:"total"`
-	} `json:"progressDetail"`
-}
-
-func pullImageFromRepo(image string) (string, string, error) {
-	glog.Info("Pulling image")
-	cli, err := client.NewEnvClient()
-	response, err := cli.ImagePull(context.Background(), image, types.ImagePullOptions{})
-	if err != nil {
-		return "", "", err
-	}
-	defer response.Close()
-
-	d := json.NewDecoder(response)
-
-	var events []Event
-	for {
-		var event Event
-		if err := d.Decode(&event); err != nil {
-			if err == io.EOF {
-				break
-			}
-			return "", "", err
-		}
-		events = append(events, event)
-	}
-	return processImagePullEvents(image, events)
 }
 
 type HistDiff struct {
@@ -169,42 +99,29 @@ func processHistOutput(response bytes.Buffer) ([]img.HistoryResponseItem, error)
 	return history, nil
 }
 
-func processPullCmdOutput(image string, response bytes.Buffer) (string, string, error) {
-	respReader := bytes.NewReader(response.Bytes())
-	reader := bufio.NewReader(respReader)
-
-	var events []Event
-	for {
-		var event Event
-		text, _, err := reader.ReadLine()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return "", "", err
-		}
-		event.Status = string(text)
-		events = append(events, event)
+func imageToTar(image, dest string) (string, error) {
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		return "", err
 	}
-	return processImagePullEvents(image, events)
+
+	imageTarPath, err := saveImageToTar(cli, image, dest)
+	if err != nil {
+		return "", err
+	}
+	return imageTarPath, nil
 }
 
-func pullImageCmd(image string) (string, string, error) {
-	glog.Info("Pulling image")
-	pullArgs := []string{"pull", image}
-	dockerPullCmd := exec.Command("docker", pullArgs...)
-	var response bytes.Buffer
-	dockerPullCmd.Stdout = &response
-	if err := dockerPullCmd.Run(); err != nil {
-		if exiterr, ok := err.(*exec.ExitError); ok {
-			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
-				glog.Error("Docker Pull Command Exit Status: ", status.ExitStatus())
-			}
-		} else {
-			return "", "", err
-		}
+// ImageToTar writes an image to a .tar file
+func saveImageToTar(cli client.APIClient, image, tarName string) (string, error) {
+	glog.Info("Saving image")
+	imgBytes, err := cli.ImageSave(context.Background(), []string{image})
+	if err != nil {
+		return "", err
 	}
-	return processPullCmdOutput(image, response)
+	defer imgBytes.Close()
+	newpath := tarName + ".tar"
+	return newpath, copyToFile(newpath, imgBytes)
 }
 
 func imageToTarCmd(imageID, imageName string) (string, error) {

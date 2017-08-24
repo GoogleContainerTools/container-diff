@@ -1,14 +1,12 @@
 package utils
 
 import (
-	"context"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 
-	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/system"
 	"github.com/golang/glog"
 )
@@ -26,31 +24,6 @@ func GetImageLayers(pathToImage string) []string {
 		}
 	}
 	return layers
-}
-
-func saveImageToTar(image, dest string) (string, error) {
-	cli, err := client.NewEnvClient()
-	if err != nil {
-		return "", err
-	}
-
-	imageTarPath, err := ImageToTar(cli, image, dest)
-	if err != nil {
-		return "", err
-	}
-	return imageTarPath, nil
-}
-
-// ImageToTar writes an image to a .tar file
-func ImageToTar(cli client.APIClient, image, tarName string) (string, error) {
-	glog.Info("Saving image")
-	imgBytes, err := cli.ImageSave(context.Background(), []string{image})
-	if err != nil {
-		return "", err
-	}
-	defer imgBytes.Close()
-	newpath := tarName + ".tar"
-	return newpath, copyToFile(newpath, imgBytes)
 }
 
 func CheckImageID(image string) bool {
