@@ -117,9 +117,14 @@ func (p CloudPrepper) getFileSystem() (string, error) {
 		panic(err)
 	}
 
+	// By default, the image library will try to look at /etc/docker/certs.d
+	// As a non-root user, this would result in a permissions error, so we avoid this
+	// by looking in a temporary directory we create in the container-diff home directory
 	cwd, _ := os.Getwd()
+	tmpCerts, _ := ioutil.TempDir(cwd, "certs")
+	defer os.RemoveAll(tmpCerts)
 	ctx := &types.SystemContext{
-		DockerCertPath: cwd,
+		DockerCertPath: tmpCerts,
 	}
 	img, err := ref.NewImage(ctx)
 	if err != nil {
@@ -162,9 +167,14 @@ func (p CloudPrepper) getConfig() (ConfigSchema, error) {
 		return ConfigSchema{}, err
 	}
 
+	// By default, the image library will try to look at /etc/docker/certs.d
+	// As a non-root user, this would result in a permissions error, so we avoid this
+	// by looking in a temporary directory we create in the container-diff home directory
 	cwd, _ := os.Getwd()
+	tmpCerts, _ := ioutil.TempDir(cwd, "certs")
+	defer os.RemoveAll(tmpCerts)
 	ctx := &types.SystemContext{
-		DockerCertPath: cwd,
+		DockerCertPath: tmpCerts,
 	}
 	img, err := ref.NewImage(ctx)
 	if err != nil {
