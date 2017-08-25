@@ -7,14 +7,13 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "code.cloudfoundry.org/bytefmt",
+			"Rev": "f4415fafc5619dd75599a54a7c91fb3948ad58bd"
+		},
+		{
 			"ImportPath": "github.com/Microsoft/go-winio",
 			"Comment": "v0.4.2",
 			"Rev": "f533f7a102197536779ea3a8cb881d639e21ec5a"
-		},
-		{
-			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "1.0.2-34-g181d419",
-			"Rev": "181d419aa9e2223811b824e8f0b4af96f9ba9302"
 		},
 		{
 			"ImportPath": "github.com/containers/image/docker",
