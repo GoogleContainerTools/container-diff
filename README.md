@@ -85,8 +85,6 @@ To get a JSON version of the container-diff output add a `-j` or `--json` flag.
 
 ```container-diff <img1> <img2> -j```
 
-To use the docker client instead of shelling out to your local docker daemon, add a `-e` or `--eng` flag.
-
 ```container-diff <img1> <img2> -e```
 
 To order files and packages by size (in descending order) when performing file system or package analyses/diffs, add a `-o` or `--order` flag.

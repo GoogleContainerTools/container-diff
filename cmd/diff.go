@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"sync"
 
@@ -20,9 +21,6 @@ var diffCmd = &cobra.Command{
 			glog.Error(err.Error())
 			os.Exit(1)
 		}
-
-		utils.SetDockerEngine(eng)
-
 		analyzeArgs := []string{}
 		allAnalyzers := getAllAnalyzers()
 		for _, name := range allAnalyzers {
@@ -53,16 +51,24 @@ func checkDiffArgNum(args []string) (bool, error) {
 }
 
 func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
+	cli, err := NewClient()
+	if err != nil {
+		return fmt.Errorf("Error getting docker client for differ: %s", err)
+	}
+	defer cli.Close()
 	var wg sync.WaitGroup
 	wg.Add(2)
 
 	glog.Infof("Starting diff on images %s and %s, using differs: %s", image1Arg, image2Arg, diffArgs)
 
 	var image1, image2 utils.Image
-	var err error
 	go func() {
 		defer wg.Done()
-		image1, err = utils.ImagePrepper{image1Arg}.GetImage()
+		ip := utils.ImagePrepper{
+			Source: image1Arg,
+			Client: cli,
+		}
+		image1, err = ip.GetImage()
 		if err != nil {
 			glog.Error(err.Error())
 		}
@@ -70,7 +76,11 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 
 	go func() {
 		defer wg.Done()
-		image2, err = utils.ImagePrepper{image2Arg}.GetImage()
+		ip := utils.ImagePrepper{
+			Source: image2Arg,
+			Client: cli,
+		}
+		image2, err = ip.GetImage()
 		if err != nil {
 			glog.Error(err.Error())
 		}
