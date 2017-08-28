@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/containers/image/docker"
+	"github.com/containers/image/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/golang/glog"
 )
@@ -116,14 +117,23 @@ func (p CloudPrepper) getFileSystem() (string, error) {
 		panic(err)
 	}
 
-	img, err := ref.NewImage(nil)
+	// By default, the image library will try to look at /etc/docker/certs.d
+	// As a non-root user, this would result in a permissions error, so we avoid this
+	// by looking in a temporary directory we create in the container-diff home directory
+	cwd, _ := os.Getwd()
+	tmpCerts, _ := ioutil.TempDir(cwd, "certs")
+	defer os.RemoveAll(tmpCerts)
+	ctx := &types.SystemContext{
+		DockerCertPath: tmpCerts,
+	}
+	img, err := ref.NewImage(ctx)
 	if err != nil {
 		glog.Error(err)
 		return "", err
 	}
 	defer img.Close()
 
-	imgSrc, err := ref.NewImageSource(nil, nil)
+	imgSrc, err := ref.NewImageSource(ctx, nil)
 	if err != nil {
 		glog.Error(err)
 		return "", err
@@ -157,7 +167,16 @@ func (p CloudPrepper) getConfig() (ConfigSchema, error) {
 		return ConfigSchema{}, err
 	}
 
-	img, err := ref.NewImage(nil)
+	// By default, the image library will try to look at /etc/docker/certs.d
+	// As a non-root user, this would result in a permissions error, so we avoid this
+	// by looking in a temporary directory we create in the container-diff home directory
+	cwd, _ := os.Getwd()
+	tmpCerts, _ := ioutil.TempDir(cwd, "certs")
+	defer os.RemoveAll(tmpCerts)
+	ctx := &types.SystemContext{
+		DockerCertPath: tmpCerts,
+	}
+	img, err := ref.NewImage(ctx)
 	if err != nil {
 		glog.Errorf("Error referencing image %s from registry: %s", p.Source, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
@@ -194,7 +213,7 @@ func (p IDPrepper) getFileSystem() (string, error) {
 		glog.Info("Docker version incompatible with api, shelling out to local Docker client.")
 		tarPath, err = imageToTarCmd(p.Source, p.Source)
 	} else {
-		tarPath, err = saveImageToTar(p.Source, p.Source)
+		tarPath, err = imageToTar(p.Source, p.Source)
 	}
 	if err != nil {
 		return "", err
