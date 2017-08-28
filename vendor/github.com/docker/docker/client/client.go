@@ -51,12 +51,16 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/docker/docker/api"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/versions"
 	"github.com/docker/go-connections/sockets"
 	"github.com/docker/go-connections/tlsconfig"
+	"golang.org/x/net/context"
 )
 
 // ErrRedirect is the error returned by checkRedirect when the request is non-GET.
@@ -88,7 +92,7 @@ type Client struct {
 // CheckRedirect specifies the policy for dealing with redirect responses:
 // If the request is non-GET return `ErrRedirect`. Otherwise use the last response.
 //
-// Go 1.8 changes behavior for HTTP redirects (specificlaly 301, 307, and 308) in the client .
+// Go 1.8 changes behavior for HTTP redirects (specifically 301, 307, and 308) in the client .
 // The Docker client (and by extension docker API client) can be made to to send a request
 // like POST /containers//start where what would normally be in the name section of the URL is empty.
 // This triggers an HTTP 301 from the daemon.
@@ -162,7 +166,7 @@ func NewClient(host string, version string, client *http.Client, httpHeaders map
 	}
 
 	if client != nil {
-		if _, ok := client.Transport.(*http.Transport); !ok {
+		if _, ok := client.Transport.(http.RoundTripper); !ok {
 			return nil, fmt.Errorf("unable to verify TLS configuration, invalid transport %v", client.Transport)
 		}
 	} else {
@@ -216,9 +220,9 @@ func (cli *Client) getAPIPath(p string, query url.Values) string {
 	var apiPath string
 	if cli.version != "" {
 		v := strings.TrimPrefix(cli.version, "v")
-		apiPath = cli.basePath + "/v" + v + p
+		apiPath = path.Join(cli.basePath, "/v"+v+p)
 	} else {
-		apiPath = cli.basePath + p
+		apiPath = path.Join(cli.basePath, p)
 	}
 
 	u := &url.URL{
@@ -238,13 +242,34 @@ func (cli *Client) ClientVersion() string {
 	return cli.version
 }
 
-// UpdateClientVersion updates the version string associated with this
-// instance of the Client. This operation doesn't acquire a mutex.
-func (cli *Client) UpdateClientVersion(v string) {
-	if !cli.manualOverride {
-		cli.version = v
+// NegotiateAPIVersion updates the version string associated with this
+// instance of the Client to match the latest version the server supports
+func (cli *Client) NegotiateAPIVersion(ctx context.Context) {
+	ping, _ := cli.Ping(ctx)
+	cli.NegotiateAPIVersionPing(ping)
+}
+
+// NegotiateAPIVersionPing updates the version string associated with this
+// instance of the Client to match the latest version the server supports
+func (cli *Client) NegotiateAPIVersionPing(p types.Ping) {
+	if cli.manualOverride {
+		return
 	}
 
+	// try the latest version before versioning headers existed
+	if p.APIVersion == "" {
+		p.APIVersion = "1.24"
+	}
+
+	// if the client is not initialized with a version, start with the latest supported version
+	if cli.version == "" {
+		cli.version = api.DefaultVersion
+	}
+
+	// if server version is lower than the maximum version supported by the Client, downgrade
+	if versions.LessThan(p.APIVersion, api.DefaultVersion) {
+		cli.version = p.APIVersion
+	}
 }
 
 // DaemonHost returns the host associated with this instance of the Client.

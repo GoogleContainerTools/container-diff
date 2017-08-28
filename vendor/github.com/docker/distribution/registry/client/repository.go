@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/client/transport"
@@ -321,7 +321,8 @@ func (t *tags) Get(ctx context.Context, tag string) (distribution.Descriptor, er
 	defer resp.Body.Close()
 
 	switch {
-	case resp.StatusCode >= 200 && resp.StatusCode < 400:
+	case resp.StatusCode >= 200 && resp.StatusCode < 400 && len(resp.Header.Get("Docker-Content-Digest")) > 0:
+		// if the response is a success AND a Docker-Content-Digest can be retrieved from the headers
 		return descriptorFromResponse(resp)
 	default:
 		// if the response is an error - there will be no body to decode.
