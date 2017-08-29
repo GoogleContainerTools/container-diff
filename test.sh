@@ -16,6 +16,10 @@
 
 set -e
 
+echo "Running go tests..."
+go test `go list ./... | grep -v vendor`
+
+echo "Checking gofmt..."
 files=$(find . -name "*.go" | grep -v vendor/ | xargs gofmt -l -s)
 if [[ $files ]]; then
     echo "Gofmt errors in files: $files"

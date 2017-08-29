@@ -33,7 +33,11 @@ cross: $(foreach platform, $(SUPPORTED_PLATFORMS), out/$(PROJECT)-$(platform))
 
 .PHONY: test
 test: $(BUILD_DIR)/$(PROJECT)
-	./.container-diff-tests.sh
+	@ ./test.sh
+
+.PHONY: integration
+integration: $(BUILD_DIR)/$(PROJECT)
+	go test -v -tags integration $(REPOPATH)/tests
 
 .PHONY: clean
 clean:
