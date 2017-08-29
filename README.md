@@ -39,31 +39,31 @@ Download the [container-diff-windows-amd64.exe](https://storage.googleapis.com/c
 
 ## Quickstart
 
-To use container-diff to perform analysis on a single image, you need one Docker image (in the form of an ID, tarball, or URL from a repo).  Once you have that image, you can run any of the following analyzers:
+To use `container-diff analyze` to perform analysis on a single image, you need one Docker image (in the form of an ID, tarball, or URL from a repo).  Once you have that image, you can run any of the following analyzers:
 
 ```
-container-diff <img>     [Run all analyzers]
-container-diff <img> -d  [History]
-container-diff <img> -f  [File System]
-container-diff <img> -p  [Pip]
-container-diff <img> -a  [Apt]
-container-diff <img> -n  [Node]
+container-diff analyze <img>     [Run all analyzers]
+container-diff analyze <img> -d  [History]
+container-diff analyze <img> -f  [File System]
+container-diff analyze <img> -p  [Pip]
+container-diff analyze <img> -a  [Apt]
+container-diff analyze <img> -n  [Node]
 ```
 
 To use container-diff to perform a diff analysis on two images, you need two Docker images (in the form of an ID, tarball, or URL from a repo).  Once you have those images, you can run any of the following differs:
 ```
-container-diff <img1> <img2>     [Run all differs]
-container-diff <img1> <img2> -d  [History]
-container-diff <img1> <img2> -f  [File System]
-container-diff <img1> <img2> -p  [Pip]
-container-diff <img1> <img2> -a  [Apt]
-container-diff <img1> <img2> -n  [Node]
+container-diff diff <img1> <img2>     [Run all differs]
+container-diff diff <img1> <img2> -d  [History]
+container-diff diff <img1> <img2> -f  [File System]
+container-diff diff <img1> <img2> -p  [Pip]
+container-diff diff <img1> <img2> -a  [Apt]
+container-diff diff <img1> <img2> -n  [Node]
 ```
 
-You can similarly run many differs or analyzers at once:
+You can similarly run many analyzers at once:
 
 ```
-container-diff <img1> <img2> -d -a -n [History, Apt, and Node]
+container-diff diff <img1> <img2> -d -a -n [History, Apt, and Node]
 ```
 
 All of the analyzer flags with their long versions can be seen below:
