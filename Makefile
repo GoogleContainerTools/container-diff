@@ -9,7 +9,7 @@ ORG := github.com/GoogleCloudPlatform
 PROJECT := container-diff
 REPOPATH ?= $(ORG)/$(PROJECT)
 
-SUPPORTED_PLATFORMS := linux-amd64 darwin-amd64
+SUPPORTED_PLATFORMS := linux-amd64 darwin-amd64 windows-amd64
 BUILD_PACKAGE = $(REPOPATH)
 
 # These build tags are from the containers/image library.
