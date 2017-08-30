@@ -2,6 +2,8 @@ VERSION_MAJOR ?= 0
 VERSION_MINOR ?= 2
 VERSION_BUILD ?= 0
 
+VERSION ?= v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_BUILD)
+
 GOOS ?= $(shell go env GOOS)
 GOARCH = amd64
 BUILD_DIR ?= ./out
@@ -17,13 +19,14 @@ BUILD_PACKAGE = $(REPOPATH)
 # container_image_ostree_stub allows building the library without requiring the libostree development libraries
 # container_image_openpgp forces a Golang-only OpenPGP implementation for signature verification instead of the default cgo/gpgme-based implementation
 GO_BUILD_TAGS := "container_image_ostree_stub containers_image_openpgp"
+GO_LDFLAGS := "-X $(REPOPATH)/version.version=$(VERSION)"
 GO_FILES := $(shell go list  -f '{{join .Deps "\n"}}' $(BUILD_PACKAGE) | grep $(ORG) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}')
 
 $(BUILD_DIR)/$(PROJECT): out/$(PROJECT)-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/$(PROJECT)-$(GOOS)-$(GOARCH) $@
 
 $(BUILD_DIR)/$(PROJECT)-%-$(GOARCH): $(GO_FILES) $(BUILD_DIR)
-	GOOS=$* GOARCH=$(GOARCH) go build -tags $(GO_BUILD_TAGS) -o $@ $(BUILD_PACKAGE)
+	GOOS=$* GOARCH=$(GOARCH) go build -tags $(GO_BUILD_TAGS) -ldflags $(GO_LDFLAGS) -o $@ $(BUILD_PACKAGE)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
