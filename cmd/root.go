@@ -37,9 +37,9 @@ var analyzeFlagMap = map[string]*bool{
 type validatefxn func(args []string) (bool, error)
 
 var RootCmd = &cobra.Command{
-	Use:   "To analyze a single image: [image].  To compare two images: [image1] [image2]",
-	Short: "Analyze a single image or compare two images.",
-	Long:  `Analyzes a single image or compares two images using the specifed analyzers/differs as indicated via flags (see documentation for available ones).`,
+	Use:   "container-diff",
+	Short: "container-diff is a tool for analyzing and comparing container images",
+	Long:  `container-diff is a CLI tool for analyzing and comparing container images.`,
 }
 
 func NewClient() (*client.Client, error) {
