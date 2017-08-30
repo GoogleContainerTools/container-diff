@@ -277,7 +277,7 @@
 		{
 			"ImportPath": "github.com/opencontainers/runc/libcontainer/user",
 			"Comment": "v1.0.0-rc3-153-gc5ec2548",
-			"Rev": "c5ec25487693612aed95673800863e134785f946"
+			"Rev": "6056912217c002341877cd106b4df51032a09ac1"
 		},
 		{
 			"ImportPath": "github.com/pkg/errors",
@@ -320,11 +320,11 @@
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
-			"Rev": "0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79"
+			"Rev": "ab9e364efd8b52800ff7ee48a9ffba4e0ed78dfb"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/windows",
-			"Rev": "0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79"
+			"Rev": "ab9e364efd8b52800ff7ee48a9ffba4e0ed78dfb"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
