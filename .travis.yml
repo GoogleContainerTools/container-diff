@@ -1,11 +1,8 @@
-sudo: required
-dist: trusty
-
 language: go
+os: linux
 go:
-        - 1.8.1
+        - 1.8.3
 go_import_path: github.com/GoogleCloudPlatform/container-diff
 
 script:
- - ./.gofmt.sh
- - travis_wait ./.container-diff-tests.sh
+ - make test integration

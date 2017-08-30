@@ -9,7 +9,7 @@ ORG := github.com/GoogleCloudPlatform
 PROJECT := container-diff
 REPOPATH ?= $(ORG)/$(PROJECT)
 
-SUPPORTED_PLATFORMS := linux-amd64 darwin-amd64
+SUPPORTED_PLATFORMS := linux-amd64 darwin-amd64 windows-amd64
 BUILD_PACKAGE = $(REPOPATH)
 
 # These build tags are from the containers/image library.
@@ -33,7 +33,11 @@ cross: $(foreach platform, $(SUPPORTED_PLATFORMS), out/$(PROJECT)-$(platform))
 
 .PHONY: test
 test: $(BUILD_DIR)/$(PROJECT)
-	./.container-diff-tests.sh
+	@ ./test.sh
+
+.PHONY: integration
+integration: $(BUILD_DIR)/$(PROJECT)
+	go test -v -tags integration $(REPOPATH)/tests
 
 .PHONY: clean
 clean:
