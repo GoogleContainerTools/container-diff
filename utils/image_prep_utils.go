@@ -3,6 +3,7 @@ package utils
 import (
 	"archive/tar"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -14,7 +15,8 @@ import (
 
 	"github.com/containers/image/docker"
 	"github.com/containers/image/types"
-	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+
 	"github.com/golang/glog"
 )
 
@@ -51,6 +53,7 @@ type ConfigSchema struct {
 
 type ImagePrepper struct {
 	Source string
+	Client *client.Client
 }
 
 type Prepper interface {
@@ -203,18 +206,7 @@ type IDPrepper struct {
 }
 
 func (p IDPrepper) getFileSystem() (string, error) {
-	// check client compatibility with Docker API
-	valid, err := ValidDockerVersion()
-	if err != nil {
-		return "", err
-	}
-	var tarPath string
-	if !valid {
-		glog.Info("Docker version incompatible with api, shelling out to local Docker client.")
-		tarPath, err = imageToTarCmd(p.Source, p.Source)
-	} else {
-		tarPath, err = imageToTar(p.Source, p.Source)
-	}
+	tarPath, err := saveImageToTar(p.Client, p.Source, p.Source)
 	if err != nil {
 		return "", err
 	}
@@ -224,24 +216,13 @@ func (p IDPrepper) getFileSystem() (string, error) {
 }
 
 func (p IDPrepper) getConfig() (ConfigSchema, error) {
-	// check client compatibility with Docker API
-	valid, err := ValidDockerVersion()
-	if err != nil {
-		return ConfigSchema{}, err
-	}
-	var containerConfig container.Config
-	if !valid {
-		glog.Info("Docker version incompatible with api, shelling out to local Docker client.")
-		containerConfig, err = getImageConfigCmd(p.Source)
-	} else {
-		containerConfig, err = getImageConfig(p.Source)
-	}
+	inspect, _, err := p.Client.ImageInspectWithRaw(context.Background(), p.Source)
 	if err != nil {
 		return ConfigSchema{}, err
 	}
 
 	config := ConfigObject{
-		Env: containerConfig.Env,
+		Env: inspect.Config.Env,
 	}
 	history := p.getHistory()
 	return ConfigSchema{
@@ -251,7 +232,7 @@ func (p IDPrepper) getConfig() (ConfigSchema, error) {
 }
 
 func (p IDPrepper) getHistory() []ImageHistoryItem {
-	history, err := getImageHistory(p.Source)
+	history, err := p.Client.ImageHistory(context.Background(), p.Source)
 	if err != nil {
 		glog.Error("Could not obtain image history for %s: %s", p.Source, err)
 	}

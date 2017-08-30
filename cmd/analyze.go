@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
@@ -19,9 +20,6 @@ var analyzeCmd = &cobra.Command{
 			glog.Error(err.Error())
 			os.Exit(1)
 		}
-
-		utils.SetDockerEngine(eng)
-
 		analyzeArgs := []string{}
 		allAnalyzers := getAllAnalyzers()
 		for _, name := range allAnalyzers {
@@ -52,7 +50,17 @@ func checkAnalyzeArgNum(args []string) (bool, error) {
 }
 
 func analyzeImage(imageArg string, analyzerArgs []string) error {
-	image, err := utils.ImagePrepper{imageArg}.GetImage()
+	cli, err := NewClient()
+	if err != nil {
+		return fmt.Errorf("Error getting docker client for differ: %s", err)
+	}
+	defer cli.Close()
+	ip := utils.ImagePrepper{
+		Source: imageArg,
+		Client: cli,
+	}
+
+	image, err := ip.GetImage()
 	if err != nil {
 		glog.Error(err.Error())
 		cleanupImage(image)

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	goflag "flag"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"sort"
 
 	"github.com/GoogleCloudPlatform/container-diff/utils"
+	"github.com/docker/docker/client"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -38,6 +40,16 @@ var RootCmd = &cobra.Command{
 	Use:   "To analyze a single image: [image].  To compare two images: [image1] [image2]",
 	Short: "Analyze a single image or compare two images.",
 	Long:  `Analyzes a single image or compares two images using the specifed analyzers/differs as indicated via flags (see documentation for available ones).`,
+}
+
+func NewClient() (*client.Client, error) {
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		return nil, fmt.Errorf("Error getting docker client: %s", err)
+	}
+	cli.NegotiateAPIVersion(context.Background())
+
+	return cli, nil
 }
 
 func outputResults(resultMap map[string]utils.Result) {
@@ -145,7 +157,6 @@ func init() {
 
 func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&json, "json", "j", false, "JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).")
-	cmd.Flags().BoolVarP(&eng, "eng", "e", false, "By default the docker calls are shelled out locally, set this flag to use the Docker Engine Client (version compatibility required).")
 	cmd.Flags().BoolVarP(&pip, "pip", "p", false, "Set this flag to use the pip differ.")
 	cmd.Flags().BoolVarP(&node, "node", "n", false, "Set this flag to use the node differ.")
 	cmd.Flags().BoolVarP(&apt, "apt", "a", false, "Set this flag to use the apt differ.")
