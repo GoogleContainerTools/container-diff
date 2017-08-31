@@ -117,7 +117,7 @@ func (p CloudPrepper) getFileSystem() (string, error) {
 	path := strings.Replace(URLMatch[1], ":", "", -1)
 	ref, err := docker.ParseReference("//" + p.Source)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	// By default, the image library will try to look at /etc/docker/certs.d
