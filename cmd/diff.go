@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
@@ -17,37 +18,28 @@ var diffCmd = &cobra.Command{
 	Short: "Compare two images: [image1] [image2]",
 	Long:  `Compares two images using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if validArgs, err := validateArgs(args, checkDiffArgNum, checkArgType); !validArgs {
+		if err := validateArgs(args, checkDiffArgNum, checkArgType); err != nil {
 			glog.Error(err.Error())
 			os.Exit(1)
 		}
-		analyzeArgs := []string{}
-		allAnalyzers := getAllAnalyzers()
-		for _, name := range allAnalyzers {
-			if *analyzeFlagMap[name] == true {
-				analyzeArgs = append(analyzeArgs, name)
-			}
+		if err := checkIfValidAnalyzer(types); err != nil {
+			glog.Error(err)
+			os.Exit(1)
 		}
-
-		// If no analyzers are specified, perform them all as the default
-		if len(analyzeArgs) == 0 {
-			analyzeArgs = allAnalyzers
-		}
-
-		if err := diffImages(args[0], args[1], analyzeArgs); err != nil {
+		if err := diffImages(args[0], args[1], strings.Split(types, ",")); err != nil {
 			glog.Error(err)
 			os.Exit(1)
 		}
 	},
 }
 
-func checkDiffArgNum(args []string) (bool, error) {
+func checkDiffArgNum(args []string) error {
 	var errMessage string
 	if len(args) != 2 {
 		errMessage = "'diff' requires two images as arguments: container diff [image1] [image2]"
-		return false, errors.New(errMessage)
+		return errors.New(errMessage)
 	}
-	return true, nil
+	return nil
 }
 
 func diffImages(image1Arg, image2Arg string, diffArgs []string) error {

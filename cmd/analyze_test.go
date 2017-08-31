@@ -12,8 +12,8 @@ var analyzeArgNumTests = []testpair{
 
 func TestAnalyzeArgNum(t *testing.T) {
 	for _, test := range analyzeArgNumTests {
-		valid, err := checkAnalyzeArgNum(test.input)
-		if valid != test.expected_output {
+		err := checkAnalyzeArgNum(test.input)
+		if (err == nil) != test.expected_output {
 			if test.expected_output {
 				t.Errorf("Got unexpected error: %s", err)
 			} else {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
@@ -16,37 +17,29 @@ var analyzeCmd = &cobra.Command{
 	Short: "Analyzes an image: [image]",
 	Long:  `Analyzes an image using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if validArgs, err := validateArgs(args, checkAnalyzeArgNum, checkArgType); !validArgs {
+		if err := validateArgs(args, checkAnalyzeArgNum, checkArgType); err != nil {
 			glog.Error(err.Error())
 			os.Exit(1)
 		}
-		analyzeArgs := []string{}
-		allAnalyzers := getAllAnalyzers()
-		for _, name := range allAnalyzers {
-			if *analyzeFlagMap[name] == true {
-				analyzeArgs = append(analyzeArgs, name)
-			}
+		if err := checkIfValidAnalyzer(types); err != nil {
+			glog.Error(err)
+			os.Exit(1)
 		}
-
-		// If no analyzers are specified, perform them all as the default
-		if len(analyzeArgs) == 0 {
-			analyzeArgs = allAnalyzers
-		}
-
-		if err := analyzeImage(args[0], analyzeArgs); err != nil {
+		if err := analyzeImage(args[0], strings.Split(types, ",")); err != nil {
 			glog.Error(err)
 			os.Exit(1)
 		}
 	},
 }
 
-func checkAnalyzeArgNum(args []string) (bool, error) {
+func checkAnalyzeArgNum(args []string) error {
 	var errMessage string
 	if len(args) != 1 {
 		errMessage = "'analyze' requires one image as an argument: container analyze [image]"
-		return false, errors.New(errMessage)
+		glog.Errorf(errMessage)
+		return errors.New(errMessage)
 	}
-	return true, nil
+	return nil
 }
 
 func analyzeImage(imageArg string, analyzerArgs []string) error {

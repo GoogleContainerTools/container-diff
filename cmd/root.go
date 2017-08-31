@@ -1,40 +1,28 @@
 package cmd
 
 import (
-	"bytes"
 	"context"
-	"errors"
 	goflag "flag"
 	"fmt"
 	"os"
 	"reflect"
 	"sort"
+	"strings"
 
+	"github.com/GoogleCloudPlatform/container-diff/differs"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
 var json bool
-var eng bool
 var save bool
-var apt bool
-var node bool
-var file bool
-var history bool
-var pip bool
+var types string
 
-var analyzeFlagMap = map[string]*bool{
-	"apt":     &apt,
-	"node":    &node,
-	"file":    &file,
-	"history": &history,
-	"pip":     &pip,
-}
-
-type validatefxn func(args []string) (bool, error)
+type validatefxn func(args []string) error
 
 var RootCmd = &cobra.Command{
 	Use:   "container-diff",
@@ -90,24 +78,13 @@ func cleanupImage(image utils.Image) {
 	}
 }
 
-func getAllAnalyzers() []string {
-	allAnalyzers := []string{}
-	for name := range analyzeFlagMap {
-		allAnalyzers = append(allAnalyzers, name)
-	}
-	return allAnalyzers
-}
-
-func validateArgs(args []string, validatefxns ...validatefxn) (bool, error) {
+func validateArgs(args []string, validatefxns ...validatefxn) error {
 	for _, validatefxn := range validatefxns {
-		valid, err := validatefxn(args)
-		if err != nil {
-			return false, err
-		} else if !valid {
-			return false, nil
+		if err := validatefxn(args); err != nil {
+			return err
 		}
 	}
-	return true, nil
+	return nil
 }
 
 func checkImage(arg string) bool {
@@ -117,20 +94,27 @@ func checkImage(arg string) bool {
 	return true
 }
 
-func checkArgType(args []string) (bool, error) {
-	var buffer bytes.Buffer
-	valid := true
+func checkArgType(args []string) error {
 	for _, arg := range args {
 		if !checkImage(arg) {
-			valid = false
 			errMessage := fmt.Sprintf("Argument %s is not an image ID, URL, or tar\n", args[0])
-			buffer.WriteString(errMessage)
+			glog.Errorf(errMessage)
+			return errors.New(errMessage)
 		}
 	}
-	if !valid {
-		return false, errors.New(buffer.String())
+	return nil
+}
+
+func checkIfValidAnalyzer(flagtypes string) error {
+	analyzers := strings.Split(flagtypes, ",")
+	for _, name := range analyzers {
+		if _, exists := differs.Analyzers[name]; !exists {
+			errMessage := fmt.Sprintf("Argument %s is not an image ID, URL, or tar\n", name)
+			glog.Errorf(errMessage)
+			return errors.New(errMessage)
+		}
 	}
-	return true, nil
+	return nil
 }
 
 func remove(path string, dir bool) string {
@@ -157,11 +141,7 @@ func init() {
 
 func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&json, "json", "j", false, "JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).")
-	cmd.Flags().BoolVarP(&pip, "pip", "p", false, "Set this flag to use the pip differ.")
-	cmd.Flags().BoolVarP(&node, "node", "n", false, "Set this flag to use the node differ.")
-	cmd.Flags().BoolVarP(&apt, "apt", "a", false, "Set this flag to use the apt differ.")
-	cmd.Flags().BoolVarP(&file, "file", "f", false, "Set this flag to use the file differ.")
-	cmd.Flags().BoolVarP(&history, "history", "d", false, "Set this flag to use the dockerfile history differ.")
+	cmd.Flags().StringVarP(&types, "types", "t", "", "This flag sets the list of analyzer types to use.  It expects a comma separated list of supported analyzers.")
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&utils.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 }
