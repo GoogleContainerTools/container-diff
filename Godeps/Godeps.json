@@ -28,11 +28,19 @@
 			"Rev": "74e359348c7ce9e0caf4fa75aa8de3809cf41c46"
 		},
 		{
+			"ImportPath": "github.com/containers/image/docker/tarfile",
+			"Rev": "74e359348c7ce9e0caf4fa75aa8de3809cf41c46"
+		},
+		{
 			"ImportPath": "github.com/containers/image/image",
 			"Rev": "74e359348c7ce9e0caf4fa75aa8de3809cf41c46"
 		},
 		{
 			"ImportPath": "github.com/containers/image/manifest",
+			"Rev": "74e359348c7ce9e0caf4fa75aa8de3809cf41c46"
+		},
+		{
+			"ImportPath": "github.com/containers/image/pkg/compression",
 			"Rev": "74e359348c7ce9e0caf4fa75aa8de3809cf41c46"
 		},
 		{
@@ -279,6 +287,11 @@
 			"Rev": "6056912217c002341877cd106b4df51032a09ac1"
 		},
 		{
+			"ImportPath": "github.com/opencontainers/runc/libcontainer/utils",
+			"Comment": "v1.0.0-rc3-171-g60569122",
+			"Rev": "6056912217c002341877cd106b4df51032a09ac1"
+		},
+		{
 			"ImportPath": "github.com/pkg/errors",
 			"Comment": "v0.8.0-5-gc605e28",
 			"Rev": "c605e284fe17294bda444b34710735b29d1a9d90"
@@ -324,6 +337,30 @@
 		},
 		{
 			"ImportPath": "golang.org/x/sys/windows",
+			"Rev": "ab9e364efd8b52800ff7ee48a9ffba4e0ed78dfb"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows/registry",
+			"Rev": "ab9e364efd8b52800ff7ee48a9ffba4e0ed78dfb"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows/svc",
+			"Rev": "ab9e364efd8b52800ff7ee48a9ffba4e0ed78dfb"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows/svc/debug",
+			"Rev": "ab9e364efd8b52800ff7ee48a9ffba4e0ed78dfb"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows/svc/eventlog",
+			"Rev": "ab9e364efd8b52800ff7ee48a9ffba4e0ed78dfb"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows/svc/example",
+			"Rev": "ab9e364efd8b52800ff7ee48a9ffba4e0ed78dfb"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows/svc/mgr",
 			"Rev": "ab9e364efd8b52800ff7ee48a9ffba4e0ed78dfb"
 		},
 		{

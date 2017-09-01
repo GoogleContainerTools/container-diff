@@ -9,21 +9,21 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/containers/image/docker"
+	"github.com/containers/image/docker/tarfile"
 	"github.com/containers/image/types"
 	"github.com/docker/docker/client"
 
 	"github.com/golang/glog"
 )
 
-var sourceToPrepMap = map[string]Prepper{
-	"ID":  IDPrepper{},
-	"URL": CloudPrepper{},
-	"tar": TarPrepper{},
+var sourceToPrepMap = map[string]func(ip ImagePrepper) Prepper{
+	"ID":  func(ip ImagePrepper) Prepper { return IDPrepper{ImagePrepper: ip} },
+	"URL": func(ip ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
+	"tar": func(ip ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
 }
 
 var sourceCheckMap = map[string]func(string) bool{
@@ -68,9 +68,7 @@ func (p ImagePrepper) GetImage() (Image, error) {
 	var prepper Prepper
 	for source, check := range sourceCheckMap {
 		if check(img) {
-			typePrepper := reflect.TypeOf(sourceToPrepMap[source])
-			prepper = reflect.New(typePrepper).Interface().(Prepper)
-			reflect.ValueOf(prepper).Elem().Field(0).Set(reflect.ValueOf(p))
+			prepper = sourceToPrepMap[source](p)
 			break
 		}
 	}
@@ -258,38 +256,35 @@ func (p TarPrepper) getConfig() (ConfigSchema, error) {
 	if err != nil {
 		return ConfigSchema{}, err
 	}
-	contents, err := ioutil.ReadDir(tempDir)
+
+	var config ConfigSchema
+	// First open the manifest, then find the referenced config.
+	manifestPath := filepath.Join(tempDir, "manifest.json")
+	contents, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
-		glog.Errorf("Could not read image tar contents: %s", err)
+		return ConfigSchema{}, err
+	}
+
+	manifests := []tarfile.ManifestItem{}
+	if err := json.Unmarshal(contents, &manifests); err != nil {
+		return ConfigSchema{}, err
+	}
+
+	if len(manifests) != 1 {
+		return ConfigSchema{}, errors.New("specified tar file contains multiple images")
+	}
+
+	cfgFilename := filepath.Join(tempDir, manifests[0].Config)
+	file, err := ioutil.ReadFile(cfgFilename)
+	if err != nil {
+		glog.Errorf("Could not read config file %s: %s", cfgFilename, err)
+		return ConfigSchema{}, errors.New("Could not obtain image config")
+	}
+	err = json.Unmarshal(file, &config)
+	if err != nil {
+		glog.Errorf("Could not marshal config file %s: %s", cfgFilename, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
 	}
 
-	var config ConfigSchema
-	configList := []string{}
-	for _, item := range contents {
-		if filepath.Ext(item.Name()) == ".json" && item.Name() != "manifest.json" {
-			if len(configList) != 0 {
-				// Another <image>.json file has already been processed and the image config obtained is uncertain.
-				glog.Error("Multiple possible config sources detected for image at " + p.Source + ". Multiple images likely contained in tar. Choosing first one, but diff results may not be completely accurate.")
-				break
-			}
-			fileName := filepath.Join(tempDir, item.Name())
-			file, err := ioutil.ReadFile(fileName)
-			if err != nil {
-				glog.Errorf("Could not read config file %s: %s", fileName, err)
-				return ConfigSchema{}, errors.New("Could not obtain image config")
-			}
-			err = json.Unmarshal(file, &config)
-			if err != nil {
-				glog.Errorf("Could not marshal config file %s: %s", fileName, err)
-				return ConfigSchema{}, errors.New("Could not obtain image config")
-			}
-			configList = append(configList, fileName)
-		}
-	}
-	if reflect.DeepEqual(ConfigSchema{}, config) {
-		glog.Warningf("No image config found in tar source %s. Pip differ may be incomplete due to missing PYTHONPATH information.")
-		return config, nil
-	}
 	return config, nil
 }
