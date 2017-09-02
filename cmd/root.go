@@ -7,7 +7,6 @@ import (
 	goflag "flag"
 	"fmt"
 	"os"
-	"reflect"
 	"sort"
 
 	"github.com/GoogleCloudPlatform/container-diff/utils"
@@ -81,7 +80,7 @@ func outputResults(resultMap map[string]utils.Result) {
 }
 
 func cleanupImage(image utils.Image) {
-	if !reflect.DeepEqual(image, (utils.Image{})) {
+	if image.FSPath != "" {
 		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
 		errMsg := remove(image.FSPath, true)
 		if errMsg != "" {

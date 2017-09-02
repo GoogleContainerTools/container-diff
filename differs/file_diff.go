@@ -7,6 +7,10 @@ import (
 type FileAnalyzer struct {
 }
 
+func (a FileAnalyzer) Name() string {
+	return "FileAnalyzer"
+}
+
 // FileDiff diffs two packages and compares their contents
 func (a FileAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
 	diff, err := diffImageFiles(image1, image2)

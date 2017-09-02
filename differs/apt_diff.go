@@ -14,6 +14,10 @@ import (
 type AptAnalyzer struct {
 }
 
+func (a AptAnalyzer) Name() string {
+	return "AptAnalyzer"
+}
+
 // AptDiff compares the packages installed by apt-get.
 func (a AptAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
 	diff, err := singleVersionDiff(image1, image2, a)

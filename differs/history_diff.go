@@ -14,6 +14,10 @@ type HistDiff struct {
 	Dels []string
 }
 
+func (a HistoryAnalyzer) Name() string {
+	return "HistoryAnalyzer"
+}
+
 func (a HistoryAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
 	diff, err := getHistoryDiff(image1, image2)
 	return &utils.HistDiffResult{

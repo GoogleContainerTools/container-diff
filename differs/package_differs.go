@@ -1,7 +1,6 @@
 package differs
 
 import (
-	"reflect"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/utils"
@@ -9,10 +8,12 @@ import (
 
 type MultiVersionPackageAnalyzer interface {
 	getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error)
+	Name() string
 }
 
 type SingleVersionPackageAnalyzer interface {
 	getPackages(image utils.Image) (map[string]utils.PackageInfo, error)
+	Name() string
 }
 
 func multiVersionDiff(image1, image2 utils.Image, differ MultiVersionPackageAnalyzer) (*utils.MultiVersionPackageDiffResult, error) {
@@ -29,7 +30,7 @@ func multiVersionDiff(image1, image2 utils.Image, differ MultiVersionPackageAnal
 	return &utils.MultiVersionPackageDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
-		DiffType: strings.TrimSuffix(reflect.TypeOf(differ).Name(), "Analyzer"),
+		DiffType: strings.TrimSuffix(differ.Name(), "Analyzer"),
 		Diff:     diff,
 	}, nil
 }
@@ -48,7 +49,7 @@ func singleVersionDiff(image1, image2 utils.Image, differ SingleVersionPackageAn
 	return &utils.SingleVersionPackageDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
-		DiffType: strings.TrimSuffix(reflect.TypeOf(differ).Name(), "Analyzer"),
+		DiffType: strings.TrimSuffix(differ.Name(), "Analyzer"),
 		Diff:     diff,
 	}, nil
 }
@@ -61,7 +62,7 @@ func multiVersionAnalysis(image utils.Image, analyzer MultiVersionPackageAnalyze
 
 	analysis := utils.MultiVersionPackageAnalyzeResult{
 		Image:       image.Source,
-		AnalyzeType: strings.TrimSuffix(reflect.TypeOf(analyzer).Name(), "Analyzer"),
+		AnalyzeType: strings.TrimSuffix(analyzer.Name(), "Analyzer"),
 		Analysis:    pack,
 	}
 	return &analysis, nil
@@ -75,7 +76,7 @@ func singleVersionAnalysis(image utils.Image, analyzer SingleVersionPackageAnaly
 
 	analysis := utils.SingleVersionPackageAnalyzeResult{
 		Image:       image.Source,
-		AnalyzeType: strings.TrimSuffix(reflect.TypeOf(analyzer).Name(), "Analyzer"),
+		AnalyzeType: strings.TrimSuffix(analyzer.Name(), "Analyzer"),
 		Analysis:    pack,
 	}
 	return &analysis, nil

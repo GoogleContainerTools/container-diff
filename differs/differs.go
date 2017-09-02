@@ -3,7 +3,6 @@ package differs
 import (
 	"errors"
 	"fmt"
-	"reflect"
 
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 	"github.com/golang/glog"
@@ -23,6 +22,7 @@ type SingleRequest struct {
 type Analyzer interface {
 	Diff(image1, image2 utils.Image) (utils.Result, error)
 	Analyze(image utils.Image) (utils.Result, error)
+	Name() string
 }
 
 var analyzers = map[string]Analyzer{
@@ -40,11 +40,10 @@ func (req DiffRequest) GetDiff() (map[string]utils.Result, error) {
 
 	results := map[string]utils.Result{}
 	for _, differ := range diffs {
-		differName := reflect.TypeOf(differ).Name()
 		if diff, err := differ.Diff(img1, img2); err == nil {
-			results[differName] = diff
+			results[differ.Name()] = diff
 		} else {
-			glog.Errorf("Error getting diff with %s: %s", differName, err)
+			glog.Errorf("Error getting diff with %s: %s", differ.Name(), err)
 		}
 	}
 
@@ -64,7 +63,7 @@ func (req SingleRequest) GetAnalysis() (map[string]utils.Result, error) {
 
 	results := map[string]utils.Result{}
 	for _, analyzer := range analyses {
-		analyzeName := reflect.TypeOf(analyzer).Name()
+		analyzeName := analyzer.Name()
 		if analysis, err := analyzer.Analyze(img); err == nil {
 			results[analyzeName] = analysis
 		} else {

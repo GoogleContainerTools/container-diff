@@ -3,7 +3,6 @@ package differs
 import (
 	"io/ioutil"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"strings"
 
@@ -12,6 +11,10 @@ import (
 )
 
 type PipAnalyzer struct {
+}
+
+func (a PipAnalyzer) Name() string {
+	return "PipAnalyzer"
 }
 
 // PipDiff compares pip-installed Python packages between layers of two different images.
@@ -29,7 +32,7 @@ func (a PipAnalyzer) getPackages(image utils.Image) (map[string]map[string]utils
 	path := image.FSPath
 	packages := make(map[string]map[string]utils.PackageInfo)
 	pythonPaths := []string{}
-	if !reflect.DeepEqual(utils.ConfigSchema{}, image.Config) {
+	if image.Config.Config.Env != nil {
 		paths := getPythonPaths(image.Config.Config.Env)
 		for _, p := range paths {
 			pythonPaths = append(pythonPaths, p)

@@ -14,6 +14,10 @@ import (
 type NodeAnalyzer struct {
 }
 
+func (a NodeAnalyzer) Name() string {
+	return "NodeAnalyzer"
+}
+
 // NodeDiff compares the packages installed by apt-get.
 func (a NodeAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
 	diff, err := multiVersionDiff(image1, image2, a)
