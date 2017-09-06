@@ -30,7 +30,7 @@ fi
 if [[ -f $(which python 2>&1) ]]; then
 	PYTHON="python"
 else
-	PYTHON="docker run --rm -it -v $(pwd):/minikube -w /minikube python python"
+	PYTHON="docker run --rm -it -v $(pwd):/container-diff -w /container-diff python python"
 fi
 
 
