@@ -35,8 +35,8 @@ var argTypeTests = []testpair{
 
 func TestArgType(t *testing.T) {
 	for _, test := range argTypeTests {
-		valid, err := checkArgType(test.input)
-		if valid != test.expected_output {
+		err := checkArgType(test.input)
+		if (err == nil) != test.expected_output {
 			if test.expected_output {
 				t.Errorf("Got unexpected error: %s", err)
 			} else {

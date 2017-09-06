@@ -77,7 +77,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 		description string
 		imageA      string
 		imageB      string
-		differFlag  string
+		differFlags []string
 		subcommand  string
 
 		//TODO: Don't consume a json file
@@ -88,7 +88,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       diffBase,
 			imageB:       diffModified,
-			differFlag:   "-f",
+			differFlags:  []string{"--types=file"},
 			expectedFile: "file_diff_expected.json",
 		},
 		{
@@ -96,7 +96,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       aptBase,
 			imageB:       aptModified,
-			differFlag:   "-a",
+			differFlags:  []string{"--types=apt"},
 			expectedFile: "apt_diff_expected.json",
 		},
 		{
@@ -104,7 +104,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       nodeBase,
 			imageB:       nodeModified,
-			differFlag:   "-n",
+			differFlags:  []string{"--types=node"},
 			expectedFile: "node_diff_order_expected.json",
 		},
 		{
@@ -112,7 +112,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       multiBase,
 			imageB:       multiModified,
-			differFlag:   "-npa",
+			differFlags:  []string{"--types=node,pip,apt"},
 			expectedFile: "multi_diff_expected.json",
 		},
 		{
@@ -120,7 +120,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       diffBase,
 			imageB:       diffModified,
-			differFlag:   "-d",
+			differFlags:  []string{"--types=history"},
 			expectedFile: "hist_diff_expected.json",
 		},
 		{
@@ -128,35 +128,35 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       aptBase,
 			imageB:       aptModified,
-			differFlag:   "-ao",
+			differFlags:  []string{"--types=apt", "-o"},
 			expectedFile: "apt_sorted_diff_expected.json",
 		},
 		{
 			description:  "apt analysis",
 			subcommand:   "analyze",
 			imageA:       aptModified,
-			differFlag:   "-a",
+			differFlags:  []string{"--types=apt"},
 			expectedFile: "apt_analysis_expected.json",
 		},
 		{
 			description:  "file sorted analysis",
 			subcommand:   "analyze",
 			imageA:       diffModified,
-			differFlag:   "-fo",
+			differFlags:  []string{"--types=file", "-o"},
 			expectedFile: "file_sorted_analysis_expected.json",
 		},
 		{
 			description:  "pip analysis",
 			subcommand:   "analyze",
 			imageA:       pipModified,
-			differFlag:   "-p",
+			differFlags:  []string{"--types=pip"},
 			expectedFile: "pip_analysis_expected.json",
 		},
 		{
 			description:  "node analysis",
 			subcommand:   "analyze",
 			imageA:       nodeModified,
-			differFlag:   "-n",
+			differFlags:  []string{"--types=node"},
 			expectedFile: "node_analysis_expected.json",
 		},
 	}
@@ -166,7 +166,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			if test.imageB != "" {
 				args = append(args, test.imageB)
 			}
-			args = append(args, test.differFlag)
+			args = append(args, test.differFlags...)
 			args = append(args, "-j")
 			actual, err := runner.Run(args...)
 			if err != nil {

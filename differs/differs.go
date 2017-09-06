@@ -41,7 +41,7 @@ type Analyzer interface {
 	Name() string
 }
 
-var analyzers = map[string]Analyzer{
+var Analyzers = map[string]Analyzer{
 	"history": HistoryAnalyzer{},
 	"file":    FileAnalyzer{},
 	"apt":     AptAnalyzer{},
@@ -99,7 +99,7 @@ func (req SingleRequest) GetAnalysis() (map[string]utils.Result, error) {
 
 func GetAnalyzers(analyzeNames []string) (analyzeFuncs []Analyzer, err error) {
 	for _, name := range analyzeNames {
-		if a, exists := analyzers[name]; exists {
+		if a, exists := Analyzers[name]; exists {
 			analyzeFuncs = append(analyzeFuncs, a)
 		} else {
 			glog.Errorf("Unknown analyzer/differ specified", name)

@@ -43,27 +43,29 @@ To use `container-diff analyze` to perform analysis on a single image, you need 
 
 ```
 container-diff analyze <img>     [Run all analyzers]
-container-diff analyze <img> -d  [History]
-container-diff analyze <img> -f  [File System]
-container-diff analyze <img> -p  [Pip]
-container-diff analyze <img> -a  [Apt]
-container-diff analyze <img> -n  [Node]
+container-diff analyze <img> --types=history  [History]
+container-diff analyze <img> --types=file  [File System]
+container-diff analyze <img> --types=pip  [Pip]
+container-diff analyze <img> --types=apt  [Apt]
+container-diff analyze <img> --types=node  [Node]
+container-diff analyze <img> --types=apt,node  [Apt and Node]
+# --types=<analyzer1>,<analyzer2>,<analyzer3>,...
 ```
 
 To use container-diff to perform a diff analysis on two images, you need two Docker images (in the form of an ID, tarball, or URL from a repo).  Once you have those images, you can run any of the following differs:
 ```
 container-diff diff <img1> <img2>     [Run all differs]
-container-diff diff <img1> <img2> -d  [History]
-container-diff diff <img1> <img2> -f  [File System]
-container-diff diff <img1> <img2> -p  [Pip]
-container-diff diff <img1> <img2> -a  [Apt]
-container-diff diff <img1> <img2> -n  [Node]
+container-diff diff <img1> <img2> --types=history  [History]
+container-diff diff <img1> <img2> --types=file  [File System]
+container-diff diff <img1> <img2> --types=pip  [Pip]
+container-diff diff <img1> <img2> --types=apt  [Apt]
+container-diff diff <img1> <img2> --types=node  [Node]
 ```
 
 You can similarly run many analyzers at once:
 
 ```
-container-diff diff <img1> <img2> -d -a -n [History, Apt, and Node]
+container-diff diff <img1> <img2> --types=history,apt,node [History, Apt, and Node]
 ```
 
 All of the analyzer flags with their long versions can be seen below:
@@ -228,7 +230,7 @@ To run container-diff on image IDs, docker must be installed.
 ## Example Run
 
 ```
-$ container-diff gcr.io/google-appengine/python:2017-07-21-123058 gcr.io/google-appengine/python:2017-06-29-190410 -a -n -p
+$ container-diff diff gcr.io/google-appengine/python:2017-07-21-123058 gcr.io/google-appengine/python:2017-06-29-190410 --types=apt,node,pip
 
 -----AptDiffer-----
 
@@ -371,8 +373,4 @@ If using existing package tools, you should create the appropriate structs (e.g.
 This is where you define how your analyzer should output for a human readable format (`OutputText`) and as a struct which can then be written to a `.json` file.  See [diff_output_utils.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/utils/diff_output_utils.go) and [analyze_output_utils.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/analyze_output_utils.go).
 
 5. Add your analyzer to the `analyses` map in [differs.go](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/differs.go#L22) with the corresponding Analyzer struct as the value.
-
-
-
-
 
