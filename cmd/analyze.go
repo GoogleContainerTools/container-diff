@@ -94,8 +94,7 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 	outputResults(analyses)
 
 	if save {
-		dir, _ := os.Getwd()
-		glog.Infof("Image was saved at %s as %s", dir, image.FSPath)
+		glog.Infof("Image was saved at %s", image.FSPath)
 	}
 
 	return nil

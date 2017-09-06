@@ -110,8 +110,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	outputResults(diffs)
 
 	if save {
-		dir, _ := os.Getwd()
-		glog.Infof("Images were saved at %s as %s and %s", dir, imageMap[image1Arg].FSPath,
+		glog.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
 			imageMap[image2Arg].FSPath)
 
 	}

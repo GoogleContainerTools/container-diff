@@ -162,6 +162,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.description, func(t *testing.T) {
+			t.Parallel()
 			args := []string{test.subcommand, test.imageA}
 			if test.imageB != "" {
 				args = append(args, test.imageB)

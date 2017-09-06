@@ -128,7 +128,13 @@ func (p CloudPrepper) getFileSystem() (string, error) {
 	URLPattern := regexp.MustCompile("^.+/(.+(:.+){0,1})$")
 	URLMatch := URLPattern.FindStringSubmatch(p.Source)
 	// Removing the ":" so that the image path name can be <image><tag>
-	path := strings.Replace(URLMatch[1], ":", "", -1)
+	sanitizedName := strings.Replace(URLMatch[1], ":", "", -1)
+
+	path, err := ioutil.TempDir("", sanitizedName)
+	if err != nil {
+		return "", err
+	}
+
 	ref, err := docker.ParseReference("//" + p.Source)
 	if err != nil {
 		return "", err
@@ -154,10 +160,6 @@ func (p CloudPrepper) getFileSystem() (string, error) {
 	if err != nil {
 		glog.Error(err)
 		return "", err
-	}
-
-	if _, ok := os.Stat(path); ok != nil {
-		os.MkdirAll(path, 0777)
 	}
 
 	for _, b := range img.LayerInfos() {
