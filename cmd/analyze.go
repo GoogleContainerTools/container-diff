@@ -75,34 +75,34 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 		Source: imageArg,
 		Client: cli,
 	}
-
 	image, err := ip.GetImage()
+
+	if !save {
+		defer cleanupImage(image)
+	}
 	if err != nil {
 		glog.Error(err.Error())
-		cleanupImage(image)
 		return errors.New("Could not perform image analysis")
 	}
 	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
 		glog.Error(err.Error())
-		cleanupImage(image)
 		return errors.New("Could not perform image analysis")
 	}
 
 	req := differs.SingleRequest{image, analyzeTypes}
-	if analyses, err := req.GetAnalysis(); err == nil {
-		glog.Info("Retrieving analyses")
-		outputResults(analyses)
-		if !save {
-			cleanupImage(image)
-		} else {
-			dir, _ := os.Getwd()
-			glog.Infof("Image was saved at %s as %s", dir, image.FSPath)
-		}
-	} else {
+	analyses, err := req.GetAnalysis()
+	if err != nil {
 		glog.Error(err.Error())
-		cleanupImage(image)
 		return errors.New("Could not perform image analysis")
+	}
+
+	glog.Info("Retrieving analyses")
+	outputResults(analyses)
+
+	if save {
+		dir, _ := os.Getwd()
+		glog.Infof("Image was saved at %s as %s", dir, image.FSPath)
 	}
 
 	return nil
