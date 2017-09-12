@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"testing"
 
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 )
 
@@ -60,7 +61,7 @@ func TestGetNodePackages(t *testing.T) {
 	}
 
 	for _, test := range testCases {
-		image := utils.Image{FSPath: test.path}
+		image := pkgutil.Image{FSPath: test.path}
 		d := NodeAnalyzer{}
 		packages, err := d.getPackages(image)
 		if err != nil && !test.err {

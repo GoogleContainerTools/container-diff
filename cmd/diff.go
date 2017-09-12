@@ -24,7 +24,7 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 )
@@ -68,21 +68,21 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 
 	glog.Infof("Starting diff on images %s and %s, using differs: %s", image1Arg, image2Arg, diffArgs)
 
-	imageMap := map[string]*utils.Image{
+	imageMap := map[string]*pkgutil.Image{
 		image1Arg: {},
 		image2Arg: {},
 	}
 	for imageArg := range imageMap {
-		go func(imageName string, imageMap map[string]*utils.Image) {
+		go func(imageName string, imageMap map[string]*pkgutil.Image) {
 			defer wg.Done()
-			ip := utils.ImagePrepper{
+			ip := pkgutil.ImagePrepper{
 				Source: imageName,
 				Client: cli,
 			}
 			image, err := ip.GetImage()
 			imageMap[imageName] = &image
 			if err != nil {
-				glog.Error(err.Error())
+				glog.Errorf("Diff may be inaccurate: %s", err.Error())
 			}
 		}(imageArg, imageMap)
 	}

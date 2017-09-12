@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
@@ -83,7 +84,7 @@ func outputResults(resultMap map[string]utils.Result) {
 	}
 }
 
-func cleanupImage(image utils.Image) {
+func cleanupImage(image pkgutil.Image) {
 	if image.FSPath != "" {
 		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
 		errMsg := remove(image.FSPath, true)
@@ -103,7 +104,7 @@ func validateArgs(args []string, validatefxns ...validatefxn) error {
 }
 
 func checkImage(arg string) bool {
-	if !utils.CheckImageID(arg) && !utils.CheckImageURL(arg) && !utils.CheckTar(arg) {
+	if !pkgutil.CheckImageID(arg) && !pkgutil.CheckImageURL(arg) && !pkgutil.CheckTar(arg) {
 		return false
 	}
 	return true

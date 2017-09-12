@@ -19,23 +19,25 @@ package utils
 import (
 	"reflect"
 	"testing"
+
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 )
 
 type difftestpair struct {
-	input           [2]Directory
+	input           [2]pkgutil.Directory
 	expected_output []string
 }
 
-var d1 = Directory{"Dir1", []string{}}
-var d2 = Directory{"Dir2", []string{"file1"}}
-var d3 = Directory{"Dir2", []string{"file1", "file2"}}
+var d1 = pkgutil.Directory{"Dir1", []string{}}
+var d2 = pkgutil.Directory{"Dir2", []string{"file1"}}
+var d3 = pkgutil.Directory{"Dir2", []string{"file1", "file2"}}
 
 func TestGetAddedEntries(t *testing.T) {
 	var additiontests = []difftestpair{
-		{[2]Directory{d1, d1}, []string{}},
-		{[2]Directory{d2, d1}, []string{}},
-		{[2]Directory{d2, d3}, []string{"file2"}},
-		{[2]Directory{d1, d3}, []string{"file1", "file2"}},
+		{[2]pkgutil.Directory{d1, d1}, []string{}},
+		{[2]pkgutil.Directory{d2, d1}, []string{}},
+		{[2]pkgutil.Directory{d2, d3}, []string{"file2"}},
+		{[2]pkgutil.Directory{d1, d3}, []string{"file1", "file2"}},
 	}
 
 	for _, test := range additiontests {
@@ -48,10 +50,10 @@ func TestGetAddedEntries(t *testing.T) {
 
 func TestGetDeletedEntries(t *testing.T) {
 	var deletiontests = []difftestpair{
-		{[2]Directory{d1, d1}, []string{}},
-		{[2]Directory{d1, d2}, []string{}},
-		{[2]Directory{d3, d2}, []string{"file2"}},
-		{[2]Directory{d3, d1}, []string{"file1", "file2"}},
+		{[2]pkgutil.Directory{d1, d1}, []string{}},
+		{[2]pkgutil.Directory{d1, d2}, []string{}},
+		{[2]pkgutil.Directory{d3, d2}, []string{"file2"}},
+		{[2]pkgutil.Directory{d3, d1}, []string{"file1", "file2"}},
 	}
 
 	for _, test := range deletiontests {
@@ -63,16 +65,16 @@ func TestGetDeletedEntries(t *testing.T) {
 }
 
 func TestGetModifiedEntries(t *testing.T) {
-	var testdir1 = Directory{"test_files/dir1/", []string{"file1", "file2", "file3"}}
-	var testdir2 = Directory{"test_files/dir2/", []string{"file1", "file2", "file4"}}
-	var testdir3 = Directory{"test_files/dir1_copy/", []string{"file1", "file2", "file3"}}
-	var testdir4 = Directory{"test_files/dir2_modified/", []string{"file1", "file2", "file4"}}
+	var testdir1 = pkgutil.Directory{"test_files/dir1/", []string{"file1", "file2", "file3"}}
+	var testdir2 = pkgutil.Directory{"test_files/dir2/", []string{"file1", "file2", "file4"}}
+	var testdir3 = pkgutil.Directory{"test_files/dir1_copy/", []string{"file1", "file2", "file3"}}
+	var testdir4 = pkgutil.Directory{"test_files/dir2_modified/", []string{"file1", "file2", "file4"}}
 
 	var modifiedtests = []difftestpair{
-		{[2]Directory{d1, d1}, []string{}},
-		{[2]Directory{testdir1, testdir3}, []string{}},
-		{[2]Directory{testdir1, testdir2}, []string{"file2"}},
-		{[2]Directory{testdir2, testdir4}, []string{"file1", "file2", "file4"}},
+		{[2]pkgutil.Directory{d1, d1}, []string{}},
+		{[2]pkgutil.Directory{testdir1, testdir3}, []string{}},
+		{[2]pkgutil.Directory{testdir1, testdir2}, []string{"file2"}},
+		{[2]pkgutil.Directory{testdir2, testdir4}, []string{"file1", "file2", "file4"}},
 	}
 
 	for _, test := range modifiedtests {
@@ -87,13 +89,13 @@ func TestGetDirectory(t *testing.T) {
 	tests := []struct {
 		descrip  string
 		path     string
-		expected Directory
+		expected pkgutil.Directory
 		deep     bool
 	}{
 		{
 			descrip: "deep",
 			path:    "testTars/la-croix3-full",
-			expected: Directory{
+			expected: pkgutil.Directory{
 				Root:    "testTars/la-croix3-full",
 				Content: []string{"/lime.txt", "/nest", "/nest/f1.txt", "/nested-dir", "/nested-dir/f2.txt", "/passionfruit.txt", "/peach-pear.txt"},
 			},
@@ -102,7 +104,7 @@ func TestGetDirectory(t *testing.T) {
 		{
 			descrip: "shallow",
 			path:    "testTars/la-croix3-full",
-			expected: Directory{
+			expected: pkgutil.Directory{
 				Root:    "testTars/la-croix3-full",
 				Content: []string{"/lime.txt", "/nest", "/nested-dir", "/passionfruit.txt", "/peach-pear.txt"},
 			},
@@ -110,7 +112,7 @@ func TestGetDirectory(t *testing.T) {
 		},
 	}
 	for _, testCase := range tests {
-		dir, err := GetDirectory(testCase.path, testCase.deep)
+		dir, err := pkgutil.GetDirectory(testCase.path, testCase.deep)
 		if err != nil {
 			t.Errorf("Error converting directory to Directory struct")
 		}
@@ -139,7 +141,7 @@ func TestCheckSameFile(t *testing.T) {
 	}
 
 	for _, test := range samefiletests {
-		output, err := checkSameFile(test.input[0], test.input[1])
+		output, err := pkgutil.CheckSameFile(test.input[0], test.input[1])
 		if err != nil && test.expected_success {
 			t.Errorf("Got unexpected error: %s", err)
 		}

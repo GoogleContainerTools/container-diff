@@ -17,8 +17,27 @@ limitations under the License.
 package utils
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
+
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/golang/glog"
 	"github.com/pmezard/go-difflib/difflib"
 )
+
+type DirDiff struct {
+	Adds []pkgutil.DirectoryEntry
+	Dels []pkgutil.DirectoryEntry
+	Mods []EntryDiff
+}
+
+type EntryDiff struct {
+	Name  string
+	Size1 int64
+	Size2 int64
+}
 
 // Modification of difflib's unified differ
 func GetAdditions(a, b []string) []string {
@@ -72,4 +91,101 @@ func GetMatches(a, b []string) []string {
 		}
 	}
 	return matches
+}
+
+// DiffDirectory takes the diff of two directories, assuming both are completely unpacked
+func DiffDirectory(d1, d2 pkgutil.Directory) (DirDiff, bool) {
+	adds := GetAddedEntries(d1, d2)
+	sort.Strings(adds)
+	addedEntries := pkgutil.CreateDirectoryEntries(d2.Root, adds)
+
+	dels := GetDeletedEntries(d1, d2)
+	sort.Strings(dels)
+	deletedEntries := pkgutil.CreateDirectoryEntries(d1.Root, dels)
+
+	mods := GetModifiedEntries(d1, d2)
+	sort.Strings(mods)
+	modifiedEntries := createEntryDiffs(d1.Root, d2.Root, mods)
+
+	var same bool
+	if len(adds) == 0 && len(dels) == 0 && len(mods) == 0 {
+		same = true
+	} else {
+		same = false
+	}
+
+	return DirDiff{addedEntries, deletedEntries, modifiedEntries}, same
+}
+
+// Checks for content differences between files of the same name from different directories
+func GetModifiedEntries(d1, d2 pkgutil.Directory) []string {
+	d1files := d1.Content
+	d2files := d2.Content
+
+	filematches := GetMatches(d1files, d2files)
+
+	modified := []string{}
+	for _, f := range filematches {
+		f1path := fmt.Sprintf("%s%s", d1.Root, f)
+		f2path := fmt.Sprintf("%s%s", d2.Root, f)
+
+		f1stat, err := os.Stat(f1path)
+		if err != nil {
+			glog.Errorf("Error checking directory entry %s: %s\n", f, err)
+			continue
+		}
+		f2stat, err := os.Stat(f2path)
+		if err != nil {
+			glog.Errorf("Error checking directory entry %s: %s\n", f, err)
+			continue
+		}
+
+		// If the directory entry in question is a tar, verify that the two have the same size
+		if pkgutil.IsTar(f1path) {
+			if f1stat.Size() != f2stat.Size() {
+				modified = append(modified, f)
+			}
+			continue
+		}
+
+		// If the directory entry is not a tar and not a directory, then it's a file so make sure the file contents are the same
+		// Note: We skip over directory entries because to compare directories, we compare their contents
+		if !f1stat.IsDir() {
+			same, err := pkgutil.CheckSameFile(f1path, f2path)
+			if err != nil {
+				glog.Errorf("Error diffing contents of %s and %s: %s\n", f1path, f2path, err)
+				continue
+			}
+			if !same {
+				modified = append(modified, f)
+			}
+		}
+	}
+	return modified
+}
+
+func GetAddedEntries(d1, d2 pkgutil.Directory) []string {
+	return GetAdditions(d1.Content, d2.Content)
+}
+
+func GetDeletedEntries(d1, d2 pkgutil.Directory) []string {
+	return GetDeletions(d1.Content, d2.Content)
+}
+
+func createEntryDiffs(root1, root2 string, entryNames []string) (entries []EntryDiff) {
+	for _, name := range entryNames {
+		entryPath1 := filepath.Join(root1, name)
+		size1 := pkgutil.GetSize(entryPath1)
+
+		entryPath2 := filepath.Join(root2, name)
+		size2 := pkgutil.GetSize(entryPath2)
+
+		entry := EntryDiff{
+			Name:  name,
+			Size1: size1,
+			Size2: size2,
+		}
+		entries = append(entries, entry)
+	}
+	return entries
 }

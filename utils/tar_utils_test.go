@@ -24,6 +24,8 @@ import (
 	"log"
 	"os"
 	"testing"
+
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 )
 
 func TestUnTar(t *testing.T) {
@@ -80,7 +82,7 @@ func TestUnTar(t *testing.T) {
 		if test.starter != "" {
 			CopyDir(test.starter, test.target)
 		}
-		err := UnTar(test.tarPath, test.target)
+		err := pkgutil.UnTar(test.tarPath, test.target)
 		if err != nil && !test.err {
 			t.Errorf(test.descrip, "Got unexpected error: %s", err)
 			remove = false
@@ -183,7 +185,7 @@ func TestIsTar(t *testing.T) {
 		{input: "/testTar/la-croix1-actual", expected: false},
 	}
 	for _, test := range testCases {
-		actual := isTar(test.input)
+		actual := pkgutil.IsTar(test.input)
 		if test.expected != actual {
 			t.Errorf("Expected: %t but got: %t", test.expected, actual)
 		}
@@ -191,8 +193,8 @@ func TestIsTar(t *testing.T) {
 }
 
 func dirEquals(actual string, path string) bool {
-	d1, _ := GetDirectory(actual, true)
-	d2, _ := GetDirectory(path, true)
+	d1, _ := pkgutil.GetDirectory(actual, true)
+	d2, _ := pkgutil.GetDirectory(path, true)
 	diff, same := DiffDirectory(d1, d2)
 	if !same {
 		fmt.Printf("%v", diff)

@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"testing"
 
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 )
 
@@ -121,7 +122,7 @@ func TestGetAptPackages(t *testing.T) {
 	}
 	for _, test := range testCases {
 		d := AptAnalyzer{}
-		image := utils.Image{FSPath: test.path}
+		image := pkgutil.Image{FSPath: test.path}
 		packages, err := d.getPackages(image)
 		if err != nil && !test.err {
 			t.Errorf("Got unexpected error: %s", err)

@@ -22,6 +22,7 @@ import (
 	"regexp"
 	"strings"
 
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 	"github.com/golang/glog"
 )
@@ -34,17 +35,17 @@ func (a PipAnalyzer) Name() string {
 }
 
 // PipDiff compares pip-installed Python packages between layers of two different images.
-func (a PipAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
+func (a PipAnalyzer) Diff(image1, image2 pkgutil.Image) (utils.Result, error) {
 	diff, err := multiVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func (a PipAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
+func (a PipAnalyzer) Analyze(image pkgutil.Image) (utils.Result, error) {
 	analysis, err := multiVersionAnalysis(image, a)
 	return analysis, err
 }
 
-func (a PipAnalyzer) getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error) {
+func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]utils.PackageInfo, error) {
 	path := image.FSPath
 	packages := make(map[string]map[string]utils.PackageInfo)
 	pythonPaths := []string{}
@@ -87,7 +88,7 @@ func (a PipAnalyzer) getPackages(image utils.Image) (map[string]map[string]utils
 				var size int64
 				if i-1 >= 0 && contents[i-1].Name() == packageName {
 					packagePath := filepath.Join(pythonPath, packageName)
-					size = utils.GetSize(packagePath)
+					size = pkgutil.GetSize(packagePath)
 				} else if i+1 < len(contents) && contents[i+1].Name() == packageName+".py" {
 					size = contents[i+1].Size()
 

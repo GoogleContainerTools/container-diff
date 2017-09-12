@@ -19,20 +19,21 @@ package differs
 import (
 	"strings"
 
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 )
 
 type MultiVersionPackageAnalyzer interface {
-	getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error)
+	getPackages(image pkgutil.Image) (map[string]map[string]utils.PackageInfo, error)
 	Name() string
 }
 
 type SingleVersionPackageAnalyzer interface {
-	getPackages(image utils.Image) (map[string]utils.PackageInfo, error)
+	getPackages(image pkgutil.Image) (map[string]utils.PackageInfo, error)
 	Name() string
 }
 
-func multiVersionDiff(image1, image2 utils.Image, differ MultiVersionPackageAnalyzer) (*utils.MultiVersionPackageDiffResult, error) {
+func multiVersionDiff(image1, image2 pkgutil.Image, differ MultiVersionPackageAnalyzer) (*utils.MultiVersionPackageDiffResult, error) {
 	pack1, err := differ.getPackages(image1)
 	if err != nil {
 		return &utils.MultiVersionPackageDiffResult{}, err
@@ -51,7 +52,7 @@ func multiVersionDiff(image1, image2 utils.Image, differ MultiVersionPackageAnal
 	}, nil
 }
 
-func singleVersionDiff(image1, image2 utils.Image, differ SingleVersionPackageAnalyzer) (*utils.SingleVersionPackageDiffResult, error) {
+func singleVersionDiff(image1, image2 pkgutil.Image, differ SingleVersionPackageAnalyzer) (*utils.SingleVersionPackageDiffResult, error) {
 	pack1, err := differ.getPackages(image1)
 	if err != nil {
 		return &utils.SingleVersionPackageDiffResult{}, err
@@ -70,7 +71,7 @@ func singleVersionDiff(image1, image2 utils.Image, differ SingleVersionPackageAn
 	}, nil
 }
 
-func multiVersionAnalysis(image utils.Image, analyzer MultiVersionPackageAnalyzer) (*utils.MultiVersionPackageAnalyzeResult, error) {
+func multiVersionAnalysis(image pkgutil.Image, analyzer MultiVersionPackageAnalyzer) (*utils.MultiVersionPackageAnalyzeResult, error) {
 	pack, err := analyzer.getPackages(image)
 	if err != nil {
 		return &utils.MultiVersionPackageAnalyzeResult{}, err
@@ -84,7 +85,7 @@ func multiVersionAnalysis(image utils.Image, analyzer MultiVersionPackageAnalyze
 	return &analysis, nil
 }
 
-func singleVersionAnalysis(image utils.Image, analyzer SingleVersionPackageAnalyzer) (*utils.SingleVersionPackageAnalyzeResult, error) {
+func singleVersionAnalysis(image pkgutil.Image, analyzer SingleVersionPackageAnalyzer) (*utils.SingleVersionPackageAnalyzeResult, error) {
 	pack, err := analyzer.getPackages(image)
 	if err != nil {
 		return &utils.SingleVersionPackageAnalyzeResult{}, err

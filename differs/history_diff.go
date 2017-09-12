@@ -19,6 +19,7 @@ package differs
 import (
 	"strings"
 
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 )
 
@@ -34,7 +35,7 @@ func (a HistoryAnalyzer) Name() string {
 	return "HistoryAnalyzer"
 }
 
-func (a HistoryAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
+func (a HistoryAnalyzer) Diff(image1, image2 pkgutil.Image) (utils.Result, error) {
 	diff, err := getHistoryDiff(image1, image2)
 	return &utils.HistDiffResult{
 		Image1:   image1.Source,
@@ -44,7 +45,7 @@ func (a HistoryAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) 
 	}, err
 }
 
-func (a HistoryAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
+func (a HistoryAnalyzer) Analyze(image pkgutil.Image) (utils.Result, error) {
 	history := getHistoryList(image.Config.History)
 	result := utils.ListAnalyzeResult{
 		Image:       image.Source,
@@ -54,7 +55,7 @@ func (a HistoryAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
 	return &result, nil
 }
 
-func getHistoryDiff(image1, image2 utils.Image) (HistDiff, error) {
+func getHistoryDiff(image1, image2 pkgutil.Image) (HistDiff, error) {
 	history1 := getHistoryList(image1.Config.History)
 	history2 := getHistoryList(image2.Config.History)
 
@@ -64,7 +65,7 @@ func getHistoryDiff(image1, image2 utils.Image) (HistDiff, error) {
 	return diff, nil
 }
 
-func getHistoryList(historyItems []utils.ImageHistoryItem) []string {
+func getHistoryList(historyItems []pkgutil.ImageHistoryItem) []string {
 	strhistory := make([]string, len(historyItems))
 	for i, layer := range historyItems {
 		strhistory[i] = strings.TrimSpace(layer.CreatedBy)

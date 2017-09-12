@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"testing"
 
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 )
 
@@ -77,19 +78,19 @@ func TestGetPythonVersion(t *testing.T) {
 func TestGetPythonPackages(t *testing.T) {
 	testCases := []struct {
 		descrip          string
-		image            utils.Image
+		image            pkgutil.Image
 		expectedPackages map[string]map[string]utils.PackageInfo
 	}{
 		{
 			descrip: "noPackagesTest",
-			image: utils.Image{
+			image: pkgutil.Image{
 				FSPath: "testDirs/pipTests/noPackagesTest",
 			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{},
 		},
 		{
 			descrip: "packagesMultiVersion, no PYTHONPATH",
-			image: utils.Image{
+			image: pkgutil.Image{
 				FSPath: "testDirs/pipTests/packagesMultiVersion",
 			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{
@@ -105,7 +106,7 @@ func TestGetPythonPackages(t *testing.T) {
 		},
 		{
 			descrip: "packagesSingleVersion, no PYTHONPATH",
-			image: utils.Image{
+			image: pkgutil.Image{
 				FSPath: "testDirs/pipTests/packagesSingleVersion",
 			},
 			expectedPackages: map[string]map[string]utils.PackageInfo{
@@ -117,10 +118,10 @@ func TestGetPythonPackages(t *testing.T) {
 		},
 		{
 			descrip: "pythonPathTests, PYTHONPATH",
-			image: utils.Image{
+			image: pkgutil.Image{
 				FSPath: "testDirs/pipTests/pythonPathTests",
-				Config: utils.ConfigSchema{
-					Config: utils.ConfigObject{
+				Config: pkgutil.ConfigSchema{
+					Config: pkgutil.ConfigObject{
 						Env: []string{"PYTHONPATH=testDirs/pipTests/pythonPathTests/pythonPath1:testDirs/pipTests/pythonPathTests/pythonPath2/subdir", "ENVVAR2=something"},
 					},
 				},
@@ -135,10 +136,10 @@ func TestGetPythonPackages(t *testing.T) {
 		},
 		{
 			descrip: "pythonPathTests, no PYTHONPATH",
-			image: utils.Image{
+			image: pkgutil.Image{
 				FSPath: "testDirs/pipTests/pythonPathTests",
-				Config: utils.ConfigSchema{
-					Config: utils.ConfigObject{
+				Config: pkgutil.ConfigSchema{
+					Config: pkgutil.ConfigObject{
 						Env: []string{"ENVVAR=something"},
 					},
 				},

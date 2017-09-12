@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 	"github.com/golang/glog"
 )
@@ -35,17 +36,17 @@ func (a NodeAnalyzer) Name() string {
 }
 
 // NodeDiff compares the packages installed by apt-get.
-func (a NodeAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
+func (a NodeAnalyzer) Diff(image1, image2 pkgutil.Image) (utils.Result, error) {
 	diff, err := multiVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func (a NodeAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
+func (a NodeAnalyzer) Analyze(image pkgutil.Image) (utils.Result, error) {
 	analysis, err := multiVersionAnalysis(image, a)
 	return analysis, err
 }
 
-func (a NodeAnalyzer) getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error) {
+func (a NodeAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]utils.PackageInfo, error) {
 	path := image.FSPath
 	packages := make(map[string]map[string]utils.PackageInfo)
 	if _, err := os.Stat(path); err != nil {
@@ -74,7 +75,7 @@ func (a NodeAnalyzer) getPackages(image utils.Image) (map[string]map[string]util
 			var currInfo utils.PackageInfo
 			currInfo.Version = packageJSON.Version
 			packagePath := strings.TrimSuffix(currPackage, "package.json")
-			currInfo.Size = utils.GetSize(packagePath)
+			currInfo.Size = pkgutil.GetSize(packagePath)
 			mapPath := strings.Replace(packagePath, path, "", 1)
 			// Check if other package version already recorded
 			if _, ok := packages[packageJSON.Name]; !ok {

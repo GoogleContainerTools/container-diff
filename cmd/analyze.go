@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 )
@@ -62,7 +62,7 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 		return fmt.Errorf("Error getting docker client for differ: %s", err)
 	}
 	defer cli.Close()
-	ip := utils.ImagePrepper{
+	ip := pkgutil.ImagePrepper{
 		Source: imageArg,
 		Client: cli,
 	}

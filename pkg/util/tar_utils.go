@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package utils
+package util
 
 import (
 	"archive/tar"
@@ -105,7 +105,7 @@ func UnTar(filename string, target string) error {
 	return nil
 }
 
-func isTar(path string) bool {
+func IsTar(path string) bool {
 	return filepath.Ext(path) == ".tar"
 }
 

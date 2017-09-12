@@ -20,24 +20,25 @@ import (
 	"errors"
 	"fmt"
 
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/utils"
 	"github.com/golang/glog"
 )
 
 type DiffRequest struct {
-	Image1    utils.Image
-	Image2    utils.Image
+	Image1    pkgutil.Image
+	Image2    pkgutil.Image
 	DiffTypes []Analyzer
 }
 
 type SingleRequest struct {
-	Image        utils.Image
+	Image        pkgutil.Image
 	AnalyzeTypes []Analyzer
 }
 
 type Analyzer interface {
-	Diff(image1, image2 utils.Image) (utils.Result, error)
-	Analyze(image utils.Image) (utils.Result, error)
+	Diff(image1, image2 pkgutil.Image) (utils.Result, error)
+	Analyze(image pkgutil.Image) (utils.Result, error)
 	Name() string
 }
 
