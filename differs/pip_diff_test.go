@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 )
 
 func TestGetPythonVersion(t *testing.T) {
@@ -79,21 +79,21 @@ func TestGetPythonPackages(t *testing.T) {
 	testCases := []struct {
 		descrip          string
 		image            pkgutil.Image
-		expectedPackages map[string]map[string]utils.PackageInfo
+		expectedPackages map[string]map[string]util.PackageInfo
 	}{
 		{
 			descrip: "noPackagesTest",
 			image: pkgutil.Image{
 				FSPath: "testDirs/pipTests/noPackagesTest",
 			},
-			expectedPackages: map[string]map[string]utils.PackageInfo{},
+			expectedPackages: map[string]map[string]util.PackageInfo{},
 		},
 		{
 			descrip: "packagesMultiVersion, no PYTHONPATH",
 			image: pkgutil.Image{
 				FSPath: "testDirs/pipTests/packagesMultiVersion",
 			},
-			expectedPackages: map[string]map[string]utils.PackageInfo{
+			expectedPackages: map[string]map[string]util.PackageInfo{
 				"packageone": {
 					"/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: 0},
 					"/usr/local/lib/python2.7/site-packages": {Version: "0.1.1", Size: 0},
@@ -109,7 +109,7 @@ func TestGetPythonPackages(t *testing.T) {
 			image: pkgutil.Image{
 				FSPath: "testDirs/pipTests/packagesSingleVersion",
 			},
-			expectedPackages: map[string]map[string]utils.PackageInfo{
+			expectedPackages: map[string]map[string]util.PackageInfo{
 				"packageone": {"/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: 0}},
 				"packagetwo": {"/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: 0}},
 				"script1":    {"/usr/local/lib/python3.6/site-packages": {Version: "1.0", Size: 0}},
@@ -126,7 +126,7 @@ func TestGetPythonPackages(t *testing.T) {
 					},
 				},
 			},
-			expectedPackages: map[string]map[string]utils.PackageInfo{
+			expectedPackages: map[string]map[string]util.PackageInfo{
 				"packageone":   {"/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: 0}},
 				"packagetwo":   {"/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: 0}},
 				"packagefive":  {"/pythonPath2/subdir": {Version: "3.6.9", Size: 0}},
@@ -144,7 +144,7 @@ func TestGetPythonPackages(t *testing.T) {
 					},
 				},
 			},
-			expectedPackages: map[string]map[string]utils.PackageInfo{
+			expectedPackages: map[string]map[string]util.PackageInfo{
 				"packageone": {"/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: 0}},
 				"packagetwo": {"/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: 0}},
 			},

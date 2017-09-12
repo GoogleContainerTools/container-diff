@@ -26,7 +26,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
@@ -56,7 +56,7 @@ func NewClient() (*client.Client, error) {
 	return cli, nil
 }
 
-func outputResults(resultMap map[string]utils.Result) {
+func outputResults(resultMap map[string]util.Result) {
 	// Outputs diff/analysis results in alphabetical order by analyzer name
 	sortedTypes := []string{}
 	for analyzerType := range resultMap {
@@ -77,7 +77,7 @@ func outputResults(resultMap map[string]utils.Result) {
 		}
 	}
 	if json {
-		err := utils.JSONify(results)
+		err := util.JSONify(results)
 		if err != nil {
 			glog.Error(err)
 		}
@@ -159,5 +159,5 @@ func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&json, "json", "j", false, "JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).")
 	cmd.Flags().StringVarP(&types, "types", "t", "", "This flag sets the list of analyzer types to use.  It expects a comma separated list of supported analyzers.")
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
-	cmd.Flags().BoolVarP(&utils.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
+	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 }

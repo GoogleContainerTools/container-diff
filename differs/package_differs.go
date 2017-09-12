@@ -20,31 +20,31 @@ import (
 	"strings"
 
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 )
 
 type MultiVersionPackageAnalyzer interface {
-	getPackages(image pkgutil.Image) (map[string]map[string]utils.PackageInfo, error)
+	getPackages(image pkgutil.Image) (map[string]map[string]util.PackageInfo, error)
 	Name() string
 }
 
 type SingleVersionPackageAnalyzer interface {
-	getPackages(image pkgutil.Image) (map[string]utils.PackageInfo, error)
+	getPackages(image pkgutil.Image) (map[string]util.PackageInfo, error)
 	Name() string
 }
 
-func multiVersionDiff(image1, image2 pkgutil.Image, differ MultiVersionPackageAnalyzer) (*utils.MultiVersionPackageDiffResult, error) {
+func multiVersionDiff(image1, image2 pkgutil.Image, differ MultiVersionPackageAnalyzer) (*util.MultiVersionPackageDiffResult, error) {
 	pack1, err := differ.getPackages(image1)
 	if err != nil {
-		return &utils.MultiVersionPackageDiffResult{}, err
+		return &util.MultiVersionPackageDiffResult{}, err
 	}
 	pack2, err := differ.getPackages(image2)
 	if err != nil {
-		return &utils.MultiVersionPackageDiffResult{}, err
+		return &util.MultiVersionPackageDiffResult{}, err
 	}
 
-	diff := utils.GetMultiVersionMapDiff(pack1, pack2)
-	return &utils.MultiVersionPackageDiffResult{
+	diff := util.GetMultiVersionMapDiff(pack1, pack2)
+	return &util.MultiVersionPackageDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
 		DiffType: strings.TrimSuffix(differ.Name(), "Analyzer"),
@@ -52,18 +52,18 @@ func multiVersionDiff(image1, image2 pkgutil.Image, differ MultiVersionPackageAn
 	}, nil
 }
 
-func singleVersionDiff(image1, image2 pkgutil.Image, differ SingleVersionPackageAnalyzer) (*utils.SingleVersionPackageDiffResult, error) {
+func singleVersionDiff(image1, image2 pkgutil.Image, differ SingleVersionPackageAnalyzer) (*util.SingleVersionPackageDiffResult, error) {
 	pack1, err := differ.getPackages(image1)
 	if err != nil {
-		return &utils.SingleVersionPackageDiffResult{}, err
+		return &util.SingleVersionPackageDiffResult{}, err
 	}
 	pack2, err := differ.getPackages(image2)
 	if err != nil {
-		return &utils.SingleVersionPackageDiffResult{}, err
+		return &util.SingleVersionPackageDiffResult{}, err
 	}
 
-	diff := utils.GetMapDiff(pack1, pack2)
-	return &utils.SingleVersionPackageDiffResult{
+	diff := util.GetMapDiff(pack1, pack2)
+	return &util.SingleVersionPackageDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
 		DiffType: strings.TrimSuffix(differ.Name(), "Analyzer"),
@@ -71,13 +71,13 @@ func singleVersionDiff(image1, image2 pkgutil.Image, differ SingleVersionPackage
 	}, nil
 }
 
-func multiVersionAnalysis(image pkgutil.Image, analyzer MultiVersionPackageAnalyzer) (*utils.MultiVersionPackageAnalyzeResult, error) {
+func multiVersionAnalysis(image pkgutil.Image, analyzer MultiVersionPackageAnalyzer) (*util.MultiVersionPackageAnalyzeResult, error) {
 	pack, err := analyzer.getPackages(image)
 	if err != nil {
-		return &utils.MultiVersionPackageAnalyzeResult{}, err
+		return &util.MultiVersionPackageAnalyzeResult{}, err
 	}
 
-	analysis := utils.MultiVersionPackageAnalyzeResult{
+	analysis := util.MultiVersionPackageAnalyzeResult{
 		Image:       image.Source,
 		AnalyzeType: strings.TrimSuffix(analyzer.Name(), "Analyzer"),
 		Analysis:    pack,
@@ -85,13 +85,13 @@ func multiVersionAnalysis(image pkgutil.Image, analyzer MultiVersionPackageAnaly
 	return &analysis, nil
 }
 
-func singleVersionAnalysis(image pkgutil.Image, analyzer SingleVersionPackageAnalyzer) (*utils.SingleVersionPackageAnalyzeResult, error) {
+func singleVersionAnalysis(image pkgutil.Image, analyzer SingleVersionPackageAnalyzer) (*util.SingleVersionPackageAnalyzeResult, error) {
 	pack, err := analyzer.getPackages(image)
 	if err != nil {
-		return &utils.SingleVersionPackageAnalyzeResult{}, err
+		return &util.SingleVersionPackageAnalyzeResult{}, err
 	}
 
-	analysis := utils.SingleVersionPackageAnalyzeResult{
+	analysis := util.SingleVersionPackageAnalyzeResult{
 		Image:       image.Source,
 		AnalyzeType: strings.TrimSuffix(analyzer.Name(), "Analyzer"),
 		Analysis:    pack,

@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/golang/glog"
 )
 
@@ -35,19 +35,19 @@ func (a PipAnalyzer) Name() string {
 }
 
 // PipDiff compares pip-installed Python packages between layers of two different images.
-func (a PipAnalyzer) Diff(image1, image2 pkgutil.Image) (utils.Result, error) {
+func (a PipAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
 	diff, err := multiVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func (a PipAnalyzer) Analyze(image pkgutil.Image) (utils.Result, error) {
+func (a PipAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 	analysis, err := multiVersionAnalysis(image, a)
 	return analysis, err
 }
 
-func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]utils.PackageInfo, error) {
+func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]util.PackageInfo, error) {
 	path := image.FSPath
-	packages := make(map[string]map[string]utils.PackageInfo)
+	packages := make(map[string]map[string]util.PackageInfo)
 	pythonPaths := []string{}
 	if image.Config.Config.Env != nil {
 		paths := getPythonPaths(image.Config.Config.Env)
@@ -96,7 +96,7 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 					glog.Errorf("Could not find Python package %s for corresponding metadata info", packageName)
 					continue
 				}
-				currPackage := utils.PackageInfo{Version: version, Size: size}
+				currPackage := util.PackageInfo{Version: version, Size: size}
 				mapPath := strings.Replace(pythonPath, path, "", 1)
 				addToMap(packages, packageName, mapPath, currPackage)
 			}
@@ -106,10 +106,10 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 	return packages, nil
 }
 
-func addToMap(packages map[string]map[string]utils.PackageInfo, pack string, path string, packInfo utils.PackageInfo) {
+func addToMap(packages map[string]map[string]util.PackageInfo, pack string, path string, packInfo util.PackageInfo) {
 	if _, ok := packages[pack]; !ok {
 		// package not yet seen
-		infoMap := make(map[string]utils.PackageInfo)
+		infoMap := make(map[string]util.PackageInfo)
 		infoMap[path] = packInfo
 		packages[pack] = infoMap
 		return

@@ -18,7 +18,7 @@ package differs
 
 import (
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 )
 
 type FileAnalyzer struct {
@@ -29,9 +29,9 @@ func (a FileAnalyzer) Name() string {
 }
 
 // FileDiff diffs two packages and compares their contents
-func (a FileAnalyzer) Diff(image1, image2 pkgutil.Image) (utils.Result, error) {
+func (a FileAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
 	diff, err := diffImageFiles(image1, image2)
-	return &utils.DirDiffResult{
+	return &util.DirDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
 		DiffType: "File",
@@ -39,8 +39,8 @@ func (a FileAnalyzer) Diff(image1, image2 pkgutil.Image) (utils.Result, error) {
 	}, err
 }
 
-func (a FileAnalyzer) Analyze(image pkgutil.Image) (utils.Result, error) {
-	var result utils.FileAnalyzeResult
+func (a FileAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
+	var result util.FileAnalyzeResult
 
 	imgDir, err := pkgutil.GetDirectory(image.FSPath, true)
 	if err != nil {
@@ -53,11 +53,11 @@ func (a FileAnalyzer) Analyze(image pkgutil.Image) (utils.Result, error) {
 	return &result, err
 }
 
-func diffImageFiles(image1, image2 pkgutil.Image) (utils.DirDiff, error) {
+func diffImageFiles(image1, image2 pkgutil.Image) (util.DirDiff, error) {
 	img1 := image1.FSPath
 	img2 := image2.FSPath
 
-	var diff utils.DirDiff
+	var diff util.DirDiff
 
 	img1Dir, err := pkgutil.GetDirectory(img1, true)
 	if err != nil {
@@ -68,6 +68,6 @@ func diffImageFiles(image1, image2 pkgutil.Image) (utils.DirDiff, error) {
 		return diff, err
 	}
 
-	diff, _ = utils.DiffDirectory(img1Dir, img2Dir)
+	diff, _ = util.DiffDirectory(img1Dir, img2Dir)
 	return diff, nil
 }
