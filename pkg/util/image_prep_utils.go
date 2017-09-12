@@ -287,3 +287,31 @@ func (p TarPrepper) getConfig() (ConfigSchema, error) {
 
 	return config, nil
 }
+
+func CleanupImage(image Image) {
+	if image.FSPath != "" {
+		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
+		errMsg := remove(image.FSPath, true)
+		if errMsg != "" {
+			glog.Error(errMsg)
+		}
+	}
+}
+
+func remove(path string, dir bool) string {
+	var errStr string
+	if path == "" {
+		return ""
+	}
+
+	var err error
+	if dir {
+		err = os.RemoveAll(path)
+	} else {
+		err = os.Remove(path)
+	}
+	if err != nil {
+		errStr = "\nUnable to remove " + path
+	}
+	return errStr
+}

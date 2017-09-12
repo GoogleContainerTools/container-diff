@@ -89,8 +89,8 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	wg.Wait()
 
 	if !save {
-		defer cleanupImage(*imageMap[image1Arg])
-		defer cleanupImage(*imageMap[image2Arg])
+		defer pkgutil.CleanupImage(*imageMap[image1Arg])
+		defer pkgutil.CleanupImage(*imageMap[image2Arg])
 	}
 
 	diffTypes, err := differs.GetAnalyzers(diffArgs)

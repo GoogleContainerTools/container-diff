@@ -20,7 +20,6 @@ import (
 	"context"
 	goflag "flag"
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 
@@ -84,16 +83,6 @@ func outputResults(resultMap map[string]util.Result) {
 	}
 }
 
-func cleanupImage(image pkgutil.Image) {
-	if image.FSPath != "" {
-		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
-		errMsg := remove(image.FSPath, true)
-		if errMsg != "" {
-			glog.Error(errMsg)
-		}
-	}
-}
-
 func validateArgs(args []string, validatefxns ...validatefxn) error {
 	for _, validatefxn := range validatefxns {
 		if err := validatefxn(args); err != nil {
@@ -131,24 +120,6 @@ func checkIfValidAnalyzer(flagtypes string) error {
 		}
 	}
 	return nil
-}
-
-func remove(path string, dir bool) string {
-	var errStr string
-	if path == "" {
-		return ""
-	}
-
-	var err error
-	if dir {
-		err = os.RemoveAll(path)
-	} else {
-		err = os.Remove(path)
-	}
-	if err != nil {
-		errStr = "\nUnable to remove " + path
-	}
-	return errStr
 }
 
 func init() {

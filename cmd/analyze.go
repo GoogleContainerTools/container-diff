@@ -69,7 +69,7 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 	image, err := ip.GetImage()
 
 	if !save {
-		defer cleanupImage(image)
+		defer pkgutil.CleanupImage(image)
 	}
 	if err != nil {
 		glog.Error(err.Error())
