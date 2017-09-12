@@ -25,8 +25,9 @@ BUILD_DIR ?= ./out
 ORG := github.com/GoogleCloudPlatform
 PROJECT := container-diff
 REPOPATH ?= $(ORG)/$(PROJECT)
+RELEASE_BUCKET ?= $(PROJECT)
 
-SUPPORTED_PLATFORMS := linux-amd64 darwin-amd64 windows-amd64
+SUPPORTED_PLATFORMS := linux-amd64 darwin-amd64 windows-amd64.exe
 BUILD_PACKAGE = $(REPOPATH)
 
 # These build tags are from the containers/image library.
@@ -37,17 +38,20 @@ GO_BUILD_TAGS := "container_image_ostree_stub containers_image_openpgp"
 GO_LDFLAGS := "-X $(REPOPATH)/version.version=$(VERSION)"
 GO_FILES := $(shell go list  -f '{{join .Deps "\n"}}' $(BUILD_PACKAGE) | grep $(ORG) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}')
 
-$(BUILD_DIR)/$(PROJECT): out/$(PROJECT)-$(GOOS)-$(GOARCH)
+$(BUILD_DIR)/$(PROJECT): $(BUILD_DIR)/$(PROJECT)-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/$(PROJECT)-$(GOOS)-$(GOARCH) $@
 
 $(BUILD_DIR)/$(PROJECT)-%-$(GOARCH): $(GO_FILES) $(BUILD_DIR)
 	GOOS=$* GOARCH=$(GOARCH) go build -tags $(GO_BUILD_TAGS) -ldflags $(GO_LDFLAGS) -o $@ $(BUILD_PACKAGE)
 
+%.exe: %
+	mv $< $@
+
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 .PHONY: cross
-cross: $(foreach platform, $(SUPPORTED_PLATFORMS), out/$(PROJECT)-$(platform))
+cross: $(foreach platform, $(SUPPORTED_PLATFORMS), $(BUILD_DIR)/$(PROJECT)-$(platform))
 
 .PHONY: test
 test: $(BUILD_DIR)/$(PROJECT)
@@ -56,6 +60,10 @@ test: $(BUILD_DIR)/$(PROJECT)
 .PHONY: integration
 integration: $(BUILD_DIR)/$(PROJECT)
 	go test -v -tags integration $(REPOPATH)/tests
+
+.PHONY: release
+release: cross
+	gsutil cp $(BUILD_DIR)/$(PROJECT)-* gs://$(RELEASE_BUCKET)/$(VERSION)/
 
 .PHONY: clean
 clean:
