@@ -121,10 +121,13 @@ func checkArgType(args []string) error {
 }
 
 func checkIfValidAnalyzer(flagtypes string) error {
+	if flagtypes == "" {
+		return nil
+	}
 	analyzers := strings.Split(flagtypes, ",")
 	for _, name := range analyzers {
 		if _, exists := differs.Analyzers[name]; !exists {
-			errMessage := fmt.Sprintf("Argument %s is not an image ID, URL, or tar\n", name)
+			errMessage := fmt.Sprintf("Argument %s is not a valid analyzer\n", name)
 			glog.Errorf(errMessage)
 			return errors.New(errMessage)
 		}
