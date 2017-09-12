@@ -32,15 +32,16 @@ var analyzeCmd = &cobra.Command{
 	Use:   "analyze",
 	Short: "Analyzes an image: [image]",
 	Long:  `Analyzes an image using the specifed analyzers as indicated via flags (see documentation for available ones).`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Args: func(cmd *cobra.Command, args []string) error {
 		if err := validateArgs(args, checkAnalyzeArgNum, checkArgType); err != nil {
-			glog.Error(err.Error())
-			os.Exit(1)
+			return errors.New(err.Error())
 		}
 		if err := checkIfValidAnalyzer(types); err != nil {
-			glog.Error(err)
-			os.Exit(1)
+			return errors.New(err.Error())
 		}
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
 		if err := analyzeImage(args[0], strings.Split(types, ",")); err != nil {
 			glog.Error(err)
 			os.Exit(1)
@@ -49,11 +50,8 @@ var analyzeCmd = &cobra.Command{
 }
 
 func checkAnalyzeArgNum(args []string) error {
-	var errMessage string
 	if len(args) != 1 {
-		errMessage = "'analyze' requires one image as an argument: container analyze [image]"
-		glog.Errorf(errMessage)
-		return errors.New(errMessage)
+		return errors.New("'analyze' requires one image as an argument: container analyze [image]")
 	}
 	return nil
 }
