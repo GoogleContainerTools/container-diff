@@ -33,15 +33,16 @@ var diffCmd = &cobra.Command{
 	Use:   "diff",
 	Short: "Compare two images: [image1] [image2]",
 	Long:  `Compares two images using the specifed analyzers as indicated via flags (see documentation for available ones).`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Args: func(cmd *cobra.Command, args []string) error {
 		if err := validateArgs(args, checkDiffArgNum, checkArgType); err != nil {
-			glog.Error(err.Error())
-			os.Exit(1)
+			return errors.New(err.Error())
 		}
 		if err := checkIfValidAnalyzer(types); err != nil {
-			glog.Error(err)
-			os.Exit(1)
+			return errors.New(err.Error())
 		}
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
 		if err := diffImages(args[0], args[1], strings.Split(types, ",")); err != nil {
 			glog.Error(err)
 			os.Exit(1)
@@ -50,10 +51,8 @@ var diffCmd = &cobra.Command{
 }
 
 func checkDiffArgNum(args []string) error {
-	var errMessage string
 	if len(args) != 2 {
-		errMessage = "'diff' requires two images as arguments: container diff [image1] [image2]"
-		return errors.New(errMessage)
+		return errors.New("'diff' requires two images as arguments: container diff [image1] [image2]")
 	}
 	return nil
 }

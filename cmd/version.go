@@ -27,6 +27,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version of container-diff",
 	Long:  `Print the version of container-diff.`,
+	Args:  cobra.ExactArgs(0),
 	Run: func(command *cobra.Command, args []string) {
 		fmt.Println(version.GetVersion())
 	},

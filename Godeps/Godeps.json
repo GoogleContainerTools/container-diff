@@ -314,11 +314,12 @@
 		},
 		{
 			"ImportPath": "github.com/spf13/cobra",
-			"Rev": "b4dbd37a01839e0653eec12aa4bbb2a2ce7b2a37"
+			"Rev": "b78744579491c1ceeaaa3b40205e56b0591b93a3"
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
-			"Rev": "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
+			"Comment": "v1.0.0-3-g7aff26d",
+			"Rev": "7aff26db30c1be810f9de5038ec5ef96ac41fd7c"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh/terminal",
