@@ -23,7 +23,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/golang/glog"
 )
 
@@ -35,19 +36,19 @@ func (a AptAnalyzer) Name() string {
 }
 
 // AptDiff compares the packages installed by apt-get.
-func (a AptAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
+func (a AptAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
 	diff, err := singleVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func (a AptAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
+func (a AptAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 	analysis, err := singleVersionAnalysis(image, a)
 	return analysis, err
 }
 
-func (a AptAnalyzer) getPackages(image utils.Image) (map[string]utils.PackageInfo, error) {
+func (a AptAnalyzer) getPackages(image pkgutil.Image) (map[string]util.PackageInfo, error) {
 	path := image.FSPath
-	packages := make(map[string]utils.PackageInfo)
+	packages := make(map[string]util.PackageInfo)
 	if _, err := os.Stat(path); err != nil {
 		// invalid image directory path
 		return packages, err
@@ -74,7 +75,7 @@ func (a AptAnalyzer) getPackages(image utils.Image) (map[string]utils.PackageInf
 	return packages, nil
 }
 
-func parseLine(text string, currPackage string, packages map[string]utils.PackageInfo) string {
+func parseLine(text string, currPackage string, packages map[string]util.PackageInfo) string {
 	line := strings.Split(text, ": ")
 	if len(line) == 2 {
 		key := line[0]
@@ -91,7 +92,7 @@ func parseLine(text string, currPackage string, packages map[string]utils.Packag
 			modifiedValue := strings.Replace(value, "+", " ", 1)
 			currPackageInfo, ok := packages[currPackage]
 			if !ok {
-				currPackageInfo = utils.PackageInfo{}
+				currPackageInfo = util.PackageInfo{}
 			}
 			currPackageInfo.Version = modifiedValue
 			packages[currPackage] = currPackageInfo
@@ -100,7 +101,7 @@ func parseLine(text string, currPackage string, packages map[string]utils.Packag
 		case "Installed-Size":
 			currPackageInfo, ok := packages[currPackage]
 			if !ok {
-				currPackageInfo = utils.PackageInfo{}
+				currPackageInfo = util.PackageInfo{}
 			}
 			var size int64
 			var err error

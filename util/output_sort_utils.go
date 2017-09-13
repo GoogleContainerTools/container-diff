@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package utils
+package util
 
 import (
 	"sort"
+
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 )
 
 var SortSize bool
@@ -185,9 +187,9 @@ func (infos packageInfoByVersion) Less(i, j int) bool {
 	return infos[i].Version < infos[j].Version
 }
 
-type directoryBy func(e1, e2 *DirectoryEntry) bool
+type directoryBy func(e1, e2 *pkgutil.DirectoryEntry) bool
 
-func (by directoryBy) Sort(entries []DirectoryEntry) {
+func (by directoryBy) Sort(entries []pkgutil.DirectoryEntry) {
 	ds := &directorySorter{
 		entries: entries,
 		by:      by,
@@ -196,8 +198,8 @@ func (by directoryBy) Sort(entries []DirectoryEntry) {
 }
 
 type directorySorter struct {
-	entries []DirectoryEntry
-	by      func(p1, p2 *DirectoryEntry) bool
+	entries []pkgutil.DirectoryEntry
+	by      func(p1, p2 *pkgutil.DirectoryEntry) bool
 }
 
 func (s *directorySorter) Len() int {
@@ -212,12 +214,12 @@ func (s *directorySorter) Swap(i, j int) {
 	s.entries[i], s.entries[j] = s.entries[j], s.entries[i]
 }
 
-var directoryNameSort = func(e1, e2 *DirectoryEntry) bool {
+var directoryNameSort = func(e1, e2 *pkgutil.DirectoryEntry) bool {
 	return e1.Name < e2.Name
 }
 
 // If directory entries have the same size, sort by name.
-var directorySizeSort = func(e1, e2 *DirectoryEntry) bool {
+var directorySizeSort = func(e1, e2 *pkgutil.DirectoryEntry) bool {
 	if e1.Size == e2.Size {
 		return e1.Name < e2.Name
 	}

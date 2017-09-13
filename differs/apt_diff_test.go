@@ -20,64 +20,65 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 )
 
 func TestParseLine(t *testing.T) {
 	testCases := []struct {
 		descrip     string
 		line        string
-		packages    map[string]utils.PackageInfo
+		packages    map[string]util.PackageInfo
 		currPackage string
 		expPackage  string
-		expected    map[string]utils.PackageInfo
+		expected    map[string]util.PackageInfo
 	}{
 		{
 			descrip:    "Not applicable line",
 			line:       "Garbage: garbage info",
-			packages:   map[string]utils.PackageInfo{},
+			packages:   map[string]util.PackageInfo{},
 			expPackage: "",
-			expected:   map[string]utils.PackageInfo{},
+			expected:   map[string]util.PackageInfo{},
 		},
 		{
 			descrip:     "Package line",
 			line:        "Package: La-Croix",
 			currPackage: "Tea",
 			expPackage:  "La-Croix",
-			packages:    map[string]utils.PackageInfo{},
-			expected:    map[string]utils.PackageInfo{},
+			packages:    map[string]util.PackageInfo{},
+			expected:    map[string]util.PackageInfo{},
 		},
 		{
 			descrip:     "Version line",
 			line:        "Version: Lime",
-			packages:    map[string]utils.PackageInfo{},
+			packages:    map[string]util.PackageInfo{},
 			currPackage: "La-Croix",
 			expPackage:  "La-Croix",
-			expected:    map[string]utils.PackageInfo{"La-Croix": {Version: "Lime"}},
+			expected:    map[string]util.PackageInfo{"La-Croix": {Version: "Lime"}},
 		},
 		{
 			descrip:     "Version line with deb release info",
 			line:        "Version: Lime+extra_lime",
-			packages:    map[string]utils.PackageInfo{},
+			packages:    map[string]util.PackageInfo{},
 			currPackage: "La-Croix",
 			expPackage:  "La-Croix",
-			expected:    map[string]utils.PackageInfo{"La-Croix": {Version: "Lime extra_lime"}},
+			expected:    map[string]util.PackageInfo{"La-Croix": {Version: "Lime extra_lime"}},
 		},
 		{
 			descrip:     "Size line",
 			line:        "Installed-Size: 12",
-			packages:    map[string]utils.PackageInfo{},
+			packages:    map[string]util.PackageInfo{},
 			currPackage: "La-Croix",
 			expPackage:  "La-Croix",
-			expected:    map[string]utils.PackageInfo{"La-Croix": {Size: 12288}},
+			expected:    map[string]util.PackageInfo{"La-Croix": {Size: 12288}},
 		},
 		{
 			descrip:     "Pre-existing PackageInfo struct",
 			line:        "Installed-Size: 12",
-			packages:    map[string]utils.PackageInfo{"La-Croix": {Version: "Lime"}},
+			packages:    map[string]util.PackageInfo{"La-Croix": {Version: "Lime"}},
 			currPackage: "La-Croix",
 			expPackage:  "La-Croix",
-			expected:    map[string]utils.PackageInfo{"La-Croix": {Version: "Lime", Size: 12288}},
+			expected:    map[string]util.PackageInfo{"La-Croix": {Version: "Lime", Size: 12288}},
 		},
 	}
 
@@ -96,24 +97,24 @@ func TestGetAptPackages(t *testing.T) {
 	testCases := []struct {
 		descrip  string
 		path     string
-		expected map[string]utils.PackageInfo
+		expected map[string]util.PackageInfo
 		err      bool
 	}{
 		{
 			descrip:  "no directory",
 			path:     "testDirs/notThere",
-			expected: map[string]utils.PackageInfo{},
+			expected: map[string]util.PackageInfo{},
 			err:      true,
 		},
 		{
 			descrip:  "no packages",
 			path:     "testDirs/noPackages",
-			expected: map[string]utils.PackageInfo{},
+			expected: map[string]util.PackageInfo{},
 		},
 		{
 			descrip: "packages in expected location",
 			path:    "testDirs/packageOne",
-			expected: map[string]utils.PackageInfo{
+			expected: map[string]util.PackageInfo{
 				"pac1": {Version: "1.0"},
 				"pac2": {Version: "2.0"},
 				"pac3": {Version: "3.0"}},
@@ -121,7 +122,7 @@ func TestGetAptPackages(t *testing.T) {
 	}
 	for _, test := range testCases {
 		d := AptAnalyzer{}
-		image := utils.Image{FSPath: test.path}
+		image := pkgutil.Image{FSPath: test.path}
 		packages, err := d.getPackages(image)
 		if err != nil && !test.err {
 			t.Errorf("Got unexpected error: %s", err)

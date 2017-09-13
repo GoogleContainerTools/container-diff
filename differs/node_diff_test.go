@@ -20,31 +20,32 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 )
 
 func TestGetNodePackages(t *testing.T) {
 	testCases := []struct {
 		descrip  string
 		path     string
-		expected map[string]map[string]utils.PackageInfo
+		expected map[string]map[string]util.PackageInfo
 		err      bool
 	}{
 		{
 			descrip:  "no directory",
 			path:     "testDirs/notThere",
-			expected: map[string]map[string]utils.PackageInfo{},
+			expected: map[string]map[string]util.PackageInfo{},
 			err:      true,
 		},
 		{
 			descrip:  "no packages",
 			path:     "testDirs/noPackages",
-			expected: map[string]map[string]utils.PackageInfo{},
+			expected: map[string]map[string]util.PackageInfo{},
 		},
 		{
 			descrip: "all packages in one layer",
 			path:    "testDirs/packageOne",
-			expected: map[string]map[string]utils.PackageInfo{
+			expected: map[string]map[string]util.PackageInfo{
 				"pac1": {"/node_modules/pac1/": {Version: "1.0", Size: 41}},
 				"pac2": {"/usr/local/lib/node_modules/pac2/": {Version: "2.0", Size: 41}},
 				"pac3": {"/node_modules/pac3/": {Version: "3.0", Size: 41}}},
@@ -52,7 +53,7 @@ func TestGetNodePackages(t *testing.T) {
 		{
 			descrip: "Multi version packages",
 			path:    "testDirs/packageMulti",
-			expected: map[string]map[string]utils.PackageInfo{
+			expected: map[string]map[string]util.PackageInfo{
 				"pac1": {"/node_modules/pac1/": {Version: "1.0", Size: 41}},
 				"pac2": {"/node_modules/pac2/": {Version: "2.0", Size: 41},
 					"/usr/local/lib/node_modules/pac2/": {Version: "3.0", Size: 41}}},
@@ -60,7 +61,7 @@ func TestGetNodePackages(t *testing.T) {
 	}
 
 	for _, test := range testCases {
-		image := utils.Image{FSPath: test.path}
+		image := pkgutil.Image{FSPath: test.path}
 		d := NodeAnalyzer{}
 		packages, err := d.getPackages(image)
 		if err != nil && !test.err {

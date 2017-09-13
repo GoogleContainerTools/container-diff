@@ -19,7 +19,8 @@ package differs
 import (
 	"strings"
 
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 )
 
 type HistoryAnalyzer struct {
@@ -34,9 +35,9 @@ func (a HistoryAnalyzer) Name() string {
 	return "HistoryAnalyzer"
 }
 
-func (a HistoryAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
+func (a HistoryAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
 	diff, err := getHistoryDiff(image1, image2)
-	return &utils.HistDiffResult{
+	return &util.HistDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
 		DiffType: "History",
@@ -44,9 +45,9 @@ func (a HistoryAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) 
 	}, err
 }
 
-func (a HistoryAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
+func (a HistoryAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 	history := getHistoryList(image.Config.History)
-	result := utils.ListAnalyzeResult{
+	result := util.ListAnalyzeResult{
 		Image:       image.Source,
 		AnalyzeType: "History",
 		Analysis:    history,
@@ -54,17 +55,17 @@ func (a HistoryAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
 	return &result, nil
 }
 
-func getHistoryDiff(image1, image2 utils.Image) (HistDiff, error) {
+func getHistoryDiff(image1, image2 pkgutil.Image) (HistDiff, error) {
 	history1 := getHistoryList(image1.Config.History)
 	history2 := getHistoryList(image2.Config.History)
 
-	adds := utils.GetAdditions(history1, history2)
-	dels := utils.GetDeletions(history1, history2)
+	adds := util.GetAdditions(history1, history2)
+	dels := util.GetDeletions(history1, history2)
 	diff := HistDiff{adds, dels}
 	return diff, nil
 }
 
-func getHistoryList(historyItems []utils.ImageHistoryItem) []string {
+func getHistoryList(historyItems []pkgutil.ImageHistoryItem) []string {
 	strhistory := make([]string, len(historyItems))
 	for i, layer := range historyItems {
 		strhistory[i] = strings.TrimSpace(layer.CreatedBy)

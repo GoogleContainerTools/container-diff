@@ -20,24 +20,25 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/golang/glog"
 )
 
 type DiffRequest struct {
-	Image1    utils.Image
-	Image2    utils.Image
+	Image1    pkgutil.Image
+	Image2    pkgutil.Image
 	DiffTypes []Analyzer
 }
 
 type SingleRequest struct {
-	Image        utils.Image
+	Image        pkgutil.Image
 	AnalyzeTypes []Analyzer
 }
 
 type Analyzer interface {
-	Diff(image1, image2 utils.Image) (utils.Result, error)
-	Analyze(image utils.Image) (utils.Result, error)
+	Diff(image1, image2 pkgutil.Image) (util.Result, error)
+	Analyze(image pkgutil.Image) (util.Result, error)
 	Name() string
 }
 
@@ -49,12 +50,12 @@ var Analyzers = map[string]Analyzer{
 	"node":    NodeAnalyzer{},
 }
 
-func (req DiffRequest) GetDiff() (map[string]utils.Result, error) {
+func (req DiffRequest) GetDiff() (map[string]util.Result, error) {
 	img1 := req.Image1
 	img2 := req.Image2
 	diffs := req.DiffTypes
 
-	results := map[string]utils.Result{}
+	results := map[string]util.Result{}
 	for _, differ := range diffs {
 		if diff, err := differ.Diff(img1, img2); err == nil {
 			results[differ.Name()] = diff
@@ -73,11 +74,11 @@ func (req DiffRequest) GetDiff() (map[string]utils.Result, error) {
 	return results, err
 }
 
-func (req SingleRequest) GetAnalysis() (map[string]utils.Result, error) {
+func (req SingleRequest) GetAnalysis() (map[string]util.Result, error) {
 	img := req.Image
 	analyses := req.AnalyzeTypes
 
-	results := map[string]utils.Result{}
+	results := map[string]util.Result{}
 	for _, analyzer := range analyses {
 		analyzeName := analyzer.Name()
 		if analysis, err := analyzer.Analyze(img); err == nil {

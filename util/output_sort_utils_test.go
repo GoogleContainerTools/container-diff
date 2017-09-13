@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package utils
+package util
 
 import (
 	"reflect"
 	"testing"
+
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 )
 
 var packageTests = [][]PackageOutput{
@@ -90,7 +92,7 @@ func TestSortPackageOutput(t *testing.T) {
 	}
 }
 
-var directoryTests = [][]DirectoryEntry{
+var directoryTests = [][]pkgutil.DirectoryEntry{
 	{
 		{Name: "a", Size: 10},
 		{Name: "b", Size: 12},
@@ -105,14 +107,14 @@ var directoryTests = [][]DirectoryEntry{
 
 func TestSortDirectoryEntries(t *testing.T) {
 	for _, test := range []struct {
-		input    []DirectoryEntry
-		sortBy   func(a, b *DirectoryEntry) bool
-		expected []DirectoryEntry
+		input    []pkgutil.DirectoryEntry
+		sortBy   func(a, b *pkgutil.DirectoryEntry) bool
+		expected []pkgutil.DirectoryEntry
 	}{
 		{
 			input:  directoryTests[0],
 			sortBy: directorySizeSort,
-			expected: []DirectoryEntry{
+			expected: []pkgutil.DirectoryEntry{
 				{Name: "c", Size: 20},
 				{Name: "b", Size: 12},
 				{Name: "a", Size: 10},
@@ -121,7 +123,7 @@ func TestSortDirectoryEntries(t *testing.T) {
 		{
 			input:  directoryTests[0],
 			sortBy: directoryNameSort,
-			expected: []DirectoryEntry{
+			expected: []pkgutil.DirectoryEntry{
 				{Name: "a", Size: 10},
 				{Name: "b", Size: 12},
 				{Name: "c", Size: 20},
@@ -130,7 +132,7 @@ func TestSortDirectoryEntries(t *testing.T) {
 		{
 			input:  directoryTests[1],
 			sortBy: directorySizeSort,
-			expected: []DirectoryEntry{
+			expected: []pkgutil.DirectoryEntry{
 				{Name: "b", Size: 12},
 				{Name: "c", Size: 12},
 				{Name: "a", Size: 10},

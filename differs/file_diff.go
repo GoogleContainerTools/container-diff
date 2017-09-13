@@ -17,7 +17,8 @@ limitations under the License.
 package differs
 
 import (
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 )
 
 type FileAnalyzer struct {
@@ -28,9 +29,9 @@ func (a FileAnalyzer) Name() string {
 }
 
 // FileDiff diffs two packages and compares their contents
-func (a FileAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
+func (a FileAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
 	diff, err := diffImageFiles(image1, image2)
-	return &utils.DirDiffResult{
+	return &util.DirDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
 		DiffType: "File",
@@ -38,35 +39,35 @@ func (a FileAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
 	}, err
 }
 
-func (a FileAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
-	var result utils.FileAnalyzeResult
+func (a FileAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
+	var result util.FileAnalyzeResult
 
-	imgDir, err := utils.GetDirectory(image.FSPath, true)
+	imgDir, err := pkgutil.GetDirectory(image.FSPath, true)
 	if err != nil {
 		return result, err
 	}
 
 	result.Image = image.Source
 	result.AnalyzeType = "File"
-	result.Analysis = utils.GetDirectoryEntries(imgDir)
+	result.Analysis = pkgutil.GetDirectoryEntries(imgDir)
 	return &result, err
 }
 
-func diffImageFiles(image1, image2 utils.Image) (utils.DirDiff, error) {
+func diffImageFiles(image1, image2 pkgutil.Image) (util.DirDiff, error) {
 	img1 := image1.FSPath
 	img2 := image2.FSPath
 
-	var diff utils.DirDiff
+	var diff util.DirDiff
 
-	img1Dir, err := utils.GetDirectory(img1, true)
+	img1Dir, err := pkgutil.GetDirectory(img1, true)
 	if err != nil {
 		return diff, err
 	}
-	img2Dir, err := utils.GetDirectory(img2, true)
+	img2Dir, err := pkgutil.GetDirectory(img2, true)
 	if err != nil {
 		return diff, err
 	}
 
-	diff, _ = utils.DiffDirectory(img1Dir, img2Dir)
+	diff, _ = util.DiffDirectory(img1Dir, img2Dir)
 	return diff, nil
 }

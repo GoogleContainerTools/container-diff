@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package utils
+package util
 
 import (
 	"archive/tar"
@@ -155,16 +155,16 @@ func (p CloudPrepper) getFileSystem() (string, error) {
 	for _, b := range img.LayerInfos() {
 		bi, _, err := imgSrc.GetBlob(b)
 		if err != nil {
-			glog.Errorf("Diff may be inaccurate, failed to pull image layer with error: %s", err)
+			glog.Errorf("Failed to pull image layer with error: %s", err)
 		}
 		gzf, err := gzip.NewReader(bi)
 		if err != nil {
-			glog.Errorf("Diff may be inaccurate, failed to read layers with error: %s", err)
+			glog.Errorf("Failed to read layers with error: %s", err)
 		}
 		tr := tar.NewReader(gzf)
 		err = unpackTar(tr, path)
 		if err != nil {
-			glog.Errorf("Diff may be inaccurate, failed to untar layer with error: %s", err)
+			glog.Errorf("Failed to untar layer with error: %s", err)
 		}
 	}
 	return path, nil
@@ -286,4 +286,32 @@ func (p TarPrepper) getConfig() (ConfigSchema, error) {
 	}
 
 	return config, nil
+}
+
+func CleanupImage(image Image) {
+	if image.FSPath != "" {
+		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
+		errMsg := remove(image.FSPath, true)
+		if errMsg != "" {
+			glog.Error(errMsg)
+		}
+	}
+}
+
+func remove(path string, dir bool) string {
+	var errStr string
+	if path == "" {
+		return ""
+	}
+
+	var err error
+	if dir {
+		err = os.RemoveAll(path)
+	} else {
+		err = os.Remove(path)
+	}
+	if err != nil {
+		errStr = "\nUnable to remove " + path
+	}
+	return errStr
 }

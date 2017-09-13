@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package utils
+package util
 
 import (
 	"code.cloudfoundry.org/bytefmt"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 )
 
 type StrPackageOutput struct {
@@ -99,7 +100,7 @@ type StrDirectoryEntry struct {
 	Size string
 }
 
-func stringifyDirectoryEntries(entries []DirectoryEntry) (strEntries []StrDirectoryEntry) {
+func stringifyDirectoryEntries(entries []pkgutil.DirectoryEntry) (strEntries []StrDirectoryEntry) {
 	for _, entry := range entries {
 		strEntry := StrDirectoryEntry{Name: entry.Name, Size: stringifySize(entry.Size)}
 		strEntries = append(strEntries, strEntry)

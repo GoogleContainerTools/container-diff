@@ -14,12 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package utils
+package util
 
 import (
 	"errors"
 	"fmt"
 
+	"github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/golang/glog"
 )
 
@@ -175,7 +176,7 @@ func getMultiVersionPackageOutput(packageMap map[string]map[string]PackageInfo) 
 type FileAnalyzeResult AnalyzeResult
 
 func (r FileAnalyzeResult) OutputStruct() interface{} {
-	analysis, valid := r.Analysis.([]DirectoryEntry)
+	analysis, valid := r.Analysis.([]util.DirectoryEntry)
 	if !valid {
 		glog.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
 		return errors.New("Could not output FileAnalyzer analysis result")
@@ -191,7 +192,7 @@ func (r FileAnalyzeResult) OutputStruct() interface{} {
 }
 
 func (r FileAnalyzeResult) OutputText(analyzeType string) error {
-	analysis, valid := r.Analysis.([]DirectoryEntry)
+	analysis, valid := r.Analysis.([]util.DirectoryEntry)
 	if !valid {
 		glog.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
 		return errors.New("Could not output FileAnalyzer analysis result")

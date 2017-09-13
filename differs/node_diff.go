@@ -23,7 +23,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/container-diff/utils"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/golang/glog"
 )
 
@@ -35,19 +36,19 @@ func (a NodeAnalyzer) Name() string {
 }
 
 // NodeDiff compares the packages installed by apt-get.
-func (a NodeAnalyzer) Diff(image1, image2 utils.Image) (utils.Result, error) {
+func (a NodeAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
 	diff, err := multiVersionDiff(image1, image2, a)
 	return diff, err
 }
 
-func (a NodeAnalyzer) Analyze(image utils.Image) (utils.Result, error) {
+func (a NodeAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 	analysis, err := multiVersionAnalysis(image, a)
 	return analysis, err
 }
 
-func (a NodeAnalyzer) getPackages(image utils.Image) (map[string]map[string]utils.PackageInfo, error) {
+func (a NodeAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]util.PackageInfo, error) {
 	path := image.FSPath
-	packages := make(map[string]map[string]utils.PackageInfo)
+	packages := make(map[string]map[string]util.PackageInfo)
 	if _, err := os.Stat(path); err != nil {
 		// path provided invalid
 		return packages, err
@@ -59,7 +60,7 @@ func (a NodeAnalyzer) getPackages(image utils.Image) (map[string]map[string]util
 	}
 
 	for _, modulesDir := range layerStems {
-		packageJSONs, _ := utils.BuildLayerTargets(modulesDir, "package.json")
+		packageJSONs, _ := util.BuildLayerTargets(modulesDir, "package.json")
 		for _, currPackage := range packageJSONs {
 			if _, err := os.Stat(currPackage); err != nil {
 				// package.json file does not exist at this target path
@@ -71,15 +72,15 @@ func (a NodeAnalyzer) getPackages(image utils.Image) (map[string]map[string]util
 				return packages, err
 			}
 			// Build PackageInfo for this package occurence
-			var currInfo utils.PackageInfo
+			var currInfo util.PackageInfo
 			currInfo.Version = packageJSON.Version
 			packagePath := strings.TrimSuffix(currPackage, "package.json")
-			currInfo.Size = utils.GetSize(packagePath)
+			currInfo.Size = pkgutil.GetSize(packagePath)
 			mapPath := strings.Replace(packagePath, path, "", 1)
 			// Check if other package version already recorded
 			if _, ok := packages[packageJSON.Name]; !ok {
 				// package not yet seen
-				infoMap := make(map[string]utils.PackageInfo)
+				infoMap := make(map[string]util.PackageInfo)
 				infoMap[mapPath] = currInfo
 				packages[packageJSON.Name] = infoMap
 				continue
