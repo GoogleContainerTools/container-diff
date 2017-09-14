@@ -11,12 +11,36 @@
 			"Rev": "f4415fafc5619dd75599a54a7c91fb3948ad58bd"
 		},
 		{
+			"ImportPath": "github.com/BurntSushi/toml",
+			"Comment": "v0.3.0-7-ga368813",
+			"Rev": "a368813c5e648fee92e5f6c30e3944ff9d5e8895"
+		},
+		{
 			"ImportPath": "github.com/Microsoft/go-winio",
 			"Comment": "v0.4.2",
 			"Rev": "f533f7a102197536779ea3a8cb881d639e21ec5a"
 		},
 		{
+			"ImportPath": "github.com/Microsoft/go-winio/archive/tar",
+			"Comment": "v0.4.2",
+			"Rev": "f533f7a102197536779ea3a8cb881d639e21ec5a"
+		},
+		{
+			"ImportPath": "github.com/Microsoft/go-winio/backuptar",
+			"Comment": "v0.4.2",
+			"Rev": "f533f7a102197536779ea3a8cb881d639e21ec5a"
+		},
+		{
+			"ImportPath": "github.com/Microsoft/hcsshim",
+			"Comment": "v0.6.5",
+			"Rev": "4486bc29c643509eac9de46f1d77ecb96b5b364f"
+		},
+		{
 			"ImportPath": "github.com/containers/image/docker",
+			"Rev": "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
+		},
+		{
+			"ImportPath": "github.com/containers/image/docker/daemon",
 			"Rev": "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
 		},
 		{
@@ -48,6 +72,10 @@
 			"Rev": "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
 		},
 		{
+			"ImportPath": "github.com/containers/image/storage",
+			"Rev": "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
+		},
+		{
 			"ImportPath": "github.com/containers/image/transports",
 			"Rev": "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
 		},
@@ -56,7 +84,131 @@
 			"Rev": "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
 		},
 		{
+			"ImportPath": "github.com/containers/storage",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/drivers",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/drivers/aufs",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/drivers/btrfs",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/drivers/devmapper",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/drivers/overlay",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/drivers/register",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/drivers/vfs",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/drivers/windows",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/drivers/zfs",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/archive",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/chrootarchive",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/devicemapper",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/directory",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/fileutils",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
 			"ImportPath": "github.com/containers/storage/pkg/homedir",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/idtools",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/ioutils",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/longpath",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/loopback",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/mount",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/parsers",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/parsers/kernel",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/plugins",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/plugins/transport",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/pools",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/promise",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/random",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/reexec",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/stringid",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/system",
+			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
+		},
+		{
+			"ImportPath": "github.com/containers/storage/pkg/truncindex",
 			"Rev": "f8cff0727cf0802f0752ca58d2c05ec5270a47d5"
 		},
 		{
@@ -274,8 +426,17 @@
 		},
 		{
 			"ImportPath": "github.com/inconshreveable/mousetrap",
-			"Comment": "v1.0",
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-shellwords",
+			"Comment": "v1.0.3-11-g95c860c",
+			"Rev": "95c860c1895b21b58903abdd1d9c591560b0601c"
+		},
+		{
+			"ImportPath": "github.com/mistifyio/go-zfs",
+			"Comment": "v2.1.1-5-g1b4ae6f",
+			"Rev": "1b4ae6fb4e77b095934d4430860ff202060169f8"
 		},
 		{
 			"ImportPath": "github.com/opencontainers/go-digest",
@@ -293,9 +454,28 @@
 			"Rev": "d9ffa2f05d4dbe917edfdffcafaf427287a26d1c"
 		},
 		{
+			"ImportPath": "github.com/opencontainers/runc/libcontainer/system",
+			"Comment": "v1.0.0-rc3-171-g60569122",
+			"Rev": "6056912217c002341877cd106b4df51032a09ac1"
+		},
+		{
 			"ImportPath": "github.com/opencontainers/runc/libcontainer/user",
 			"Comment": "v1.0.0-rc3-171-g60569122",
 			"Rev": "6056912217c002341877cd106b4df51032a09ac1"
+		},
+		{
+			"ImportPath": "github.com/opencontainers/selinux/go-selinux",
+			"Comment": "v1.0.0-rc1-5-g4a2974b",
+			"Rev": "4a2974bf1ee960774ffd517717f1f45325af0206"
+		},
+		{
+			"ImportPath": "github.com/opencontainers/selinux/go-selinux/label",
+			"Comment": "v1.0.0-rc1-5-g4a2974b",
+			"Rev": "4a2974bf1ee960774ffd517717f1f45325af0206"
+		},
+		{
+			"ImportPath": "github.com/pborman/uuid",
+			"Rev": "ca53cad383cad2479bbba7f7a1a05797ec1386e4"
 		},
 		{
 			"ImportPath": "github.com/pkg/errors",
@@ -320,6 +500,26 @@
 			"ImportPath": "github.com/spf13/pflag",
 			"Comment": "v1.0.0-3-g7aff26d",
 			"Rev": "7aff26db30c1be810f9de5038ec5ef96ac41fd7c"
+		},
+		{
+			"ImportPath": "github.com/tchap/go-patricia/patricia",
+			"Comment": "v2.2.6-3-g5ad6cdb",
+			"Rev": "5ad6cdb7538b0097d5598c7e57f0a24072adf7dc"
+		},
+		{
+			"ImportPath": "github.com/vbatts/tar-split/archive/tar",
+			"Comment": "v0.10.1-7-ged1c085",
+			"Rev": "ed1c08584d3a11ffb7acdea352cc4df24aa75f81"
+		},
+		{
+			"ImportPath": "github.com/vbatts/tar-split/tar/asm",
+			"Comment": "v0.10.1-7-ged1c085",
+			"Rev": "ed1c08584d3a11ffb7acdea352cc4df24aa75f81"
+		},
+		{
+			"ImportPath": "github.com/vbatts/tar-split/tar/storage",
+			"Comment": "v0.10.1-7-ged1c085",
+			"Rev": "ed1c08584d3a11ffb7acdea352cc4df24aa75f81"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh/terminal",
