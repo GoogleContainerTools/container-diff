@@ -40,6 +40,10 @@
 			"Rev": "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
 		},
 		{
+			"ImportPath": "github.com/containers/image/docker/archive",
+			"Rev": "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
+		},
+		{
 			"ImportPath": "github.com/containers/image/docker/daemon",
 			"Rev": "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
 		},

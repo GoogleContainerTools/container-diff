@@ -19,26 +19,22 @@ package util
 import (
 	"archive/tar"
 	"compress/gzip"
-	"context"
-	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
-	"github.com/containers/image/docker"
-	"github.com/containers/image/docker/tarfile"
+	"github.com/GoogleCloudPlatform/container-diff/pkg/util/preppers"
+	"github.com/containers/image/types"
 	"github.com/docker/docker/client"
 
 	"github.com/golang/glog"
 )
 
 var sourceToPrepMap = map[string]func(ip ImagePrepper) Prepper{
-	"ID":  func(ip ImagePrepper) Prepper { return IDPrepper{ImagePrepper: ip} },
-	"URL": func(ip ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
-	"tar": func(ip ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
+	"ID":  func(ip ImagePrepper) Prepper { return preppers.IDPrepper{ImagePrepper: ip} },
+	"URL": func(ip ImagePrepper) Prepper { return preppers.CloudPrepper{ImagePrepper: ip} },
+	"tar": func(ip ImagePrepper) Prepper { return preppers.TarPrepper{ImagePrepper: ip} },
 }
 
 var sourceCheckMap = map[string]func(string) bool{
@@ -116,29 +112,35 @@ func getImageFromTar(tarPath string) (string, error) {
 	return path, err
 }
 
-// CloudPrepper prepares images sourced from a Cloud registry
-type CloudPrepper struct {
-	ImagePrepper
+func CleanupImage(image Image) {
+	if image.FSPath != "" {
+		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
+		errMsg := remove(image.FSPath, true)
+		if errMsg != "" {
+			glog.Error(errMsg)
+		}
+	}
 }
 
-func (p CloudPrepper) getFileSystem() (string, error) {
-	// The regexp when passed a string creates a list of the form
-	// [repourl/image:tag, image:tag, tag] (the tag may or may not be present)
-	URLPattern := regexp.MustCompile("^.+/(.+(:.+){0,1})$")
-	URLMatch := URLPattern.FindStringSubmatch(p.Source)
-	// Removing the ":" so that the image path name can be <image><tag>
-	sanitizedName := strings.Replace(URLMatch[1], ":", "", -1)
-
-	path, err := ioutil.TempDir("", sanitizedName)
-	if err != nil {
-		return "", err
+func remove(path string, dir bool) string {
+	var errStr string
+	if path == "" {
+		return ""
 	}
 
-	ref, err := docker.ParseReference("//" + p.Source)
-	if err != nil {
-		return "", err
+	var err error
+	if dir {
+		err = os.RemoveAll(path)
+	} else {
+		err = os.Remove(path)
 	}
+	if err != nil {
+		errStr = "\nUnable to remove " + path
+	}
+	return errStr
+}
 
+func processImageReference(ref types.ImageReference, path string) (string, error) {
 	img, err := ref.NewImage(nil)
 	if err != nil {
 		glog.Error(err)
@@ -168,150 +170,4 @@ func (p CloudPrepper) getFileSystem() (string, error) {
 		}
 	}
 	return path, nil
-}
-
-func (p CloudPrepper) getConfig() (ConfigSchema, error) {
-	ref, err := docker.ParseReference("//" + p.Source)
-	if err != nil {
-		return ConfigSchema{}, err
-	}
-
-	img, err := ref.NewImage(nil)
-	if err != nil {
-		glog.Errorf("Error referencing image %s from registry: %s", p.Source, err)
-		return ConfigSchema{}, errors.New("Could not obtain image config")
-	}
-	defer img.Close()
-
-	configBlob, err := img.ConfigBlob()
-	if err != nil {
-		glog.Errorf("Error obtaining config blob for image %s from registry: %s", p.Source, err)
-		return ConfigSchema{}, errors.New("Could not obtain image config")
-	}
-
-	var config ConfigSchema
-	err = json.Unmarshal(configBlob, &config)
-	if err != nil {
-		glog.Errorf("Error with config file struct for image %s: %s", p.Source, err)
-		return ConfigSchema{}, errors.New("Could not obtain image config")
-	}
-	return config, nil
-}
-
-type IDPrepper struct {
-	ImagePrepper
-}
-
-func (p IDPrepper) getFileSystem() (string, error) {
-	tarPath, err := saveImageToTar(p.Client, p.Source, p.Source)
-	if err != nil {
-		return "", err
-	}
-
-	defer os.Remove(tarPath)
-	return getImageFromTar(tarPath)
-}
-
-func (p IDPrepper) getConfig() (ConfigSchema, error) {
-	inspect, _, err := p.Client.ImageInspectWithRaw(context.Background(), p.Source)
-	if err != nil {
-		return ConfigSchema{}, err
-	}
-
-	config := ConfigObject{
-		Env: inspect.Config.Env,
-	}
-	history := p.getHistory()
-	return ConfigSchema{
-		Config:  config,
-		History: history,
-	}, nil
-}
-
-func (p IDPrepper) getHistory() []ImageHistoryItem {
-	history, err := p.Client.ImageHistory(context.Background(), p.Source)
-	if err != nil {
-		glog.Error("Could not obtain image history for %s: %s", p.Source, err)
-	}
-	historyItems := []ImageHistoryItem{}
-	for _, item := range history {
-		historyItems = append(historyItems, ImageHistoryItem{CreatedBy: item.CreatedBy})
-	}
-	return historyItems
-}
-
-type TarPrepper struct {
-	ImagePrepper
-}
-
-func (p TarPrepper) getFileSystem() (string, error) {
-	return getImageFromTar(p.Source)
-}
-
-func (p TarPrepper) getConfig() (ConfigSchema, error) {
-	tempDir := strings.TrimSuffix(p.Source, filepath.Ext(p.Source)) + "-config"
-	defer os.RemoveAll(tempDir)
-	err := UnTar(p.Source, tempDir)
-	if err != nil {
-		return ConfigSchema{}, err
-	}
-
-	var config ConfigSchema
-	// First open the manifest, then find the referenced config.
-	manifestPath := filepath.Join(tempDir, "manifest.json")
-	contents, err := ioutil.ReadFile(manifestPath)
-	if err != nil {
-		return ConfigSchema{}, err
-	}
-
-	manifests := []tarfile.ManifestItem{}
-	if err := json.Unmarshal(contents, &manifests); err != nil {
-		return ConfigSchema{}, err
-	}
-
-	if len(manifests) != 1 {
-		return ConfigSchema{}, errors.New("specified tar file contains multiple images")
-	}
-
-	cfgFilename := filepath.Join(tempDir, manifests[0].Config)
-	file, err := ioutil.ReadFile(cfgFilename)
-	if err != nil {
-		glog.Errorf("Could not read config file %s: %s", cfgFilename, err)
-		return ConfigSchema{}, errors.New("Could not obtain image config")
-	}
-	err = json.Unmarshal(file, &config)
-	if err != nil {
-		glog.Errorf("Could not marshal config file %s: %s", cfgFilename, err)
-		return ConfigSchema{}, errors.New("Could not obtain image config")
-	}
-
-	return config, nil
-}
-
-func CleanupImage(image Image) {
-	if image.FSPath != "" {
-		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
-		errMsg := remove(image.FSPath, true)
-		if errMsg != "" {
-			glog.Error(errMsg)
-		}
-	}
-}
-
-func remove(path string, dir bool) string {
-	var errStr string
-	if path == "" {
-		return ""
-	}
-
-	var err error
-	if dir {
-		err = os.RemoveAll(path)
-	} else {
-		err = os.Remove(path)
-	}
-	if err != nil {
-		errStr = "\nUnable to remove " + path
-	}
-	return errStr
 }
