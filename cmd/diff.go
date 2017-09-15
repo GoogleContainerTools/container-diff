@@ -75,9 +75,21 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	for imageArg := range imageMap {
 		go func(imageName string, imageMap map[string]*pkgutil.Image) {
 			defer wg.Done()
+
+			var prepper string
+			if strings.HasPrefix(imageName, "daemon://") {
+				// force local daemon if we have the corresponding prefix
+				prepper = pkgutil.LOCAL
+			} else if pkgutil.IsTar(imageName) {
+				prepper = pkgutil.TAR
+			} else {
+				prepper = pkgutil.REMOTE
+			}
+
 			ip := pkgutil.ImagePrepper{
-				Source: imageName,
-				Client: cli,
+				Source:  imageName,
+				Client:  cli,
+				Prepper: prepper,
 			}
 			image, err := ip.GetImage()
 			imageMap[imageName] = &image

@@ -14,40 +14,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package preppers
+package util
 
-type IDPrepper struct {
+import (
+	"context"
+
+	"github.com/containers/image/docker/daemon"
+	"github.com/golang/glog"
+)
+
+type DaemonPrepper struct {
 	ImagePrepper
 }
 
-func (p IDPrepper) getFileSystem() (string, error) {
-
-	tarPath, err := saveImageToTar(p.Client, p.Source, p.Source)
+func (p DaemonPrepper) getFileSystem() (string, error) {
+	ref, err := daemon.ParseReference(p.Source)
 	if err != nil {
 		return "", err
 	}
 
-	defer os.Remove(tarPath)
-	return getImageFromTar(tarPath)
+	return getFileSystemFromReference(ref, p.Source)
 }
 
-func (p IDPrepper) getConfig() (ConfigSchema, error) {
-	inspect, _, err := p.Client.ImageInspectWithRaw(context.Background(), p.Source)
+func (p DaemonPrepper) getConfig() (ConfigSchema, error) {
+	ref, err := daemon.ParseReference(p.Source)
 	if err != nil {
 		return ConfigSchema{}, err
 	}
 
-	config := ConfigObject{
-		Env: inspect.Config.Env,
-	}
-	history := p.getHistory()
-	return ConfigSchema{
-		Config:  config,
-		History: history,
-	}, nil
+	return getConfigFromReference(ref, p.Source)
 }
 
-func (p IDPrepper) getHistory() []ImageHistoryItem {
+func (p DaemonPrepper) getHistory() []ImageHistoryItem {
 	history, err := p.Client.ImageHistory(context.Background(), p.Source)
 	if err != nil {
 		glog.Error("Could not obtain image history for %s: %s", p.Source, err)

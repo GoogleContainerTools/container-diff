@@ -18,29 +18,36 @@ package util
 
 import (
 	"archive/tar"
-	"compress/gzip"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/container-diff/pkg/util/preppers"
 	"github.com/containers/image/types"
-	"github.com/docker/docker/client"
 
+	"github.com/containers/image/pkg/compression"
 	"github.com/golang/glog"
 )
 
+const LOCAL string = "Local Daemon"
+const REMOTE string = "Cloud Registry"
+const TAR string = "Tar"
+
 var sourceToPrepMap = map[string]func(ip ImagePrepper) Prepper{
-	"ID":  func(ip ImagePrepper) Prepper { return preppers.IDPrepper{ImagePrepper: ip} },
-	"URL": func(ip ImagePrepper) Prepper { return preppers.CloudPrepper{ImagePrepper: ip} },
-	"tar": func(ip ImagePrepper) Prepper { return preppers.TarPrepper{ImagePrepper: ip} },
+	"Local Daemon":   func(ip ImagePrepper) Prepper { return DaemonPrepper{ImagePrepper: ip} },
+	"Cloud Registry": func(ip ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
+	"Tar":            func(ip ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
 }
 
+// since we iterate through these sequentially, order matters.
+// we intentionally check local daemon first. diff.go forces alternate behavior
+// by checking image prefix.
 var sourceCheckMap = map[string]func(string) bool{
-	"ID":  CheckImageID,
-	"URL": CheckImageURL,
-	"tar": CheckTar,
+	"Local Daemon":   CheckValidLocalImageID,
+	"Cloud Registry": CheckValidRemoteImageID,
+	"Tar":            CheckTar,
 }
 
 type Image struct {
@@ -60,49 +67,6 @@ type ConfigObject struct {
 type ConfigSchema struct {
 	Config  ConfigObject       `json:"config"`
 	History []ImageHistoryItem `json:"history"`
-}
-
-type ImagePrepper struct {
-	Source string
-	Client *client.Client
-}
-
-type Prepper interface {
-	getFileSystem() (string, error)
-	getConfig() (ConfigSchema, error)
-}
-
-func (p ImagePrepper) GetImage() (Image, error) {
-	glog.Infof("Starting prep for image %s", p.Source)
-	img := p.Source
-
-	var prepper Prepper
-	for source, check := range sourceCheckMap {
-		if check(img) {
-			prepper = sourceToPrepMap[source](p)
-			break
-		}
-	}
-	if prepper == nil {
-		return Image{}, errors.New("Could not retrieve image from source")
-	}
-
-	imgPath, err := prepper.getFileSystem()
-	if err != nil {
-		return Image{}, err
-	}
-
-	config, err := prepper.getConfig()
-	if err != nil {
-		glog.Error("Error retrieving History: ", err)
-	}
-
-	glog.Infof("Finished prepping image %s", p.Source)
-	return Image{
-		Source: img,
-		FSPath: imgPath,
-		Config: config,
-	}, nil
 }
 
 func getImageFromTar(tarPath string) (string, error) {
@@ -140,7 +104,22 @@ func remove(path string, dir bool) string {
 	return errStr
 }
 
-func processImageReference(ref types.ImageReference, path string) (string, error) {
+func getFileSystemFromReference(ref types.ImageReference, imageName string) (string, error) {
+
+	// This regex when passed a string creates a list of the form
+	// [repourl/image:tag, image:tag, tag] (the tag may or may not be present)
+	// URLPattern := regexp.MustCompile("^.+/(.+(:.+){0,1})$")
+	// URLMatch := URLPattern.FindStringSubmatch(imageName)
+	// Removing the ":" so that the image path name can be <image><tag>
+	// sanitizedName := strings.Replace(URLMatch[1], ":", "", -1)
+	sanitizedName := strings.Replace(imageName, "/", "", -1)
+	sanitizedName = strings.Replace(sanitizedName, ":", "", -1)
+
+	path, err := ioutil.TempDir("", sanitizedName)
+	if err != nil {
+		return "", err
+	}
+
 	img, err := ref.NewImage(nil)
 	if err != nil {
 		glog.Error(err)
@@ -157,17 +136,50 @@ func processImageReference(ref types.ImageReference, path string) (string, error
 	for _, b := range img.LayerInfos() {
 		bi, _, err := imgSrc.GetBlob(b)
 		if err != nil {
-			glog.Errorf("Failed to pull image layer with error: %s", err)
+			glog.Errorf("Failed to pull image layer: %s", err)
 		}
-		gzf, err := gzip.NewReader(bi)
+		// try and detect layer compression
+		f, reader, err := compression.DetectCompression(bi)
 		if err != nil {
-			glog.Errorf("Failed to read layers with error: %s", err)
+			glog.Errorf("Failed to detect image compression: %s", err)
+			return "", err
 		}
-		tr := tar.NewReader(gzf)
+		if f != nil {
+			// decompress if necessary
+			reader, err = f(reader)
+			if err != nil {
+				glog.Errorf("Failed to decompress image: %s", err)
+				return "", err
+			}
+		}
+		tr := tar.NewReader(reader)
 		err = unpackTar(tr, path)
 		if err != nil {
 			glog.Errorf("Failed to untar layer with error: %s", err)
 		}
 	}
 	return path, nil
+}
+
+func getConfigFromReference(ref types.ImageReference, source string) (ConfigSchema, error) {
+	img, err := ref.NewImage(nil)
+	if err != nil {
+		glog.Errorf("Error referencing image %s from registry: %s", source, err)
+		return ConfigSchema{}, errors.New("Could not obtain image config")
+	}
+	defer img.Close()
+
+	configBlob, err := img.ConfigBlob()
+	if err != nil {
+		glog.Errorf("Error obtaining config blob for image %s from registry: %s", source, err)
+		return ConfigSchema{}, errors.New("Could not obtain image config")
+	}
+
+	var config ConfigSchema
+	err = json.Unmarshal(configBlob, &config)
+	if err != nil {
+		glog.Errorf("Error with config file struct for image %s: %s", source, err)
+		return ConfigSchema{}, errors.New("Could not obtain image config")
+	}
+	return config, nil
 }

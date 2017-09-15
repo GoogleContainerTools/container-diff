@@ -93,10 +93,9 @@ func validateArgs(args []string, validatefxns ...validatefxn) error {
 }
 
 func checkImage(arg string) bool {
-	if !pkgutil.CheckImageID(arg) && !pkgutil.CheckImageURL(arg) && !pkgutil.CheckTar(arg) {
-		return false
-	}
-	return true
+	return pkgutil.CheckValidLocalImageID(arg) ||
+		pkgutil.CheckValidRemoteImageID(arg) ||
+		pkgutil.CheckTar(arg)
 }
 
 func checkArgType(args []string) error {

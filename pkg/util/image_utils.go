@@ -22,7 +22,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
+	"github.com/containers/image/docker/reference"
 	"github.com/docker/docker/pkg/system"
 	"github.com/golang/glog"
 )
@@ -42,20 +44,41 @@ func GetImageLayers(pathToImage string) []string {
 	return layers
 }
 
-func CheckImageID(image string) bool {
-	pattern := regexp.MustCompile("[a-z|0-9]{12}")
-	if exp := pattern.FindString(image); exp != image {
-		return false
-	}
-	return true
+// this method will check all possible legal names for a docker container in a local registry.
+// we require that all images passed in have an explicit tag appended to them.
+// func CheckImageID(image string) bool {
+// 	pattern := regexp.MustCompile("[a-z|0-9]{12}")
+// 	if exp := pattern.FindString(image); exp != image {
+// 		// didn't find image by ID: let's try [name:tag]
+// 		pattern = regexp.MustCompile("[a-z|0-9]*:[a-z|0-9]*")
+// 		return pattern.MatchString(image)
+// 	}
+// 	return true
+// }
+
+// func CheckImageURL(image string) bool {
+// 	pattern := regexp.MustCompile("^.+/.+(:.+){0,1}$")
+// 	if exp := pattern.FindString(image); exp != image || CheckTar(image) {
+// 		return false
+// 	}
+// 	return true
+// }
+
+func checkValidImageID(image string) bool {
+	_, err := reference.Parse(image)
+	return (err == nil)
 }
 
-func CheckImageURL(image string) bool {
-	pattern := regexp.MustCompile("^.+/.+(:.+){0,1}$")
-	if exp := pattern.FindString(image); exp != image || CheckTar(image) {
+func CheckValidLocalImageID(image string) bool {
+	return checkValidImageID(strings.Replace(image, "daemon://", "", -1))
+}
+
+func CheckValidRemoteImageID(image string) bool {
+	daemonRegex := regexp.MustCompile("daemon://.*")
+	if match := daemonRegex.MatchString(image); match {
 		return false
 	}
-	return true
+	return checkValidImageID(image)
 }
 
 // copyToFile writes the content of the reader to the specified file
