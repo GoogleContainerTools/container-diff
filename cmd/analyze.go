@@ -56,15 +56,28 @@ func checkAnalyzeArgNum(args []string) error {
 	return nil
 }
 
-func analyzeImage(imageArg string, analyzerArgs []string) error {
+func analyzeImage(imageName string, analyzerArgs []string) error {
 	cli, err := NewClient()
 	if err != nil {
 		return fmt.Errorf("Error getting docker client for differ: %s", err)
 	}
 	defer cli.Close()
+
+	var prepper string
+	if strings.HasPrefix(imageName, "daemon://") {
+		// force local daemon if we have the corresponding prefix
+		prepper = pkgutil.LOCAL
+		imageName = strings.Replace(imageName, "daemon://", "", -1)
+	} else if pkgutil.IsTar(imageName) {
+		prepper = pkgutil.TAR
+	} else {
+		prepper = pkgutil.REMOTE
+	}
+
 	ip := pkgutil.ImagePrepper{
-		Source: imageArg,
-		Client: cli,
+		Source:  imageName,
+		Client:  cli,
+		Prepper: prepper,
 	}
 	image, err := ip.GetImage()
 

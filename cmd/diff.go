@@ -80,6 +80,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 			if strings.HasPrefix(imageName, "daemon://") {
 				// force local daemon if we have the corresponding prefix
 				prepper = pkgutil.LOCAL
+				imageName = strings.Replace(imageName, "daemon://", "", -1)
 			} else if pkgutil.IsTar(imageName) {
 				prepper = pkgutil.TAR
 			} else {
