@@ -63,6 +63,12 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 	}
 	defer cli.Close()
 
+	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
+	if err != nil {
+		glog.Error(err.Error())
+		return errors.New("Could not perform image analysis")
+	}
+
 	var prepper string
 	if strings.HasPrefix(imageName, "daemon://") {
 		// force local daemon if we have the corresponding prefix
@@ -84,11 +90,6 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 	if !save {
 		defer pkgutil.CleanupImage(image)
 	}
-	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
-	}
-	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
 		glog.Error(err.Error())
 		return errors.New("Could not perform image analysis")

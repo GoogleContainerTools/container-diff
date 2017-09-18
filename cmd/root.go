@@ -111,7 +111,7 @@ func checkArgType(args []string) error {
 
 func checkIfValidAnalyzer(flagtypes string) error {
 	if flagtypes == "" {
-		return nil
+		return errors.New("Please provide at least one analyzer to run")
 	}
 	analyzers := strings.Split(flagtypes, ",")
 	for _, name := range analyzers {
