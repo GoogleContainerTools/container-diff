@@ -79,18 +79,4 @@ func (p ImagePrepper) GetImage() (Image, error) {
 		}
 	}
 	return Image{}, errors.New("Could not retrieve image from source")
-
-	// if prepper == nil {
-	// 	return Image{}, errors.New("Could not retrieve image from source")
-	// }
-
-	// imgPath, err := prepper.getFileSystem()
-	// if err != nil {
-	// 	return Image{}, err
-	// }
-
-	// config, err := prepper.getConfig()
-	// if err != nil {
-	// 	glog.Error("Error retrieving History: ", err)
-	// }
 }

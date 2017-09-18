@@ -105,13 +105,6 @@ func remove(path string, dir bool) string {
 }
 
 func getFileSystemFromReference(ref types.ImageReference, imageName string) (string, error) {
-
-	// This regex when passed a string creates a list of the form
-	// [repourl/image:tag, image:tag, tag] (the tag may or may not be present)
-	// URLPattern := regexp.MustCompile("^.+/(.+(:.+){0,1})$")
-	// URLMatch := URLPattern.FindStringSubmatch(imageName)
-	// Removing the ":" so that the image path name can be <image><tag>
-	// sanitizedName := strings.Replace(URLMatch[1], ":", "", -1)
 	sanitizedName := strings.Replace(imageName, "/", "", -1)
 	sanitizedName = strings.Replace(sanitizedName, ":", "", -1)
 

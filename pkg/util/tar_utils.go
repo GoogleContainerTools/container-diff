@@ -78,7 +78,6 @@ func unpackTar(tr *tar.Reader, path string) error {
 
 		// if it's a file create it
 		case tar.TypeReg:
-			os.Chmod(target, mode)
 			currFile, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
 			if err != nil {
 				glog.Errorf("Error opening file %s", target)
