@@ -41,11 +41,21 @@ func unpackTar(tr *tar.Reader, path string) error {
 		if strings.Contains(header.Name, ".wh.") {
 			rmPath := filepath.Join(path, header.Name)
 			newName := strings.Replace(rmPath, ".wh.", "", 1)
-			err := os.Remove(rmPath)
+			if _, err := os.Stat(rmPath); err == nil {
+				err := os.Remove(rmPath)
+				if err != nil {
+					glog.Info(err)
+				}
+			}
 			if err != nil {
 				glog.Info(err)
 			}
-			err = os.RemoveAll(newName)
+			if _, err := os.Stat(newName); err == nil {
+				err = os.RemoveAll(newName)
+				if err != nil {
+					glog.Info(err)
+				}
+			}
 			if err != nil {
 				glog.Info(err)
 			}
