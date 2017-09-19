@@ -33,7 +33,7 @@ var analyzeCmd = &cobra.Command{
 	Short: "Analyzes an image: [image]",
 	Long:  `Analyzes an image using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if err := validateArgs(args, checkAnalyzeArgNum, checkArgType); err != nil {
+		if err := validateArgs(args, checkAnalyzeArgNum); err != nil {
 			return errors.New(err.Error())
 		}
 		if err := checkIfValidAnalyzer(types); err != nil {

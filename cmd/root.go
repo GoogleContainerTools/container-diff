@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
@@ -87,24 +86,6 @@ func validateArgs(args []string, validatefxns ...validatefxn) error {
 	for _, validatefxn := range validatefxns {
 		if err := validatefxn(args); err != nil {
 			return err
-		}
-	}
-	return nil
-}
-
-func checkImage(arg string) bool {
-	if !pkgutil.CheckImageID(arg) && !pkgutil.CheckImageURL(arg) && !pkgutil.CheckTar(arg) {
-		return false
-	}
-	return true
-}
-
-func checkArgType(args []string) error {
-	for _, arg := range args {
-		if !checkImage(arg) {
-			errMessage := fmt.Sprintf("Argument %s is not an image ID, URL, or tar\n", args[0])
-			glog.Errorf(errMessage)
-			return errors.New(errMessage)
 		}
 	}
 	return nil

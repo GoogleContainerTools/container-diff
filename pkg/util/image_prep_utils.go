@@ -30,16 +30,10 @@ import (
 	"github.com/golang/glog"
 )
 
-var sourceToPrepMap = map[string]func(ip ImagePrepper) Prepper{
-	"ID":  func(ip ImagePrepper) Prepper { return DaemonPrepper{ImagePrepper: ip} },
-	"URL": func(ip ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
-	"tar": func(ip ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
-}
-
-var sourceCheckMap = map[string]func(string) bool{
-	"ID":  CheckImageID,
-	"URL": CheckImageURL,
-	"tar": CheckTar,
+var orderedPreppers = []func(ip ImagePrepper) Prepper{
+	func(ip ImagePrepper) Prepper { return DaemonPrepper{ImagePrepper: ip} },
+	func(ip ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
+	func(ip ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
 }
 
 type Image struct {
