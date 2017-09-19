@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "docker_utils.go",
+        "fs_utils.go",
+        "image_prep_utils.go",
+        "image_utils.go",
+        "tar_utils.go",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/containers/image/docker:go_default_library",
+        "//vendor/github.com/containers/image/docker/tarfile:go_default_library",
+        "//vendor/github.com/docker/docker/client:go_default_library",
+        "//vendor/github.com/docker/docker/pkg/system:go_default_library",
+        "//vendor/github.com/golang/glog:go_default_library",
+    ],
+)

@@ -1,8 +1,17 @@
 language: go
 os: linux
-go:
-        - 1.8.3
+go: 1.8.3
+
 go_import_path: github.com/GoogleCloudPlatform/container-diff
+
+addons:
+  apt:
+    sources:
+    - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
+      key_url: 'https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg'
+    packages:
+    - bazel
+
 
 script:
  - make test integration

@@ -48,3 +48,10 @@ if [[ ! -z ${files} ]]; then
 	echo "Boilerplate missing in: ${files}."
 	exit 1
 fi
+
+# Check gazelle
+bazel run //:gazelle
+if [ "$(git status --porcelain)" ]; then
+	echo "BUILD files out of date. Run `bazel run //:gazelle` to update them."
+	exit 1
+fi

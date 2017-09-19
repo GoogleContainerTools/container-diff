@@ -1,0 +1,11 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "client.go",
+        "command.go",
+    ],
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library"],
+)
