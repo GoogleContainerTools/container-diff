@@ -38,12 +38,12 @@ type Prepper interface {
 func getImage(prepper Prepper, source string) (Image, error) {
 	imgPath, err := prepper.getFileSystem()
 	if err != nil {
-		return Image{}, fmt.Errorf("Unable to retrieve FS for prepper %s; %s", source, err.Error())
+		return Image{}, fmt.Errorf("error msg: %s", err.Error())
 	}
 
 	config, err := prepper.getConfig()
 	if err != nil {
-		return Image{}, fmt.Errorf("Error retrieving History for source %s: %s", source, err.Error())
+		return Image{}, fmt.Errorf("error msg: %s", err.Error())
 	}
 
 	glog.Infof("Finished prepping image %s", source)

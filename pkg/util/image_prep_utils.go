@@ -75,17 +75,10 @@ func getImageFromTar(tarPath string) (string, error) {
 func CleanupImage(image Image) {
 	if image.FSPath != "" {
 		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
-		if err := remove(image.FSPath, true); err != nil {
+		if err := os.RemoveAll(image.FSPath); err != nil {
 			glog.Error(err.Error())
 		}
 	}
-}
-
-func remove(path string, dir bool) error {
-	if dir {
-		return os.RemoveAll(path)
-	}
-	return os.Remove(path)
 }
 
 func getFileSystemFromReference(ref types.ImageReference, imageName string) (string, error) {

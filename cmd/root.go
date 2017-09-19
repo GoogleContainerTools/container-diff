@@ -48,7 +48,7 @@ var RootCmd = &cobra.Command{
 func NewClient() (*client.Client, error) {
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		return nil, fmt.Errorf("Error getting docker client: %s", err)
+		return nil, fmt.Errorf("error msg: %s", err)
 	}
 	cli.NegotiateAPIVersion(context.Background())
 

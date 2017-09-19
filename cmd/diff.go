@@ -60,7 +60,7 @@ func checkDiffArgNum(args []string) error {
 func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	cli, err := NewClient()
 	if err != nil {
-		return fmt.Errorf("Error getting docker client for differ: %s", err)
+		return fmt.Errorf("error msg: %s", err)
 	}
 	defer cli.Close()
 	var wg sync.WaitGroup
@@ -98,13 +98,13 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 
 	diffTypes, err := differs.GetAnalyzers(diffArgs)
 	if err != nil {
-		return fmt.Errorf("Could not perform image diff: %s", err.Error())
+		return fmt.Errorf("error msg: %s", err.Error())
 	}
 
 	req := differs.DiffRequest{*imageMap[image1Arg], *imageMap[image2Arg], diffTypes}
 	diffs, err := req.GetDiff()
 	if err != nil {
-		return fmt.Errorf("Could not perform image diff: %s", err.Error())
+		return fmt.Errorf("error msg: %s", err.Error())
 	}
 	glog.Info("Retrieving diffs")
 	outputResults(diffs)
@@ -117,13 +117,11 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 }
 
 func processImageName(imageName string) string {
-	if !pkgutil.IsTar(imageName) {
-		if !strings.HasPrefix(imageName, "daemon://") {
-			// not explicitly local, so force remote
-			return "remote://" + imageName
-		}
+	if pkgutil.IsTar(imageName) || strings.HasPrefix(imageName, "daemon://") {
+		return imageName
 	}
-	return imageName
+	// not a tar and not explicitly local, so force remote
+	return "remote://" + imageName
 }
 
 func init() {

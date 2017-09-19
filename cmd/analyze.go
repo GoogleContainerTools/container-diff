@@ -59,13 +59,13 @@ func checkAnalyzeArgNum(args []string) error {
 func analyzeImage(imageName string, analyzerArgs []string) error {
 	cli, err := NewClient()
 	if err != nil {
-		return fmt.Errorf("Error getting docker client for differ: %s", err)
+		return fmt.Errorf("error msg: %s", err)
 	}
 	defer cli.Close()
 
 	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
-		return fmt.Errorf("Could not perform image analysis: %s", err.Error())
+		return fmt.Errorf("error msg: %s", err.Error())
 	}
 
 	prefixedName := processImageName(imageName)
@@ -80,13 +80,13 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		defer pkgutil.CleanupImage(image)
 	}
 	if err != nil {
-		return fmt.Errorf("Could not perform image analysis: %s", err.Error())
+		return fmt.Errorf("error msg: %s", err.Error())
 	}
 
 	req := differs.SingleRequest{image, analyzeTypes}
 	analyses, err := req.GetAnalysis()
 	if err != nil {
-		return fmt.Errorf("Could not perform image analysis: %s", err.Error())
+		return fmt.Errorf("error msg: %s", err.Error())
 	}
 
 	glog.Info("Retrieving analyses")
