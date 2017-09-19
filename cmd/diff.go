@@ -35,10 +35,10 @@ var diffCmd = &cobra.Command{
 	Long:  `Compares two images using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if err := validateArgs(args, checkDiffArgNum, checkArgType); err != nil {
-			return errors.New(err.Error())
+			return err
 		}
 		if err := checkIfValidAnalyzer(types); err != nil {
-			return errors.New(err.Error())
+			return err
 		}
 		return nil
 	},
@@ -52,7 +52,7 @@ var diffCmd = &cobra.Command{
 
 func checkDiffArgNum(args []string) error {
 	if len(args) != 2 {
-		return errors.New("'diff' requires two images as arguments: container diff [image1] [image2]")
+		return errors.New("'diff' requires two images as arguments: container-diff diff [image1] [image2]")
 	}
 	return nil
 }
@@ -76,21 +76,11 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		go func(imageName string, imageMap map[string]*pkgutil.Image) {
 			defer wg.Done()
 
-			var prepper string
-			if strings.HasPrefix(imageName, "daemon://") {
-				// force local daemon if we have the corresponding prefix
-				prepper = pkgutil.LOCAL
-				imageName = strings.Replace(imageName, "daemon://", "", -1)
-			} else if pkgutil.IsTar(imageName) {
-				prepper = pkgutil.TAR
-			} else {
-				prepper = pkgutil.REMOTE
-			}
+			prefixedName := processImageName(imageName)
 
 			ip := pkgutil.ImagePrepper{
-				Source:  imageName,
-				Client:  cli,
-				Prepper: prepper,
+				Source: prefixedName,
+				Client: cli,
 			}
 			image, err := ip.GetImage()
 			imageMap[imageName] = &image
@@ -108,15 +98,13 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 
 	diffTypes, err := differs.GetAnalyzers(diffArgs)
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image diff")
+		return fmt.Errorf("Could not perform image diff: %s", err.Error())
 	}
 
 	req := differs.DiffRequest{*imageMap[image1Arg], *imageMap[image2Arg], diffTypes}
 	diffs, err := req.GetDiff()
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image diff")
+		return fmt.Errorf("Could not perform image diff: %s", err.Error())
 	}
 	glog.Info("Retrieving diffs")
 	outputResults(diffs)
@@ -124,9 +112,18 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	if save {
 		glog.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
 			imageMap[image2Arg].FSPath)
-
 	}
 	return nil
+}
+
+func processImageName(imageName string) string {
+	if !pkgutil.IsTar(imageName) {
+		if !strings.HasPrefix(imageName, "daemon://") {
+			// not explicitly local, so force remote
+			return "remote://" + imageName
+		}
+	}
+	return imageName
 }
 
 func init() {

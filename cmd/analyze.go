@@ -34,10 +34,10 @@ var analyzeCmd = &cobra.Command{
 	Long:  `Analyzes an image using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if err := validateArgs(args, checkAnalyzeArgNum, checkArgType); err != nil {
-			return errors.New(err.Error())
+			return err
 		}
 		if err := checkIfValidAnalyzer(types); err != nil {
-			return errors.New(err.Error())
+			return err
 		}
 		return nil
 	},
@@ -51,7 +51,7 @@ var analyzeCmd = &cobra.Command{
 
 func checkAnalyzeArgNum(args []string) error {
 	if len(args) != 1 {
-		return errors.New("'analyze' requires one image as an argument: container analyze [image]")
+		return errors.New("'analyze' requires one image as an argument: container-diff analyze [image]")
 	}
 	return nil
 }
@@ -65,25 +65,14 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 
 	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
+		return fmt.Errorf("Could not perform image analysis: %s", err.Error())
 	}
 
-	var prepper string
-	if strings.HasPrefix(imageName, "daemon://") {
-		// force local daemon if we have the corresponding prefix
-		prepper = pkgutil.LOCAL
-		imageName = strings.Replace(imageName, "daemon://", "", -1)
-	} else if pkgutil.IsTar(imageName) {
-		prepper = pkgutil.TAR
-	} else {
-		prepper = pkgutil.REMOTE
-	}
+	prefixedName := processImageName(imageName)
 
 	ip := pkgutil.ImagePrepper{
-		Source:  imageName,
-		Client:  cli,
-		Prepper: prepper,
+		Source: prefixedName,
+		Client: cli,
 	}
 	image, err := ip.GetImage()
 
@@ -91,15 +80,13 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		defer pkgutil.CleanupImage(image)
 	}
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
+		return fmt.Errorf("Could not perform image analysis: %s", err.Error())
 	}
 
 	req := differs.SingleRequest{image, analyzeTypes}
 	analyses, err := req.GetAnalysis()
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
+		return fmt.Errorf("Could not perform image analysis: %s", err.Error())
 	}
 
 	glog.Info("Retrieving analyses")

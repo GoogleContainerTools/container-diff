@@ -22,7 +22,7 @@ import (
 
 // CloudPrepper prepares images sourced from a Cloud registry
 type CloudPrepper struct {
-	ImagePrepper
+	*ImagePrepper
 }
 
 func (p CloudPrepper) getFileSystem() (string, error) {

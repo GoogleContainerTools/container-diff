@@ -24,7 +24,7 @@ import (
 )
 
 type DaemonPrepper struct {
-	ImagePrepper
+	*ImagePrepper
 }
 
 func (p DaemonPrepper) getFileSystem() (string, error) {

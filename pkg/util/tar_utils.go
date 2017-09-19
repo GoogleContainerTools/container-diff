@@ -42,8 +42,7 @@ func unpackTar(tr *tar.Reader, path string) error {
 			rmPath := filepath.Join(path, header.Name)
 			newName := strings.Replace(rmPath, ".wh.", "", 1)
 			if _, err := os.Stat(rmPath); err == nil {
-				err := os.Remove(rmPath)
-				if err != nil {
+				if err := os.Remove(rmPath); err != nil {
 					glog.Info(err)
 				}
 			}
@@ -51,8 +50,7 @@ func unpackTar(tr *tar.Reader, path string) error {
 				glog.Info(err)
 			}
 			if _, err := os.Stat(newName); err == nil {
-				err = os.RemoveAll(newName)
-				if err != nil {
+				if err = os.RemoveAll(newName); err != nil {
 					glog.Info(err)
 				}
 			}

@@ -19,15 +19,15 @@ package util
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
 )
 
 type ImagePrepper struct {
-	Source  string
-	Client  *client.Client
-	Prepper string
+	Source string
+	Client *client.Client
 }
 
 type Prepper interface {
@@ -54,17 +54,23 @@ func getImage(prepper Prepper, source string) (Image, error) {
 	}, nil
 }
 
-func (p ImagePrepper) GetImage() (Image, error) {
+func (p *ImagePrepper) GetImage() (Image, error) {
 	glog.Infof("Starting prep for image %s", p.Source)
-
-	if p.Prepper != "" {
-		// respect forced prepper here
-		prepper := sourceToPrepMap[p.Prepper](p)
-		return getImage(prepper, p.Source)
-	}
 
 	var prepper Prepper
 
+	// first, respect prefixes on image names
+	if strings.HasPrefix(p.Source, "daemon://") {
+		p.Source = strings.Replace(p.Source, "daemon://", "", -1)
+		prepper = DaemonPrepper{ImagePrepper: p}
+		return getImage(prepper, p.Source)
+	} else if strings.HasPrefix(p.Source, "remote://") {
+		p.Source = strings.Replace(p.Source, "remote://", "", -1)
+		prepper = CloudPrepper{ImagePrepper: p}
+		return getImage(prepper, p.Source)
+	}
+
+	// if no prefix found, check local daemon first, otherwise default to cloud registry
 	for source, check := range sourceCheckMap {
 		if check(p.Source) {
 			prepper = sourceToPrepMap[source](p)

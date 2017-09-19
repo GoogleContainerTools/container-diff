@@ -31,14 +31,10 @@ import (
 	"github.com/golang/glog"
 )
 
-const LOCAL string = "Local Daemon"
-const REMOTE string = "Cloud Registry"
-const TAR string = "Tar"
-
-var sourceToPrepMap = map[string]func(ip ImagePrepper) Prepper{
-	"Local Daemon":   func(ip ImagePrepper) Prepper { return DaemonPrepper{ImagePrepper: ip} },
-	"Cloud Registry": func(ip ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
-	"Tar":            func(ip ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
+var sourceToPrepMap = map[string]func(ip *ImagePrepper) Prepper{
+	"Local Daemon":   func(ip *ImagePrepper) Prepper { return DaemonPrepper{ImagePrepper: ip} },
+	"Cloud Registry": func(ip *ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
+	"Tar":            func(ip *ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
 }
 
 // since we iterate through these sequentially, order matters.
@@ -79,29 +75,17 @@ func getImageFromTar(tarPath string) (string, error) {
 func CleanupImage(image Image) {
 	if image.FSPath != "" {
 		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
-		errMsg := remove(image.FSPath, true)
-		if errMsg != "" {
-			glog.Error(errMsg)
+		if err := remove(image.FSPath, true); err != nil {
+			glog.Error(err.Error())
 		}
 	}
 }
 
-func remove(path string, dir bool) string {
-	var errStr string
-	if path == "" {
-		return ""
-	}
-
-	var err error
+func remove(path string, dir bool) error {
 	if dir {
-		err = os.RemoveAll(path)
-	} else {
-		err = os.Remove(path)
+		return os.RemoveAll(path)
 	}
-	if err != nil {
-		errStr = "\nUnable to remove " + path
-	}
-	return errStr
+	return os.Remove(path)
 }
 
 func getFileSystemFromReference(ref types.ImageReference, imageName string) (string, error) {
