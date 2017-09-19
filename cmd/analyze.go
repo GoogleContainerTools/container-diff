@@ -34,10 +34,10 @@ var analyzeCmd = &cobra.Command{
 	Long:  `Analyzes an image using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if err := validateArgs(args, checkAnalyzeArgNum, checkArgType); err != nil {
-			return errors.New(err.Error())
+			return err
 		}
 		if err := checkIfValidAnalyzer(types); err != nil {
-			return errors.New(err.Error())
+			return err
 		}
 		return nil
 	},
@@ -51,19 +51,27 @@ var analyzeCmd = &cobra.Command{
 
 func checkAnalyzeArgNum(args []string) error {
 	if len(args) != 1 {
-		return errors.New("'analyze' requires one image as an argument: container analyze [image]")
+		return errors.New("'analyze' requires one image as an argument: container-diff analyze [image]")
 	}
 	return nil
 }
 
-func analyzeImage(imageArg string, analyzerArgs []string) error {
+func analyzeImage(imageName string, analyzerArgs []string) error {
 	cli, err := NewClient()
 	if err != nil {
-		return fmt.Errorf("Error getting docker client for differ: %s", err)
+		return fmt.Errorf("error msg: %s", err)
 	}
 	defer cli.Close()
+
+	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
+	if err != nil {
+		return fmt.Errorf("error msg: %s", err.Error())
+	}
+
+	prefixedName := processImageName(imageName)
+
 	ip := pkgutil.ImagePrepper{
-		Source: imageArg,
+		Source: prefixedName,
 		Client: cli,
 	}
 	image, err := ip.GetImage()
@@ -72,20 +80,13 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 		defer pkgutil.CleanupImage(image)
 	}
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
-	}
-	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
-	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
+		return fmt.Errorf("error msg: %s", err.Error())
 	}
 
 	req := differs.SingleRequest{image, analyzeTypes}
 	analyses, err := req.GetAnalysis()
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
+		return fmt.Errorf("error msg: %s", err.Error())
 	}
 
 	glog.Info("Retrieving analyses")

@@ -41,11 +41,19 @@ func unpackTar(tr *tar.Reader, path string) error {
 		if strings.Contains(header.Name, ".wh.") {
 			rmPath := filepath.Join(path, header.Name)
 			newName := strings.Replace(rmPath, ".wh.", "", 1)
-			err := os.Remove(rmPath)
+			if _, err := os.Stat(rmPath); err == nil {
+				if err := os.Remove(rmPath); err != nil {
+					glog.Info(err)
+				}
+			}
 			if err != nil {
 				glog.Info(err)
 			}
-			err = os.RemoveAll(newName)
+			if _, err := os.Stat(newName); err == nil {
+				if err = os.RemoveAll(newName); err != nil {
+					glog.Info(err)
+				}
+			}
 			if err != nil {
 				glog.Info(err)
 			}
@@ -68,10 +76,10 @@ func unpackTar(tr *tar.Reader, path string) error {
 
 		// if it's a file create it
 		case tar.TypeReg:
-
 			currFile, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
 			if err != nil {
 				glog.Errorf("Error opening file %s", target)
+				glog.Errorf("File Mode: %s", mode.String())
 				return err
 			}
 			_, err = io.Copy(currFile, tr)
@@ -106,7 +114,9 @@ func UnTar(filename string, target string) error {
 }
 
 func IsTar(path string) bool {
-	return filepath.Ext(path) == ".tar"
+	return filepath.Ext(path) == ".tar" ||
+		filepath.Ext(path) == ".tar.gz" ||
+		filepath.Ext(path) == ".tgz"
 }
 
 func CheckTar(image string) bool {

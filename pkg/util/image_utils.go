@@ -22,7 +22,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
+	"github.com/containers/image/docker/reference"
 	"github.com/docker/docker/pkg/system"
 	"github.com/golang/glog"
 )
@@ -42,20 +44,22 @@ func GetImageLayers(pathToImage string) []string {
 	return layers
 }
 
-func CheckImageID(image string) bool {
-	pattern := regexp.MustCompile("[a-z|0-9]{12}")
-	if exp := pattern.FindString(image); exp != image {
-		return false
-	}
-	return true
+func checkValidImageID(image string) bool {
+	_, err := reference.Parse(image)
+	return (err == nil)
 }
 
-func CheckImageURL(image string) bool {
-	pattern := regexp.MustCompile("^.+/.+(:.+){0,1}$")
-	if exp := pattern.FindString(image); exp != image || CheckTar(image) {
+func CheckValidLocalImageID(image string) bool {
+	return checkValidImageID(strings.Replace(image, "daemon://", "", -1)) &&
+		!CheckTar(image)
+}
+
+func CheckValidRemoteImageID(image string) bool {
+	daemonRegex := regexp.MustCompile("daemon://.*")
+	if match := daemonRegex.MatchString(image); match {
 		return false
 	}
-	return true
+	return checkValidImageID(image) && !CheckTar(image)
 }
 
 // copyToFile writes the content of the reader to the specified file

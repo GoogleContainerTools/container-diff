@@ -103,7 +103,7 @@ func GetAnalyzers(analyzeNames []string) (analyzeFuncs []Analyzer, err error) {
 		if a, exists := Analyzers[name]; exists {
 			analyzeFuncs = append(analyzeFuncs, a)
 		} else {
-			glog.Errorf("Unknown analyzer/differ specified", name)
+			glog.Errorf("Unknown analyzer/differ specified: %s", name)
 		}
 	}
 	if len(analyzeFuncs) == 0 {

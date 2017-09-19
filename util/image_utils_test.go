@@ -27,13 +27,12 @@ type imageTestPair struct {
 	expectedOutput bool
 }
 
-func TestCheckImageID(t *testing.T) {
+func TestCheckLocalImage(t *testing.T) {
 	for _, test := range []imageTestPair{
-		{input: "123456789012", expectedOutput: true},
-		{input: "gcr.io/repo/image", expectedOutput: false},
+		{input: "daemon://gcr.io/repo/image", expectedOutput: true},
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
-		output := pkgutil.CheckImageID(test.input)
+		output := pkgutil.CheckValidLocalImageID(test.input)
 		if output != test.expectedOutput {
 			if test.expectedOutput {
 				t.Errorf("Expected input to be image ID but %s tested false", test.input)
@@ -46,7 +45,6 @@ func TestCheckImageID(t *testing.T) {
 
 func TestCheckImageTar(t *testing.T) {
 	for _, test := range []imageTestPair{
-		{input: "123456789012", expectedOutput: false},
 		{input: "gcr.io/repo/image", expectedOutput: false},
 		{input: "testTars/la-croix1.tar", expectedOutput: true},
 	} {
@@ -61,13 +59,12 @@ func TestCheckImageTar(t *testing.T) {
 	}
 }
 
-func TestCheckImageURL(t *testing.T) {
+func TestCheckRemoteImage(t *testing.T) {
 	for _, test := range []imageTestPair{
-		{input: "123456789012", expectedOutput: false},
 		{input: "gcr.io/repo/image", expectedOutput: true},
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
-		output := pkgutil.CheckImageURL(test.input)
+		output := pkgutil.CheckValidRemoteImageID(test.input)
 		if output != test.expectedOutput {
 			if test.expectedOutput {
 				t.Errorf("Expected input to be a tar file but %s tested false", test.input)
