@@ -19,24 +19,19 @@ package util
 import (
 	"archive/tar"
 	"compress/gzip"
-	"context"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
-	"github.com/containers/image/docker"
-	"github.com/containers/image/docker/tarfile"
-	"github.com/docker/docker/client"
-
+	"github.com/containers/image/types"
 	"github.com/golang/glog"
 )
 
 var sourceToPrepMap = map[string]func(ip ImagePrepper) Prepper{
-	"ID":  func(ip ImagePrepper) Prepper { return IDPrepper{ImagePrepper: ip} },
+	"ID":  func(ip ImagePrepper) Prepper { return DaemonPrepper{ImagePrepper: ip} },
 	"URL": func(ip ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
 	"tar": func(ip ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
 }
@@ -66,49 +61,6 @@ type ConfigSchema struct {
 	History []ImageHistoryItem `json:"history"`
 }
 
-type ImagePrepper struct {
-	Source string
-	Client *client.Client
-}
-
-type Prepper interface {
-	getFileSystem() (string, error)
-	getConfig() (ConfigSchema, error)
-}
-
-func (p ImagePrepper) GetImage() (Image, error) {
-	glog.Infof("Starting prep for image %s", p.Source)
-	img := p.Source
-
-	var prepper Prepper
-	for source, check := range sourceCheckMap {
-		if check(img) {
-			prepper = sourceToPrepMap[source](p)
-			break
-		}
-	}
-	if prepper == nil {
-		return Image{}, errors.New("Could not retrieve image from source")
-	}
-
-	imgPath, err := prepper.getFileSystem()
-	if err != nil {
-		return Image{}, err
-	}
-
-	config, err := prepper.getConfig()
-	if err != nil {
-		glog.Error("Error retrieving History: ", err)
-	}
-
-	glog.Infof("Finished prepping image %s", p.Source)
-	return Image{
-		Source: img,
-		FSPath: imgPath,
-		Config: config,
-	}, nil
-}
-
 func getImageFromTar(tarPath string) (string, error) {
 	glog.Info("Extracting image tar to obtain image file system")
 	path := strings.TrimSuffix(tarPath, filepath.Ext(tarPath))
@@ -116,25 +68,11 @@ func getImageFromTar(tarPath string) (string, error) {
 	return path, err
 }
 
-// CloudPrepper prepares images sourced from a Cloud registry
-type CloudPrepper struct {
-	ImagePrepper
-}
-
-func (p CloudPrepper) getFileSystem() (string, error) {
-	// The regexp when passed a string creates a list of the form
-	// [repourl/image:tag, image:tag, tag] (the tag may or may not be present)
-	URLPattern := regexp.MustCompile("^.+/(.+(:.+){0,1})$")
-	URLMatch := URLPattern.FindStringSubmatch(p.Source)
-	// Removing the ":" so that the image path name can be <image><tag>
-	sanitizedName := strings.Replace(URLMatch[1], ":", "", -1)
+func getFileSystemFromReference(ref types.ImageReference, imageName string) (string, error) {
+	sanitizedName := strings.Replace(imageName, ":", "", -1)
+	sanitizedName = strings.Replace(sanitizedName, "/", "", -1)
 
 	path, err := ioutil.TempDir("", sanitizedName)
-	if err != nil {
-		return "", err
-	}
-
-	ref, err := docker.ParseReference("//" + p.Source)
 	if err != nil {
 		return "", err
 	}
@@ -170,121 +108,26 @@ func (p CloudPrepper) getFileSystem() (string, error) {
 	return path, nil
 }
 
-func (p CloudPrepper) getConfig() (ConfigSchema, error) {
-	ref, err := docker.ParseReference("//" + p.Source)
-	if err != nil {
-		return ConfigSchema{}, err
-	}
-
+func getConfigFromReference(ref types.ImageReference, source string) (ConfigSchema, error) {
 	img, err := ref.NewImage(nil)
 	if err != nil {
-		glog.Errorf("Error referencing image %s from registry: %s", p.Source, err)
+		glog.Errorf("Error referencing image %s from registry: %s", source, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
 	}
 	defer img.Close()
 
 	configBlob, err := img.ConfigBlob()
 	if err != nil {
-		glog.Errorf("Error obtaining config blob for image %s from registry: %s", p.Source, err)
+		glog.Errorf("Error obtaining config blob for image %s from registry: %s", source, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
 	}
 
 	var config ConfigSchema
 	err = json.Unmarshal(configBlob, &config)
 	if err != nil {
-		glog.Errorf("Error with config file struct for image %s: %s", p.Source, err)
+		glog.Errorf("Error with config file struct for image %s: %s", source, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
 	}
-	return config, nil
-}
-
-type IDPrepper struct {
-	ImagePrepper
-}
-
-func (p IDPrepper) getFileSystem() (string, error) {
-	tarPath, err := saveImageToTar(p.Client, p.Source, p.Source)
-	if err != nil {
-		return "", err
-	}
-
-	defer os.Remove(tarPath)
-	return getImageFromTar(tarPath)
-}
-
-func (p IDPrepper) getConfig() (ConfigSchema, error) {
-	inspect, _, err := p.Client.ImageInspectWithRaw(context.Background(), p.Source)
-	if err != nil {
-		return ConfigSchema{}, err
-	}
-
-	config := ConfigObject{
-		Env: inspect.Config.Env,
-	}
-	history := p.getHistory()
-	return ConfigSchema{
-		Config:  config,
-		History: history,
-	}, nil
-}
-
-func (p IDPrepper) getHistory() []ImageHistoryItem {
-	history, err := p.Client.ImageHistory(context.Background(), p.Source)
-	if err != nil {
-		glog.Error("Could not obtain image history for %s: %s", p.Source, err)
-	}
-	historyItems := []ImageHistoryItem{}
-	for _, item := range history {
-		historyItems = append(historyItems, ImageHistoryItem{CreatedBy: item.CreatedBy})
-	}
-	return historyItems
-}
-
-type TarPrepper struct {
-	ImagePrepper
-}
-
-func (p TarPrepper) getFileSystem() (string, error) {
-	return getImageFromTar(p.Source)
-}
-
-func (p TarPrepper) getConfig() (ConfigSchema, error) {
-	tempDir := strings.TrimSuffix(p.Source, filepath.Ext(p.Source)) + "-config"
-	defer os.RemoveAll(tempDir)
-	err := UnTar(p.Source, tempDir)
-	if err != nil {
-		return ConfigSchema{}, err
-	}
-
-	var config ConfigSchema
-	// First open the manifest, then find the referenced config.
-	manifestPath := filepath.Join(tempDir, "manifest.json")
-	contents, err := ioutil.ReadFile(manifestPath)
-	if err != nil {
-		return ConfigSchema{}, err
-	}
-
-	manifests := []tarfile.ManifestItem{}
-	if err := json.Unmarshal(contents, &manifests); err != nil {
-		return ConfigSchema{}, err
-	}
-
-	if len(manifests) != 1 {
-		return ConfigSchema{}, errors.New("specified tar file contains multiple images")
-	}
-
-	cfgFilename := filepath.Join(tempDir, manifests[0].Config)
-	file, err := ioutil.ReadFile(cfgFilename)
-	if err != nil {
-		glog.Errorf("Could not read config file %s: %s", cfgFilename, err)
-		return ConfigSchema{}, errors.New("Could not obtain image config")
-	}
-	err = json.Unmarshal(file, &config)
-	if err != nil {
-		glog.Errorf("Could not marshal config file %s: %s", cfgFilename, err)
-		return ConfigSchema{}, errors.New("Could not obtain image config")
-	}
-
 	return config, nil
 }
 
