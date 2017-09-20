@@ -18,6 +18,7 @@ package util
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/containers/image/docker"
 	"github.com/containers/image/docker/reference"
@@ -39,12 +40,18 @@ func (p CloudPrepper) GetSource() string {
 }
 
 func (p CloudPrepper) SupportsImage() bool {
+	// will fail for strings prefixed with 'daemon://'
 	daemonRegex := regexp.MustCompile(DaemonPrefix + ".*")
-	if match := daemonRegex.MatchString(p.ImagePrepper.Source); match {
+	if match := daemonRegex.MatchString(p.ImagePrepper.Source); match || IsTar(p.ImagePrepper.Source) {
 		return false
 	}
+	strippedSource := strings.Replace(p.ImagePrepper.Source, RemotePrefix, "", -1)
 	_, err := reference.Parse(p.ImagePrepper.Source)
-	return (err == nil) && !IsTar(p.ImagePrepper.Source)
+	if err != nil {
+		p.ImagePrepper.Source = strippedSource
+		return true
+	}
+	return false
 }
 
 func (p CloudPrepper) GetFileSystem() (string, error) {

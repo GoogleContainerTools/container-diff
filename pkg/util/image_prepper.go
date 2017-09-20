@@ -19,7 +19,6 @@ package util
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
@@ -62,17 +61,6 @@ func (p *ImagePrepper) GetImage() (Image, error) {
 	img := p.Source
 
 	var prepper Prepper
-
-	// first, respect prefixes on image names
-	if strings.HasPrefix(p.Source, "daemon://") {
-		p.Source = strings.Replace(p.Source, "daemon://", "", -1)
-		prepper = DaemonPrepper{ImagePrepper: p}
-		return getImage(prepper)
-	} else if strings.HasPrefix(p.Source, "remote://") {
-		p.Source = strings.Replace(p.Source, "remote://", "", -1)
-		prepper = CloudPrepper{ImagePrepper: p}
-		return getImage(prepper)
-	}
 
 	for _, prepperConstructor := range orderedPreppers {
 		prepper = prepperConstructor(p)
