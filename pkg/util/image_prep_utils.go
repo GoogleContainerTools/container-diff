@@ -18,7 +18,6 @@ package util
 
 import (
 	"archive/tar"
-	"compress/gzip"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -26,6 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/containers/image/pkg/compression"
 	"github.com/containers/image/types"
 	"github.com/golang/glog"
 )
@@ -87,13 +87,24 @@ func getFileSystemFromReference(ref types.ImageReference, imageName string) (str
 	for _, b := range img.LayerInfos() {
 		bi, _, err := imgSrc.GetBlob(b)
 		if err != nil {
-			glog.Errorf("Failed to pull image layer with error: %s", err)
+			glog.Errorf("Failed to pull image layer: %s", err)
+			return "", err
 		}
-		gzf, err := gzip.NewReader(bi)
+		// try and detect layer compression
+		f, reader, err := compression.DetectCompression(bi)
 		if err != nil {
-			glog.Errorf("Failed to read layers with error: %s", err)
+			glog.Errorf("Failed to detect image compression: %s", err)
+			return "", err
 		}
-		tr := tar.NewReader(gzf)
+		if f != nil {
+			// decompress if necessary
+			reader, err = f(reader)
+			if err != nil {
+				glog.Errorf("Failed to decompress image: %s", err)
+				return "", err
+			}
+		}
+		tr := tar.NewReader(reader)
 		err = unpackTar(tr, path)
 		if err != nil {
 			glog.Errorf("Failed to untar layer with error: %s", err)
@@ -128,27 +139,8 @@ func getConfigFromReference(ref types.ImageReference, source string) (ConfigSche
 func CleanupImage(image Image) {
 	if image.FSPath != "" {
 		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
-		errMsg := remove(image.FSPath, true)
-		if errMsg != "" {
-			glog.Error(errMsg)
+		if err := os.RemoveAll(image.FSPath); err != nil {
+			glog.Error(err.Error())
 		}
 	}
-}
-
-func remove(path string, dir bool) string {
-	var errStr string
-	if path == "" {
-		return ""
-	}
-
-	var err error
-	if dir {
-		err = os.RemoveAll(path)
-	} else {
-		err = os.Remove(path)
-	}
-	if err != nil {
-		errStr = "\nUnable to remove " + path
-	}
-	return errStr
 }
