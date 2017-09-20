@@ -47,7 +47,7 @@ var RootCmd = &cobra.Command{
 func NewClient() (*client.Client, error) {
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		return nil, fmt.Errorf("Error getting docker client: %s", err)
+		return nil, fmt.Errorf("err msg: %s", err)
 	}
 	cli.NegotiateAPIVersion(context.Background())
 
@@ -93,7 +93,7 @@ func validateArgs(args []string, validatefxns ...validatefxn) error {
 
 func checkIfValidAnalyzer(flagtypes string) error {
 	if flagtypes == "" {
-		return nil
+		return errors.New("Please provide at least one analyzer to run")
 	}
 	analyzers := strings.Split(flagtypes, ",")
 	for _, name := range analyzers {

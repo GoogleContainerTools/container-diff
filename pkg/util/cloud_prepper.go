@@ -20,11 +20,14 @@ import (
 	"regexp"
 
 	"github.com/containers/image/docker"
+	"github.com/containers/image/docker/reference"
 )
+
+const RemotePrefix = "remote://"
 
 // CloudPrepper prepares images sourced from a Cloud registry
 type CloudPrepper struct {
-	ImagePrepper
+	*ImagePrepper
 }
 
 func (p CloudPrepper) Name() string {
@@ -36,12 +39,12 @@ func (p CloudPrepper) GetSource() string {
 }
 
 func (p CloudPrepper) SupportsImage() bool {
-	pattern := regexp.MustCompile("^.+/.+(:.+){0,1}$")
-	image := p.ImagePrepper.Source
-	if exp := pattern.FindString(image); exp != image || CheckTar(image) {
+	daemonRegex := regexp.MustCompile(DaemonPrefix + ".*")
+	if match := daemonRegex.MatchString(p.ImagePrepper.Source); match {
 		return false
 	}
-	return true
+	_, err := reference.Parse(p.ImagePrepper.Source)
+	return (err == nil) && !IsTar(p.ImagePrepper.Source)
 }
 
 func (p CloudPrepper) GetFileSystem() (string, error) {

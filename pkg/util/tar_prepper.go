@@ -29,7 +29,7 @@ import (
 )
 
 type TarPrepper struct {
-	ImagePrepper
+	*ImagePrepper
 }
 
 func (p TarPrepper) Name() string {

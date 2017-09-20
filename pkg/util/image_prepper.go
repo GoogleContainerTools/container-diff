@@ -18,6 +18,8 @@ package util
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
@@ -36,11 +38,41 @@ type Prepper interface {
 	SupportsImage() bool
 }
 
-func (p ImagePrepper) GetImage() (Image, error) {
+func getImage(prepper Prepper) (Image, error) {
+	imgPath, err := prepper.GetFileSystem()
+	if err != nil {
+		return Image{}, fmt.Errorf("error msg: %s", err.Error())
+	}
+
+	config, err := prepper.GetConfig()
+	if err != nil {
+		return Image{}, fmt.Errorf("error msg: %s", err.Error())
+	}
+
+	glog.Infof("Finished prepping image %s", prepper.GetSource())
+	return Image{
+		Source: prepper.GetSource(),
+		FSPath: imgPath,
+		Config: config,
+	}, nil
+}
+
+func (p *ImagePrepper) GetImage() (Image, error) {
 	glog.Infof("Starting prep for image %s", p.Source)
 	img := p.Source
 
 	var prepper Prepper
+
+	// first, respect prefixes on image names
+	if strings.HasPrefix(p.Source, "daemon://") {
+		p.Source = strings.Replace(p.Source, "daemon://", "", -1)
+		prepper = DaemonPrepper{ImagePrepper: p}
+		return getImage(prepper)
+	} else if strings.HasPrefix(p.Source, "remote://") {
+		p.Source = strings.Replace(p.Source, "remote://", "", -1)
+		prepper = CloudPrepper{ImagePrepper: p}
+		return getImage(prepper)
+	}
 
 	for _, prepperConstructor := range orderedPreppers {
 		prepper = prepperConstructor(p)

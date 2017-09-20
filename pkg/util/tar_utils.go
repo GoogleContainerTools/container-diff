@@ -106,7 +106,9 @@ func UnTar(filename string, target string) error {
 }
 
 func IsTar(path string) bool {
-	return filepath.Ext(path) == ".tar"
+	return filepath.Ext(path) == ".tar" ||
+		filepath.Ext(path) == ".tar.gz" ||
+		filepath.Ext(path) == ".tgz"
 }
 
 func CheckTar(image string) bool {

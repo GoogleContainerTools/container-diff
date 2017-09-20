@@ -56,20 +56,23 @@ func checkAnalyzeArgNum(args []string) error {
 	return nil
 }
 
-func analyzeImage(imageArg string, analyzerArgs []string) error {
+func analyzeImage(imageName string, analyzerArgs []string) error {
+	cli, err := NewClient()
+	if err != nil {
+		return fmt.Errorf("Error getting docker client for differ: %s", err)
+	}
+	defer cli.Close()
+
 	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
 		glog.Error(err.Error())
 		return errors.New("Could not perform image analysis")
 	}
 
-	cli, err := NewClient()
-	if err != nil {
-		return fmt.Errorf("Error getting docker client for differ: %s", err)
-	}
-	defer cli.Close()
+	prefixedName := processImageName(imageName)
+
 	ip := pkgutil.ImagePrepper{
-		Source: imageArg,
+		Source: prefixedName,
 		Client: cli,
 	}
 	image, err := ip.GetImage()
