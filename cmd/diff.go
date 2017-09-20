@@ -58,6 +58,12 @@ func checkDiffArgNum(args []string) error {
 }
 
 func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
+	diffTypes, err := differs.GetAnalyzers(diffArgs)
+	if err != nil {
+		glog.Error(err.Error())
+		return errors.New("Could not perform image diff")
+	}
+
 	cli, err := NewClient()
 	if err != nil {
 		return fmt.Errorf("Error getting docker client for differ: %s", err)
@@ -91,12 +97,6 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	if !save {
 		defer pkgutil.CleanupImage(*imageMap[image1Arg])
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
-	}
-
-	diffTypes, err := differs.GetAnalyzers(diffArgs)
-	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image diff")
 	}
 
 	req := differs.DiffRequest{*imageMap[image1Arg], *imageMap[image2Arg], diffTypes}

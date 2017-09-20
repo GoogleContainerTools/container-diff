@@ -57,6 +57,12 @@ func checkAnalyzeArgNum(args []string) error {
 }
 
 func analyzeImage(imageArg string, analyzerArgs []string) error {
+	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
+	if err != nil {
+		glog.Error(err.Error())
+		return errors.New("Could not perform image analysis")
+	}
+
 	cli, err := NewClient()
 	if err != nil {
 		return fmt.Errorf("Error getting docker client for differ: %s", err)
@@ -71,11 +77,6 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 	if !save {
 		defer pkgutil.CleanupImage(image)
 	}
-	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
-	}
-	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
 		glog.Error(err.Error())
 		return errors.New("Could not perform image analysis")
