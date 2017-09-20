@@ -49,9 +49,11 @@ if [[ ! -z ${files} ]]; then
 	exit 1
 fi
 
-# Check gazelle
-bazel run //:gazelle
-if [ "$(git status --porcelain)" ]; then
-	echo "BUILD files out of date. Run `bazel run //:gazelle` to update them."
-	exit 1
+if [ ! "$(git status --porcelain)" ]; then
+	# Check gazelle if everything is up to date.
+	bazel run //:gazelle
+	if [ "$(git status --porcelain)" ]; then
+		echo "BUILD files out of date. Run `bazel run //:gazelle` to update them."
+		exit 1
+	fi
 fi
