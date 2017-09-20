@@ -88,6 +88,7 @@ func getFileSystemFromReference(ref types.ImageReference, imageName string) (str
 		bi, _, err := imgSrc.GetBlob(b)
 		if err != nil {
 			glog.Errorf("Failed to pull image layer: %s", err)
+			return "", err
 		}
 		// try and detect layer compression
 		f, reader, err := compression.DetectCompression(bi)
