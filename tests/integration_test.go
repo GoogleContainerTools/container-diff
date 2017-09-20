@@ -20,14 +20,17 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	client "github.com/fsouza/go-dockerclient"
+	"github.com/docker/docker/client"
+	"github.com/docker/docker/api/types"
 )
 
 const (
@@ -121,6 +124,14 @@ func TestDiffAndAnalysis(t *testing.T) {
 			expectedFile: "multi_diff_expected.json",
 		},
 		{
+			description:  "multi differ local",
+			subcommand:   "diff",
+			imageA:       multiBaseLocal,
+			imageB:       multiModifiedLocal,
+			differFlags:  []string{"--types=node,pip,apt"},
+			expectedFile: "multi_diff_expected.json",
+		},
+		{
 			description:  "history differ",
 			subcommand:   "diff",
 			imageA:       diffBase,
@@ -193,9 +204,17 @@ func TestDiffAndAnalysis(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	// setup
-	cli := client.NewEnvClient()
-	err := cli.PullImage(&PullImageOptions{
-
-	})
+	ctx := context.Background()
+	cli, _ := client.NewEnvClient()
+	closer, err := cli.ImagePull(ctx, multiBase, types.ImagePullOptions{})
+	if err != nil {
+		os.Exit(1)
+	}
+	closer.Close()
+	closer, err = cli.ImagePull(ctx, multiModified, types.ImagePullOptions{})
+	if err != nil {
+		os.Exit(1)
+	}
+	closer.Close()
 	os.Exit(m.Run())
 }
