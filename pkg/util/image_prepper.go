@@ -29,8 +29,11 @@ type ImagePrepper struct {
 }
 
 type Prepper interface {
-	getFileSystem() (string, error)
-	getConfig() (ConfigSchema, error)
+	Name() string
+	GetSource() string
+	GetFileSystem() (string, error)
+	GetConfig() (ConfigSchema, error)
+	SupportsImage() bool
 }
 
 func (p ImagePrepper) GetImage() (Image, error) {
@@ -38,22 +41,24 @@ func (p ImagePrepper) GetImage() (Image, error) {
 	img := p.Source
 
 	var prepper Prepper
-	for source, check := range sourceCheckMap {
-		if check(img) {
-			prepper = sourceToPrepMap[source](p)
+
+	for _, prepperConstructor := range orderedPreppers {
+		prepper = prepperConstructor(p)
+		if prepper.SupportsImage() {
 			break
 		}
 	}
+
 	if prepper == nil {
 		return Image{}, errors.New("Could not retrieve image from source")
 	}
 
-	imgPath, err := prepper.getFileSystem()
+	imgPath, err := prepper.GetFileSystem()
 	if err != nil {
 		return Image{}, err
 	}
 
-	config, err := prepper.getConfig()
+	config, err := prepper.GetConfig()
 	if err != nil {
 		glog.Error("Error retrieving History: ", err)
 	}

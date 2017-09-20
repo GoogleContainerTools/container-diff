@@ -21,7 +21,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 
 	"github.com/docker/docker/pkg/system"
 	"github.com/golang/glog"
@@ -40,22 +39,6 @@ func GetImageLayers(pathToImage string) []string {
 		}
 	}
 	return layers
-}
-
-func CheckImageID(image string) bool {
-	pattern := regexp.MustCompile("[a-z|0-9]{12}")
-	if exp := pattern.FindString(image); exp != image {
-		return false
-	}
-	return true
-}
-
-func CheckImageURL(image string) bool {
-	pattern := regexp.MustCompile("^.+/.+(:.+){0,1}$")
-	if exp := pattern.FindString(image); exp != image || CheckTar(image) {
-		return false
-	}
-	return true
 }
 
 // copyToFile writes the content of the reader to the specified file

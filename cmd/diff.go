@@ -34,7 +34,7 @@ var diffCmd = &cobra.Command{
 	Short: "Compare two images: [image1] [image2]",
 	Long:  `Compares two images using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if err := validateArgs(args, checkDiffArgNum, checkArgType); err != nil {
+		if err := validateArgs(args, checkDiffArgNum); err != nil {
 			return errors.New(err.Error())
 		}
 		if err := checkIfValidAnalyzer(types); err != nil {

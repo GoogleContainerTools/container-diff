@@ -32,11 +32,23 @@ type TarPrepper struct {
 	ImagePrepper
 }
 
-func (p TarPrepper) getFileSystem() (string, error) {
+func (p TarPrepper) Name() string {
+	return "Tar Archive"
+}
+
+func (p TarPrepper) GetSource() string {
+	return p.ImagePrepper.Source
+}
+
+func (p TarPrepper) SupportsImage() bool {
+	return IsTar(p.ImagePrepper.Source)
+}
+
+func (p TarPrepper) GetFileSystem() (string, error) {
 	return getImageFromTar(p.Source)
 }
 
-func (p TarPrepper) getConfig() (ConfigSchema, error) {
+func (p TarPrepper) GetConfig() (ConfigSchema, error) {
 	tempDir := strings.TrimSuffix(p.Source, filepath.Ext(p.Source)) + "-config"
 	defer os.RemoveAll(tempDir)
 	err := UnTar(p.Source, tempDir)

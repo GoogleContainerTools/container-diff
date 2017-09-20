@@ -33,7 +33,12 @@ func TestCheckImageID(t *testing.T) {
 		{input: "gcr.io/repo/image", expectedOutput: false},
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
-		output := pkgutil.CheckImageID(test.input)
+		prepper := pkgutil.DaemonPrepper{
+			pkgutil.ImagePrepper{
+				Source: test.input,
+			},
+		}
+		output := prepper.SupportsImage()
 		if output != test.expectedOutput {
 			if test.expectedOutput {
 				t.Errorf("Expected input to be image ID but %s tested false", test.input)
@@ -67,7 +72,12 @@ func TestCheckImageURL(t *testing.T) {
 		{input: "gcr.io/repo/image", expectedOutput: true},
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
-		output := pkgutil.CheckImageURL(test.input)
+		prepper := pkgutil.CloudPrepper{
+			pkgutil.ImagePrepper{
+				Source: test.input,
+			},
+		}
+		output := prepper.SupportsImage()
 		if output != test.expectedOutput {
 			if test.expectedOutput {
 				t.Errorf("Expected input to be a tar file but %s tested false", test.input)
