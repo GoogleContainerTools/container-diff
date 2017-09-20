@@ -47,7 +47,8 @@ func (p CloudPrepper) SupportsImage() bool {
 	}
 	strippedSource := strings.Replace(p.ImagePrepper.Source, RemotePrefix, "", -1)
 	_, err := reference.Parse(p.ImagePrepper.Source)
-	if err != nil {
+	if err == nil {
+		// strip prefix off image source for later use
 		p.ImagePrepper.Source = strippedSource
 		return true
 	}

@@ -48,7 +48,7 @@ func (p DaemonPrepper) SupportsImage() bool {
 	}
 	strippedSource := strings.Replace(p.ImagePrepper.Source, DaemonPrefix, "", -1)
 	_, err := reference.Parse(strippedSource)
-	if err != nil {
+	if err == nil {
 		// strip prefix off image source for later use
 		p.ImagePrepper.Source = strippedSource
 		return true
