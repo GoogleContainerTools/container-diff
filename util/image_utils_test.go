@@ -29,12 +29,11 @@ type imageTestPair struct {
 
 func TestCheckImageID(t *testing.T) {
 	for _, test := range []imageTestPair{
-		{input: "123456789012", expectedOutput: true},
 		{input: "gcr.io/repo/image", expectedOutput: false},
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
 		prepper := pkgutil.DaemonPrepper{
-			pkgutil.ImagePrepper{
+			&pkgutil.ImagePrepper{
 				Source: test.input,
 			},
 		}
@@ -51,7 +50,6 @@ func TestCheckImageID(t *testing.T) {
 
 func TestCheckImageTar(t *testing.T) {
 	for _, test := range []imageTestPair{
-		{input: "123456789012", expectedOutput: false},
 		{input: "gcr.io/repo/image", expectedOutput: false},
 		{input: "testTars/la-croix1.tar", expectedOutput: true},
 	} {
@@ -68,12 +66,11 @@ func TestCheckImageTar(t *testing.T) {
 
 func TestCheckImageURL(t *testing.T) {
 	for _, test := range []imageTestPair{
-		{input: "123456789012", expectedOutput: false},
 		{input: "gcr.io/repo/image", expectedOutput: true},
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
 		prepper := pkgutil.CloudPrepper{
-			pkgutil.ImagePrepper{
+			&pkgutil.ImagePrepper{
 				Source: test.input,
 			},
 		}
