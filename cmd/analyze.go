@@ -56,7 +56,7 @@ func checkAnalyzeArgNum(args []string) error {
 	return nil
 }
 
-func analyzeImage(imageArg string, analyzerArgs []string) error {
+func analyzeImage(imageName string, analyzerArgs []string) error {
 	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
 		return err
@@ -67,11 +67,13 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 		return fmt.Errorf("Error getting docker client: %s", err)
 	}
 	defer cli.Close()
-	ip := pkgutil.ImagePrepper{
-		Source: imageArg,
-		Client: cli,
+
+	prepper, err := getPrepperForImage(imageName)
+	if err != nil {
+		return err
 	}
-	image, err := ip.GetImage()
+
+	image, err := prepper.GetImage()
 
 	if !save {
 		defer pkgutil.CleanupImage(image)

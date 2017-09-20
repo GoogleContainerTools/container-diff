@@ -27,10 +27,10 @@ type imageTestPair struct {
 	expectedOutput bool
 }
 
-func TestCheckImageID(t *testing.T) {
+func TestCheckLocalImage(t *testing.T) {
 	for _, test := range []imageTestPair{
-		{input: "123456789012", expectedOutput: true},
-		{input: "gcr.io/repo/image", expectedOutput: false},
+		{input: "daemon://gcr.io/repo/image", expectedOutput: true},
+		{input: "remote://gcr.io/repo/image", expectedOutput: false},
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
 		prepper := pkgutil.DaemonPrepper{
@@ -51,7 +51,6 @@ func TestCheckImageID(t *testing.T) {
 
 func TestCheckImageTar(t *testing.T) {
 	for _, test := range []imageTestPair{
-		{input: "123456789012", expectedOutput: false},
 		{input: "gcr.io/repo/image", expectedOutput: false},
 		{input: "testTars/la-croix1.tar", expectedOutput: true},
 	} {
@@ -66,10 +65,11 @@ func TestCheckImageTar(t *testing.T) {
 	}
 }
 
-func TestCheckImageURL(t *testing.T) {
+func TestCheckRemoteImage(t *testing.T) {
 	for _, test := range []imageTestPair{
-		{input: "123456789012", expectedOutput: false},
 		{input: "gcr.io/repo/image", expectedOutput: true},
+		{input: "daemon://gcr.io/repo/image", expectedOutput: false},
+		{input: "remote://gcr.io/repo/image", expectedOutput: true},
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
 		prepper := pkgutil.CloudPrepper{

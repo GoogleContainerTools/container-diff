@@ -18,12 +18,14 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	goflag "flag"
 	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
@@ -36,6 +38,11 @@ var save bool
 var types string
 
 type validatefxn func(args []string) error
+
+const (
+	DaemonPrefix = "daemon://"
+	RemotePrefix = "remote://"
+)
 
 var RootCmd = &cobra.Command{
 	Use:   "container-diff",
@@ -92,7 +99,7 @@ func validateArgs(args []string, validatefxns ...validatefxn) error {
 
 func checkIfValidAnalyzer(flagtypes string) error {
 	if flagtypes == "" {
-		return nil
+		return errors.New("Please provide at least one analyzer to run")
 	}
 	analyzers := strings.Split(flagtypes, ",")
 	for _, name := range analyzers {
@@ -101,6 +108,30 @@ func checkIfValidAnalyzer(flagtypes string) error {
 		}
 	}
 	return nil
+}
+
+func getPrepperForImage(image string) (pkgutil.Prepper, error) {
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		return nil, err
+	}
+	if pkgutil.IsTar(image) {
+		return pkgutil.TarPrepper{
+			Source: image,
+			Client: cli,
+		}, nil
+
+	} else if strings.HasPrefix(image, DaemonPrefix) {
+		return pkgutil.DaemonPrepper{
+			Source: strings.Replace(image, DaemonPrefix, "", -1),
+			Client: cli,
+		}, nil
+	}
+	// either has remote prefix or has no prefix, in which case we force remote
+	return pkgutil.CloudPrepper{
+		Source: strings.Replace(image, RemotePrefix, "", -1),
+		Client: cli,
+	}, nil
 }
 
 func init() {

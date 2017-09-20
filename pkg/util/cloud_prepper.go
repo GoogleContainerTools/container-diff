@@ -17,14 +17,14 @@ limitations under the License.
 package util
 
 import (
-	"regexp"
-
 	"github.com/containers/image/docker"
+	"github.com/docker/docker/client"
 )
 
 // CloudPrepper prepares images sourced from a Cloud registry
 type CloudPrepper struct {
-	ImagePrepper
+	Source string
+	Client *client.Client
 }
 
 func (p CloudPrepper) Name() string {
@@ -32,16 +32,11 @@ func (p CloudPrepper) Name() string {
 }
 
 func (p CloudPrepper) GetSource() string {
-	return p.ImagePrepper.Source
+	return p.Source
 }
 
-func (p CloudPrepper) SupportsImage() bool {
-	pattern := regexp.MustCompile("^.+/.+(:.+){0,1}$")
-	image := p.ImagePrepper.Source
-	if exp := pattern.FindString(image); exp != image || CheckTar(image) {
-		return false
-	}
-	return true
+func (p CloudPrepper) GetImage() (Image, error) {
+	return getImage(p)
 }
 
 func (p CloudPrepper) GetFileSystem() (string, error) {
