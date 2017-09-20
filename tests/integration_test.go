@@ -26,6 +26,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	client "github.com/fsouza/go-dockerclient"
 )
 
 const (
@@ -43,6 +45,9 @@ const (
 
 	multiBase     = "gcr.io/gcp-runtimes/multi-base"
 	multiModified = "gcr.io/gcp-runtimes/multi-modified"
+
+	multiBaseLocal     = "daemon://gcr.io/gcp-runtimes/multi-base"
+	multiModifiedLocal = "daemon://gcr.io/gcp-runtimes/multi-modified"
 )
 
 type ContainerDiffRunner struct {
@@ -184,4 +189,13 @@ func TestDiffAndAnalysis(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMain(m *testing.M) {
+	// setup
+	cli := client.NewEnvClient()
+	err := cli.PullImage(&PullImageOptions{
+
+	})
+	os.Exit(m.Run())
 }
