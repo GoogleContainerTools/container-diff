@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -51,7 +52,7 @@ var diffCmd = &cobra.Command{
 
 func checkDiffArgNum(args []string) error {
 	if len(args) != 2 {
-		return fmt.Errorf("'diff' requires two images as arguments: container-diff diff [image1] [image2]")
+		return errors.New("'diff' requires two images as arguments: container-diff diff [image1] [image2]")
 	}
 	return nil
 }

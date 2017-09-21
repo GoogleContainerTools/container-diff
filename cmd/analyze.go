@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -50,7 +51,7 @@ var analyzeCmd = &cobra.Command{
 
 func checkAnalyzeArgNum(args []string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("'analyze' requires one image as an argument: container-diff analyze [image]")
+		return errors.New("'analyze' requires one image as an argument: container-diff analyze [image]")
 	}
 	return nil
 }
