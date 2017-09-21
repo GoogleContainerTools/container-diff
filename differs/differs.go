@@ -17,7 +17,6 @@ limitations under the License.
 package differs
 
 import (
-	"errors"
 	"fmt"
 
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
@@ -98,16 +97,17 @@ func (req SingleRequest) GetAnalysis() (map[string]util.Result, error) {
 	return results, err
 }
 
-func GetAnalyzers(analyzeNames []string) (analyzeFuncs []Analyzer, err error) {
+func GetAnalyzers(analyzeNames []string) ([]Analyzer, error) {
+	var analyzeFuncs []Analyzer
 	for _, name := range analyzeNames {
 		if a, exists := Analyzers[name]; exists {
 			analyzeFuncs = append(analyzeFuncs, a)
 		} else {
-			glog.Errorf("Unknown analyzer/differ specified", name)
+			return nil, fmt.Errorf("Unknown analyzer/differ specified: %s", name)
 		}
 	}
 	if len(analyzeFuncs) == 0 {
-		err = errors.New("No known analyzers/differs specified")
+		return nil, fmt.Errorf("No known analyzers/differs specified")
 	}
-	return
+	return analyzeFuncs, nil
 }

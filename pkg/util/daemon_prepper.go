@@ -18,9 +18,9 @@ package util
 
 import (
 	"context"
-	"os"
 	"regexp"
 
+	"github.com/containers/image/docker/daemon"
 	"github.com/golang/glog"
 )
 
@@ -45,29 +45,19 @@ func (p DaemonPrepper) SupportsImage() bool {
 }
 
 func (p DaemonPrepper) GetFileSystem() (string, error) {
-	tarPath, err := saveImageToTar(p.Client, p.Source, p.Source)
+	ref, err := daemon.ParseReference(p.Source)
 	if err != nil {
 		return "", err
 	}
-
-	defer os.Remove(tarPath)
-	return getImageFromTar(tarPath)
+	return getFileSystemFromReference(ref, p.Source)
 }
 
 func (p DaemonPrepper) GetConfig() (ConfigSchema, error) {
-	inspect, _, err := p.Client.ImageInspectWithRaw(context.Background(), p.Source)
+	ref, err := daemon.ParseReference(p.Source)
 	if err != nil {
 		return ConfigSchema{}, err
 	}
-
-	config := ConfigObject{
-		Env: inspect.Config.Env,
-	}
-	history := p.GetHistory()
-	return ConfigSchema{
-		Config:  config,
-		History: history,
-	}, nil
+	return getConfigFromReference(ref, p.Source)
 }
 
 func (p DaemonPrepper) GetHistory() []ImageHistoryItem {

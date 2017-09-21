@@ -27,7 +27,6 @@ import (
 	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -98,9 +97,7 @@ func checkIfValidAnalyzer(flagtypes string) error {
 	analyzers := strings.Split(flagtypes, ",")
 	for _, name := range analyzers {
 		if _, exists := differs.Analyzers[name]; !exists {
-			errMessage := fmt.Sprintf("Argument %s is not a valid analyzer\n", name)
-			glog.Errorf(errMessage)
-			return errors.New(errMessage)
+			return fmt.Errorf("Argument %s is not a valid analyzer", name)
 		}
 	}
 	return nil
