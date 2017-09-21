@@ -77,6 +77,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		image1Arg: {},
 		image2Arg: {},
 	}
+	// TODO: fix error handling here
 	for imageArg := range imageMap {
 		go func(imageName string, imageMap map[string]*pkgutil.Image) {
 			defer wg.Done()

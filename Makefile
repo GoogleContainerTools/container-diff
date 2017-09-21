@@ -30,6 +30,8 @@ RELEASE_BUCKET ?= $(PROJECT)
 SUPPORTED_PLATFORMS := linux-$(GOARCH) darwin-$(GOARCH) windows-$(GOARCH).exe
 BUILD_PACKAGE = $(REPOPATH)
 
+SHELL = sh -xv
+
 # These build tags are from the containers/image library.
 # 
 # container_image_ostree_stub allows building the library without requiring the libostree development libraries
