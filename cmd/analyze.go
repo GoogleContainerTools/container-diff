@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -34,10 +33,10 @@ var analyzeCmd = &cobra.Command{
 	Long:  `Analyzes an image using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if err := validateArgs(args, checkAnalyzeArgNum); err != nil {
-			return errors.New(err.Error())
+			return err
 		}
 		if err := checkIfValidAnalyzer(types); err != nil {
-			return errors.New(err.Error())
+			return err
 		}
 		return nil
 	},
@@ -51,7 +50,7 @@ var analyzeCmd = &cobra.Command{
 
 func checkAnalyzeArgNum(args []string) error {
 	if len(args) != 1 {
-		return errors.New("'analyze' requires one image as an argument: container analyze [image]")
+		return fmt.Errorf("'analyze' requires one image as an argument: container-diff analyze [image]")
 	}
 	return nil
 }
@@ -59,13 +58,12 @@ func checkAnalyzeArgNum(args []string) error {
 func analyzeImage(imageArg string, analyzerArgs []string) error {
 	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
+		return err
 	}
 
 	cli, err := NewClient()
 	if err != nil {
-		return fmt.Errorf("Error getting docker client for differ: %s", err)
+		return fmt.Errorf("Error getting docker client: %s", err)
 	}
 	defer cli.Close()
 	ip := pkgutil.ImagePrepper{
@@ -78,15 +76,13 @@ func analyzeImage(imageArg string, analyzerArgs []string) error {
 		defer pkgutil.CleanupImage(image)
 	}
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
+		return fmt.Errorf("Error processing image: %s", err)
 	}
 
 	req := differs.SingleRequest{image, analyzeTypes}
 	analyses, err := req.GetAnalysis()
 	if err != nil {
-		glog.Error(err.Error())
-		return errors.New("Could not perform image analysis")
+		return fmt.Errorf("Error performing image analysis: %s", err)
 	}
 
 	glog.Info("Retrieving analyses")
