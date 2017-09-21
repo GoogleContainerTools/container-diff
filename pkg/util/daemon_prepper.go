@@ -18,14 +18,15 @@ package util
 
 import (
 	"context"
-	"os"
-	"regexp"
 
+	"github.com/containers/image/docker/daemon"
+	"github.com/docker/docker/client"
 	"github.com/golang/glog"
 )
 
 type DaemonPrepper struct {
-	ImagePrepper
+	Source string
+	Client *client.Client
 }
 
 func (p DaemonPrepper) Name() string {
@@ -33,41 +34,29 @@ func (p DaemonPrepper) Name() string {
 }
 
 func (p DaemonPrepper) GetSource() string {
-	return p.ImagePrepper.Source
+	return p.Source
 }
 
-func (p DaemonPrepper) SupportsImage() bool {
-	pattern := regexp.MustCompile("[a-z|0-9]{12}")
-	if exp := pattern.FindString(p.ImagePrepper.Source); exp != p.ImagePrepper.Source {
-		return false
-	}
-	return true
+func (p DaemonPrepper) GetImage() (Image, error) {
+	return getImage(p)
 }
 
 func (p DaemonPrepper) GetFileSystem() (string, error) {
-	tarPath, err := saveImageToTar(p.Client, p.Source, p.Source)
+	ref, err := daemon.ParseReference(p.Source)
 	if err != nil {
 		return "", err
 	}
 
-	defer os.Remove(tarPath)
-	return getImageFromTar(tarPath)
+	return getFileSystemFromReference(ref, p.Source)
 }
 
 func (p DaemonPrepper) GetConfig() (ConfigSchema, error) {
-	inspect, _, err := p.Client.ImageInspectWithRaw(context.Background(), p.Source)
+	ref, err := daemon.ParseReference(p.Source)
 	if err != nil {
 		return ConfigSchema{}, err
 	}
 
-	config := ConfigObject{
-		Env: inspect.Config.Env,
-	}
-	history := p.GetHistory()
-	return ConfigSchema{
-		Config:  config,
-		History: history,
-	}, nil
+	return getConfigFromReference(ref, p.Source)
 }
 
 func (p DaemonPrepper) GetHistory() []ImageHistoryItem {
