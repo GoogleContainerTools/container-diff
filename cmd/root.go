@@ -47,7 +47,14 @@ const (
 var RootCmd = &cobra.Command{
 	Use:   "container-diff",
 	Short: "container-diff is a tool for analyzing and comparing container images",
-	Long:  `container-diff is a CLI tool for analyzing and comparing container images.`,
+	Long: `container-diff is a CLI tool for analyzing and comparing container images.
+
+Images can be specified from either a local Docker daemon, or from a remote registry.
+To specify a local image, prefix the image ID with 'daemon://', e.g. 'daemon://gcr.io/foo/bar'.
+To specify a remote image, prefix the image ID with 'remote://', e.g. 'remote://gcr.io/foo/bar'.
+If no prefix is specified, the local daemon will be checked first.
+
+Tarballs can also be specified by simply providing the path to the .tar, .tar.gz, or .tgz file.`,
 }
 
 func NewClient() (*client.Client, error) {
