@@ -25,23 +25,25 @@ import (
 	"strings"
 
 	"github.com/containers/image/docker/tarfile"
+	"github.com/docker/docker/client"
 	"github.com/golang/glog"
 )
 
 type TarPrepper struct {
-	ImagePrepper
+	Source string
+	Client *client.Client
 }
 
 func (p TarPrepper) Name() string {
 	return "Tar Archive"
 }
 
-func (p TarPrepper) RawSource() string {
+func (p TarPrepper) GetSource() string {
 	return p.Source
 }
 
-func (p TarPrepper) SupportsImage() bool {
-	return IsTar(p.Source)
+func (p TarPrepper) GetImage() (Image, error) {
+	return getImage(p)
 }
 
 func (p TarPrepper) GetFileSystem() (string, error) {

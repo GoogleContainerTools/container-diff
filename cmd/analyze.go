@@ -69,13 +69,12 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		return errors.New("Could not perform image analysis")
 	}
 
-	pkgutil.SetPreppers(getPrepperForImage(imageName))
-
-	ip := pkgutil.ImagePrepper{
-		Source: imageName,
-		Client: cli,
+	prepper, err := getPrepperForImage(imageName)
+	if err != nil {
+		return err
 	}
-	image, err := ip.GetImage()
+
+	image, err := prepper.GetImage()
 
 	if !save {
 		defer pkgutil.CleanupImage(image)
@@ -100,22 +99,6 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 	}
 
 	return nil
-}
-
-func getPrepperForImage(image string) []func(ip pkgutil.ImagePrepper) pkgutil.Prepper {
-	if pkgutil.IsTar(image) {
-		return []func(pkgutil.ImagePrepper) pkgutil.Prepper{
-			func(ip pkgutil.ImagePrepper) pkgutil.Prepper { return pkgutil.TarPrepper{ImagePrepper: ip} },
-		}
-	} else if strings.HasPrefix(image, pkgutil.DaemonPrefix) {
-		return []func(pkgutil.ImagePrepper) pkgutil.Prepper{
-			func(ip pkgutil.ImagePrepper) pkgutil.Prepper { return pkgutil.DaemonPrepper{ImagePrepper: ip} },
-		}
-	}
-	// either has remote prefix or has no prefix, in which case we force remote
-	return []func(pkgutil.ImagePrepper) pkgutil.Prepper{
-		func(ip pkgutil.ImagePrepper) pkgutil.Prepper { return pkgutil.CloudPrepper{ImagePrepper: ip} },
-	}
 }
 
 func init() {

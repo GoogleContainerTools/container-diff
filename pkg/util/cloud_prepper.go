@@ -17,50 +17,42 @@ limitations under the License.
 package util
 
 import (
-	"strings"
-
 	"github.com/containers/image/docker"
-	"github.com/containers/image/docker/reference"
+	"github.com/docker/docker/client"
 )
-
-const RemotePrefix = "remote://"
 
 // CloudPrepper prepares images sourced from a Cloud registry
 type CloudPrepper struct {
-	ImagePrepper
+	Source string
+	Client *client.Client
 }
 
 func (p CloudPrepper) Name() string {
 	return "Cloud Registry"
 }
 
-func (p CloudPrepper) RawSource() string {
-	return strings.Replace(p.Source, RemotePrefix, "", -1)
+func (p CloudPrepper) GetSource() string {
+	return p.Source
 }
 
-func (p CloudPrepper) SupportsImage() bool {
-	// will fail for strings prefixed with 'daemon://'
-	if strings.HasPrefix(p.Source, DaemonPrefix) || IsTar(p.Source) {
-		return false
-	}
-	_, err := reference.Parse(p.RawSource())
-	return (err == nil)
+func (p CloudPrepper) GetImage() (Image, error) {
+	return getImage(p)
 }
 
 func (p CloudPrepper) GetFileSystem() (string, error) {
-	ref, err := docker.ParseReference("//" + p.RawSource())
+	ref, err := docker.ParseReference("//" + p.Source)
 	if err != nil {
 		return "", err
 	}
 
-	return getFileSystemFromReference(ref, p.RawSource())
+	return getFileSystemFromReference(ref, p.Source)
 }
 
 func (p CloudPrepper) GetConfig() (ConfigSchema, error) {
-	ref, err := docker.ParseReference("//" + p.RawSource())
+	ref, err := docker.ParseReference("//" + p.Source)
 	if err != nil {
 		return ConfigSchema{}, err
 	}
 
-	return getConfigFromReference(ref, p.RawSource())
+	return getConfigFromReference(ref, p.Source)
 }

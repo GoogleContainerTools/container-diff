@@ -81,12 +81,12 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		go func(imageName string, imageMap map[string]*pkgutil.Image) {
 			defer wg.Done()
 
-			pkgutil.SetPreppers(getPrepperForImage(imageName))
-			ip := pkgutil.ImagePrepper{
-				Source: imageName,
-				Client: cli,
+			prepper, err := getPrepperForImage(imageName)
+			if err != nil {
+				glog.Error(err)
+				return
 			}
-			image, err := ip.GetImage()
+			image, err := prepper.GetImage()
 			imageMap[imageName] = &image
 			if err != nil {
 				glog.Warningf("Diff may be inaccurate: %s", err)

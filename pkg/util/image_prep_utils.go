@@ -20,6 +20,7 @@ import (
 	"archive/tar"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -30,14 +31,12 @@ import (
 	"github.com/golang/glog"
 )
 
-var orderedPreppers = []func(ip ImagePrepper) Prepper{
-	func(ip ImagePrepper) Prepper { return DaemonPrepper{ImagePrepper: ip} },
-	func(ip ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
-	func(ip ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
-}
-
-func SetPreppers(preppers []func(ImagePrepper) Prepper) {
-	orderedPreppers = preppers
+type Prepper interface {
+	Name() string
+	GetConfig() (ConfigSchema, error)
+	GetFileSystem() (string, error)
+	GetImage() (Image, error)
+	GetSource() string
 }
 
 type Image struct {
@@ -57,6 +56,27 @@ type ConfigObject struct {
 type ConfigSchema struct {
 	Config  ConfigObject       `json:"config"`
 	History []ImageHistoryItem `json:"history"`
+}
+
+func getImage(p Prepper) (Image, error) {
+	glog.Infof("Retrieving image %s from source %s", p.GetSource(), p.Name())
+	imgPath, err := p.GetFileSystem()
+	if err != nil {
+		return Image{}, err
+	}
+
+	config, err := p.GetConfig()
+	if err != nil {
+		glog.Error("Error retrieving History: ", err)
+	}
+
+	glog.Infof("Finished prepping image %s", p.GetSource())
+	return Image{
+		Source: p.GetSource(),
+		FSPath: imgPath,
+		Config: config,
+	}, nil
+	return Image{}, fmt.Errorf("Could not retrieve image %s from source", p.GetSource())
 }
 
 func getImageFromTar(tarPath string) (string, error) {

@@ -18,58 +18,51 @@ package util
 
 import (
 	"context"
-	"strings"
 
 	"github.com/containers/image/docker/daemon"
-	"github.com/containers/image/docker/reference"
+	"github.com/docker/docker/client"
 	"github.com/golang/glog"
 )
 
-const DaemonPrefix = "daemon://"
-
 type DaemonPrepper struct {
-	ImagePrepper
+	Source string
+	Client *client.Client
 }
 
 func (p DaemonPrepper) Name() string {
 	return "Local Daemon"
 }
 
-func (p DaemonPrepper) RawSource() string {
-	return strings.Replace(p.Source, DaemonPrefix, "", -1)
+func (p DaemonPrepper) GetSource() string {
+	return p.Source
 }
 
-func (p DaemonPrepper) SupportsImage() bool {
-	// will fail on strings prefixed with 'remote://'
-	if strings.HasPrefix(p.Source, RemotePrefix) || IsTar(p.Source) {
-		return false
-	}
-	_, err := reference.Parse(p.RawSource())
-	return (err == nil)
+func (p DaemonPrepper) GetImage() (Image, error) {
+	return getImage(p)
 }
 
 func (p DaemonPrepper) GetFileSystem() (string, error) {
-	ref, err := daemon.ParseReference(p.RawSource())
+	ref, err := daemon.ParseReference(p.Source)
 	if err != nil {
 		return "", err
 	}
 
-	return getFileSystemFromReference(ref, p.RawSource())
+	return getFileSystemFromReference(ref, p.Source)
 }
 
 func (p DaemonPrepper) GetConfig() (ConfigSchema, error) {
-	ref, err := daemon.ParseReference(p.RawSource())
+	ref, err := daemon.ParseReference(p.Source)
 	if err != nil {
 		return ConfigSchema{}, err
 	}
 
-	return getConfigFromReference(ref, p.RawSource())
+	return getConfigFromReference(ref, p.Source)
 }
 
 func (p DaemonPrepper) GetHistory() []ImageHistoryItem {
-	history, err := p.Client.ImageHistory(context.Background(), p.RawSource())
+	history, err := p.Client.ImageHistory(context.Background(), p.Source)
 	if err != nil {
-		glog.Error("Could not obtain image history for %s: %s", p.RawSource(), err)
+		glog.Error("Could not obtain image history for %s: %s", p.Source, err)
 	}
 	historyItems := []ImageHistoryItem{}
 	for _, item := range history {
