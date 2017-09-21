@@ -34,7 +34,7 @@ func TestCheckLocalImage(t *testing.T) {
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
 		prepper := pkgutil.DaemonPrepper{
-			&pkgutil.ImagePrepper{
+			pkgutil.ImagePrepper{
 				Source: test.input,
 			},
 		}
@@ -69,10 +69,11 @@ func TestCheckRemoteImage(t *testing.T) {
 	for _, test := range []imageTestPair{
 		{input: "gcr.io/repo/image", expectedOutput: true},
 		{input: "daemon://gcr.io/repo/image", expectedOutput: false},
+		{input: "remote://gcr.io/repo/image", expectedOutput: true},
 		{input: "testTars/la-croix1.tar", expectedOutput: false},
 	} {
 		prepper := pkgutil.CloudPrepper{
-			&pkgutil.ImagePrepper{
+			pkgutil.ImagePrepper{
 				Source: test.input,
 			},
 		}

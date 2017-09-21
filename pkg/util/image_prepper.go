@@ -18,7 +18,6 @@ package util
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
@@ -31,32 +30,13 @@ type ImagePrepper struct {
 
 type Prepper interface {
 	Name() string
-	GetSource() string
+	RawSource() string
 	GetFileSystem() (string, error)
 	GetConfig() (ConfigSchema, error)
 	SupportsImage() bool
 }
 
-func getImage(prepper Prepper) (Image, error) {
-	imgPath, err := prepper.GetFileSystem()
-	if err != nil {
-		return Image{}, fmt.Errorf("error msg: %s", err.Error())
-	}
-
-	config, err := prepper.GetConfig()
-	if err != nil {
-		return Image{}, fmt.Errorf("error msg: %s", err.Error())
-	}
-
-	glog.Infof("Finished prepping image %s", prepper.GetSource())
-	return Image{
-		Source: prepper.GetSource(),
-		FSPath: imgPath,
-		Config: config,
-	}, nil
-}
-
-func (p *ImagePrepper) GetImage() (Image, error) {
+func (p ImagePrepper) GetImage() (Image, error) {
 	glog.Infof("Starting prep for image %s", p.Source)
 	img := p.Source
 

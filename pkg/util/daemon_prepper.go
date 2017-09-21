@@ -18,7 +18,6 @@ package util
 
 import (
 	"context"
-	"regexp"
 	"strings"
 
 	"github.com/containers/image/docker/daemon"
@@ -29,62 +28,48 @@ import (
 const DaemonPrefix = "daemon://"
 
 type DaemonPrepper struct {
-	*ImagePrepper
+	ImagePrepper
 }
 
 func (p DaemonPrepper) Name() string {
 	return "Local Daemon"
 }
 
-func (p DaemonPrepper) GetSource() string {
-	return p.ImagePrepper.Source
+func (p DaemonPrepper) RawSource() string {
+	return strings.Replace(p.Source, DaemonPrefix, "", -1)
 }
 
 func (p DaemonPrepper) SupportsImage() bool {
 	// will fail on strings prefixed with 'remote://'
-	remoteRegex := regexp.MustCompile(RemotePrefix + ".*")
-	if match := remoteRegex.MatchString(p.ImagePrepper.Source); match || IsTar(p.ImagePrepper.Source) {
+	if strings.HasPrefix(p.Source, RemotePrefix) || IsTar(p.Source) {
 		return false
 	}
-	strippedSource := strings.Replace(p.ImagePrepper.Source, DaemonPrefix, "", -1)
-	_, err := reference.Parse(strippedSource)
-	if err == nil {
-		// strip prefix off image source for later use
-		p.ImagePrepper.Source = strippedSource
-		return true
-	}
-	return false
+	_, err := reference.Parse(p.RawSource())
+	return (err == nil)
 }
 
 func (p DaemonPrepper) GetFileSystem() (string, error) {
-	ref, err := daemon.ParseReference(p.Source)
+	ref, err := daemon.ParseReference(p.RawSource())
 	if err != nil {
 		return "", err
 	}
 
-	return getFileSystemFromReference(ref, p.Source)
+	return getFileSystemFromReference(ref, p.RawSource())
 }
 
 func (p DaemonPrepper) GetConfig() (ConfigSchema, error) {
-	inspect, _, err := p.Client.ImageInspectWithRaw(context.Background(), p.Source)
+	ref, err := daemon.ParseReference(p.RawSource())
 	if err != nil {
 		return ConfigSchema{}, err
 	}
 
-	config := ConfigObject{
-		Env: inspect.Config.Env,
-	}
-	history := p.GetHistory()
-	return ConfigSchema{
-		Config:  config,
-		History: history,
-	}, nil
+	return getConfigFromReference(ref, p.RawSource())
 }
 
 func (p DaemonPrepper) GetHistory() []ImageHistoryItem {
-	history, err := p.Client.ImageHistory(context.Background(), p.Source)
+	history, err := p.Client.ImageHistory(context.Background(), p.RawSource())
 	if err != nil {
-		glog.Error("Could not obtain image history for %s: %s", p.Source, err)
+		glog.Error("Could not obtain image history for %s: %s", p.RawSource(), err)
 	}
 	historyItems := []ImageHistoryItem{}
 	for _, item := range history {

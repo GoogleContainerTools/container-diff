@@ -29,19 +29,19 @@ import (
 )
 
 type TarPrepper struct {
-	*ImagePrepper
+	ImagePrepper
 }
 
 func (p TarPrepper) Name() string {
 	return "Tar Archive"
 }
 
-func (p TarPrepper) GetSource() string {
-	return p.ImagePrepper.Source
+func (p TarPrepper) RawSource() string {
+	return p.Source
 }
 
 func (p TarPrepper) SupportsImage() bool {
-	return IsTar(p.ImagePrepper.Source)
+	return IsTar(p.Source)
 }
 
 func (p TarPrepper) GetFileSystem() (string, error) {

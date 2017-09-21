@@ -30,10 +30,14 @@ import (
 	"github.com/golang/glog"
 )
 
-var orderedPreppers = []func(ip *ImagePrepper) Prepper{
-	func(ip *ImagePrepper) Prepper { return DaemonPrepper{ImagePrepper: ip} },
-	func(ip *ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
-	func(ip *ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
+var orderedPreppers = []func(ip ImagePrepper) Prepper{
+	func(ip ImagePrepper) Prepper { return DaemonPrepper{ImagePrepper: ip} },
+	func(ip ImagePrepper) Prepper { return CloudPrepper{ImagePrepper: ip} },
+	func(ip ImagePrepper) Prepper { return TarPrepper{ImagePrepper: ip} },
+}
+
+func SetPreppers(preppers []func(ImagePrepper) Prepper) {
+	orderedPreppers = preppers
 }
 
 type Image struct {
