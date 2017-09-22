@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
 	"errors"
 	goflag "flag"
 	"fmt"
@@ -55,16 +54,6 @@ To specify a remote image, prefix the image ID with 'remote://', e.g. 'remote://
 If no prefix is specified, the local daemon will be checked first.
 
 Tarballs can also be specified by simply providing the path to the .tar, .tar.gz, or .tgz file.`,
-}
-
-func NewClient() (*client.Client, error) {
-	cli, err := client.NewEnvClient()
-	if err != nil {
-		return nil, fmt.Errorf("Error getting docker client: %s", err)
-	}
-	cli.NegotiateAPIVersion(context.Background())
-
-	return cli, nil
 }
 
 func outputResults(resultMap map[string]util.Result) {

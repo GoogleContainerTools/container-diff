@@ -39,6 +39,16 @@ type Event struct {
 	} `json:"progressDetail"`
 }
 
+func NewClient() (*client.Client, error) {
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		return nil, fmt.Errorf("Error getting docker client: %s", err)
+	}
+	cli.NegotiateAPIVersion(context.Background())
+
+	return cli, nil
+}
+
 func getLayersFromManifest(manifestPath string) ([]string, error) {
 	type Manifest struct {
 		Layers []string

@@ -30,7 +30,8 @@ import (
 	"testing"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
+
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 )
 
 const (
@@ -205,14 +206,16 @@ func TestDiffAndAnalysis(t *testing.T) {
 func TestMain(m *testing.M) {
 	// setup
 	ctx := context.Background()
-	cli, _ := client.NewEnvClient()
+	cli, _ := pkgutil.NewClient()
 	closer, err := cli.ImagePull(ctx, multiBase, types.ImagePullOptions{})
 	if err != nil {
+		fmt.Printf("Error retrieving docker client: %s", err)
 		os.Exit(1)
 	}
 	closer.Close()
 	closer, err = cli.ImagePull(ctx, multiModified, types.ImagePullOptions{})
 	if err != nil {
+		fmt.Printf("Error retrieving docker client: %s", err)
 		os.Exit(1)
 	}
 	closer.Close()

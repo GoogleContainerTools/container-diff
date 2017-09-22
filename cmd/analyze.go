@@ -62,7 +62,7 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		return err
 	}
 
-	cli, err := NewClient()
+	cli, err := pkgutil.NewClient()
 	if err != nil {
 		return fmt.Errorf("Error getting docker client: %s", err)
 	}

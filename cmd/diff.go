@@ -63,7 +63,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		return err
 	}
 
-	cli, err := NewClient()
+	cli, err := pkgutil.NewClient()
 	if err != nil {
 		return err
 	}
