@@ -62,7 +62,7 @@ test: $(BUILD_DIR)/$(PROJECT)
 
 .PHONY: integration
 integration: $(BUILD_DIR)/$(PROJECT)
-	go test -v -tags integration $(REPOPATH)/tests
+	go test -v -tags integration $(REPOPATH)/tests -timeout 20m
 
 .PHONY: release
 release: cross
@@ -71,5 +71,3 @@ release: cross
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
-
-

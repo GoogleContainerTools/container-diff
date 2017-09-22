@@ -25,7 +25,6 @@ go_test(
     name = "go_default_test",
     srcs = [
         "fs_utils_test.go",
-        "image_utils_test.go",
         "output_sort_utils_test.go",
         "package_diff_utils_test.go",
         "tar_utils_test.go",

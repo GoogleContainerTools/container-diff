@@ -63,7 +63,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		return err
 	}
 
-	cli, err := NewClient()
+	cli, err := pkgutil.NewClient()
 	if err != nil {
 		return err
 	}
@@ -77,17 +77,20 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		image1Arg: {},
 		image2Arg: {},
 	}
+	// TODO: fix error handling here
 	for imageArg := range imageMap {
 		go func(imageName string, imageMap map[string]*pkgutil.Image) {
 			defer wg.Done()
-			ip := pkgutil.ImagePrepper{
-				Source: imageName,
-				Client: cli,
+
+			prepper, err := getPrepperForImage(imageName)
+			if err != nil {
+				glog.Error(err)
+				return
 			}
-			image, err := ip.GetImage()
+			image, err := prepper.GetImage()
 			imageMap[imageName] = &image
 			if err != nil {
-				glog.Errorf("Diff may be inaccurate: %s", err.Error())
+				glog.Warningf("Diff may be inaccurate: %s", err)
 			}
 		}(imageArg, imageMap)
 	}
@@ -109,7 +112,6 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	if save {
 		glog.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
 			imageMap[image2Arg].FSPath)
-
 	}
 	return nil
 }

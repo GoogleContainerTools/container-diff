@@ -17,13 +17,14 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
+	"errors"
 	goflag "flag"
 	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
@@ -37,20 +38,22 @@ var types string
 
 type validatefxn func(args []string) error
 
+const (
+	DaemonPrefix = "daemon://"
+	RemotePrefix = "remote://"
+)
+
 var RootCmd = &cobra.Command{
 	Use:   "container-diff",
 	Short: "container-diff is a tool for analyzing and comparing container images",
-	Long:  `container-diff is a CLI tool for analyzing and comparing container images.`,
-}
+	Long: `container-diff is a CLI tool for analyzing and comparing container images.
 
-func NewClient() (*client.Client, error) {
-	cli, err := client.NewEnvClient()
-	if err != nil {
-		return nil, fmt.Errorf("Error getting docker client: %s", err)
-	}
-	cli.NegotiateAPIVersion(context.Background())
+Images can be specified from either a local Docker daemon, or from a remote registry.
+To specify a local image, prefix the image ID with 'daemon://', e.g. 'daemon://gcr.io/foo/bar'.
+To specify a remote image, prefix the image ID with 'remote://', e.g. 'remote://gcr.io/foo/bar'.
+If no prefix is specified, the local daemon will be checked first.
 
-	return cli, nil
+Tarballs can also be specified by simply providing the path to the .tar, .tar.gz, or .tgz file.`,
 }
 
 func outputResults(resultMap map[string]util.Result) {
@@ -92,7 +95,7 @@ func validateArgs(args []string, validatefxns ...validatefxn) error {
 
 func checkIfValidAnalyzer(flagtypes string) error {
 	if flagtypes == "" {
-		return nil
+		return errors.New("Please provide at least one analyzer to run")
 	}
 	analyzers := strings.Split(flagtypes, ",")
 	for _, name := range analyzers {
@@ -101,6 +104,30 @@ func checkIfValidAnalyzer(flagtypes string) error {
 		}
 	}
 	return nil
+}
+
+func getPrepperForImage(image string) (pkgutil.Prepper, error) {
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		return nil, err
+	}
+	if pkgutil.IsTar(image) {
+		return pkgutil.TarPrepper{
+			Source: image,
+			Client: cli,
+		}, nil
+
+	} else if strings.HasPrefix(image, DaemonPrefix) {
+		return pkgutil.DaemonPrepper{
+			Source: strings.Replace(image, DaemonPrefix, "", -1),
+			Client: cli,
+		}, nil
+	}
+	// either has remote prefix or has no prefix, in which case we force remote
+	return pkgutil.CloudPrepper{
+		Source: strings.Replace(image, RemotePrefix, "", -1),
+		Client: cli,
+	}, nil
 }
 
 func init() {

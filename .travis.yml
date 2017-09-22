@@ -2,6 +2,11 @@ language: go
 os: linux
 go: 1.8.3
 
+sudo: required
+
+services:
+  - docker
+
 go_import_path: github.com/GoogleCloudPlatform/container-diff
 
 addons:
