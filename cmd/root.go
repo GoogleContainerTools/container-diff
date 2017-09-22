@@ -20,6 +20,8 @@ import (
 	"context"
 	goflag "flag"
 	"fmt"
+	"os/user"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -36,6 +38,15 @@ var save bool
 var types string
 
 type validatefxn func(args []string) error
+
+func cacheDir() string {
+	user, err := user.Current()
+	if err != nil {
+		glog.Exit(err)
+	}
+	rootDir := filepath.Join(user.HomeDir, ".container-diff")
+	return filepath.Join(rootDir, "cache")
+}
 
 var RootCmd = &cobra.Command{
 	Use:   "container-diff",

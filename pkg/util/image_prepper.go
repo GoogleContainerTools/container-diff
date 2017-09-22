@@ -19,6 +19,7 @@ package util
 import (
 	"errors"
 
+	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	"github.com/docker/docker/client"
 	"github.com/golang/glog"
 )
@@ -26,6 +27,7 @@ import (
 type ImagePrepper struct {
 	Source string
 	Client *client.Client
+	Cache  *cache.FileCache
 }
 
 type Prepper interface {
