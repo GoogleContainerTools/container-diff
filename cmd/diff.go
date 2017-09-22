@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
+	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
@@ -68,6 +69,12 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		return err
 	}
 	defer cli.Close()
+
+	fsCache, err := cache.NewFileCache(cacheDir())
+	if err != nil {
+		return err
+	}
+
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -83,6 +90,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 			ip := pkgutil.ImagePrepper{
 				Source: imageName,
 				Client: cli,
+				Cache:  fsCache,
 			}
 			image, err := ip.GetImage()
 			imageMap[imageName] = &image

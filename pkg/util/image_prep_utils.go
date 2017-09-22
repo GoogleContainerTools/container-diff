@@ -20,11 +20,13 @@ import (
 	"archive/tar"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	"github.com/containers/image/pkg/compression"
 	"github.com/containers/image/types"
 	"github.com/golang/glog"
@@ -62,7 +64,7 @@ func getImageFromTar(tarPath string) (string, error) {
 	return path, err
 }
 
-func getFileSystemFromReference(ref types.ImageReference, imageName string) (string, error) {
+func getFileSystemFromReference(ref types.ImageReference, imageName string, c *cache.FileCache) (string, error) {
 	sanitizedName := strings.Replace(imageName, ":", "", -1)
 	sanitizedName = strings.Replace(sanitizedName, "/", "", -1)
 
@@ -85,7 +87,18 @@ func getFileSystemFromReference(ref types.ImageReference, imageName string) (str
 	}
 
 	for _, b := range img.LayerInfos() {
-		bi, _, err := imgSrc.GetBlob(b)
+		var bi io.ReadCloser
+		var err error
+		if c.HasLayer(b.Digest.String()) {
+			bi, err = c.GetLayer(b.Digest.String())
+		} else {
+			bi, _, err = imgSrc.GetBlob(b)
+			if err != nil {
+				return "", err
+			}
+			// We need to get a new reader after caching the old one.
+			bi, err = c.SetLayer(b.Digest.String(), bi)
+		}
 		if err != nil {
 			glog.Errorf("Failed to pull image layer: %s", err)
 			return "", err
