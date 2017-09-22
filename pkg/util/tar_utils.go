@@ -58,17 +58,25 @@ func unpackTar(tr *tar.Reader, path string) error {
 
 		// if its a dir and it doesn't exist create it
 		case tar.TypeDir:
-			if _, err := os.Stat(target); err != nil {
+			if _, err := os.Stat(target); os.IsNotExist(err) {
 				if err := os.MkdirAll(target, mode); err != nil {
-					glog.Errorf("Error creating directory %s while untarring", target)
 					return err
 				}
-				continue
+			} else {
+				if err := os.Chmod(target, mode); err != nil {
+					return err
+				}
 			}
 
 		// if it's a file create it
 		case tar.TypeReg:
-
+			// It's possible for a file to be included before the directory it's in is created.
+			baseDir := filepath.Dir(target)
+			if _, err := os.Stat(baseDir); os.IsNotExist(err) {
+				if err := os.MkdirAll(baseDir, 0755); err != nil {
+					return err
+				}
+			}
 			currFile, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
 			if err != nil {
 				glog.Errorf("Error opening file %s", target)
