@@ -30,8 +30,6 @@ RELEASE_BUCKET ?= $(PROJECT)
 SUPPORTED_PLATFORMS := linux-$(GOARCH) darwin-$(GOARCH) windows-$(GOARCH).exe
 BUILD_PACKAGE = $(REPOPATH)
 
-SHELL = sh -xv
-
 # These build tags are from the containers/image library.
 # 
 # container_image_ostree_stub allows building the library without requiring the libostree development libraries
@@ -64,7 +62,7 @@ test: $(BUILD_DIR)/$(PROJECT)
 
 .PHONY: integration
 integration: $(BUILD_DIR)/$(PROJECT)
-	go test -v -tags integration $(REPOPATH)/tests
+	go test -v -tags integration $(REPOPATH)/tests -timeout 20m
 
 .PHONY: release
 release: cross
@@ -73,5 +71,3 @@ release: cross
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
-
-
