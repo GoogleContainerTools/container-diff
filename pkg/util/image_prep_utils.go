@@ -20,10 +20,8 @@ import (
 	"archive/tar"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/containers/image/pkg/compression"
@@ -76,14 +74,15 @@ func getImage(p Prepper) (Image, error) {
 		FSPath: imgPath,
 		Config: config,
 	}, nil
-	return Image{}, fmt.Errorf("Could not retrieve image %s from source", p.GetSource())
 }
 
 func getImageFromTar(tarPath string) (string, error) {
 	glog.Info("Extracting image tar to obtain image file system")
-	path := strings.TrimSuffix(tarPath, filepath.Ext(tarPath))
-	err := unpackDockerSave(tarPath, path)
-	return path, err
+	tempPath, err := ioutil.TempDir("", ".container-diff")
+	if err != nil {
+		return "", err
+	}
+	return tempPath, unpackDockerSave(tarPath, tempPath)
 }
 
 func getFileSystemFromReference(ref types.ImageReference, imageName string) (string, error) {
