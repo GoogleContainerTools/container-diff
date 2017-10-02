@@ -61,9 +61,14 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 		return packages, nil
 	}
 
+	// default python package installation directories in unix
+	// these are hardcoded in the python source; unfortunately no way to retrieve them from env
 	for _, pythonVersion := range pythonVersions {
-		packagesPath := filepath.Join(path, "usr/local/lib", pythonVersion, "site-packages")
-		pythonPaths = append(pythonPaths, packagesPath)
+		pythonPaths = append(pythonPaths, filepath.Join(path, "usr/lib", pythonVersion))
+		pythonPaths = append(pythonPaths, filepath.Join(path, "usr/lib", pythonVersion, "dist-packages"))
+		pythonPaths = append(pythonPaths, filepath.Join(path, "usr/lib", pythonVersion, "site-packages"))
+		pythonPaths = append(pythonPaths, filepath.Join(path, "usr/local/lib", pythonVersion, "dist-packages"))
+		pythonPaths = append(pythonPaths, filepath.Join(path, "usr/local/lib", pythonVersion, "site-packages"))
 	}
 
 	for _, pythonPath := range pythonPaths {
@@ -77,7 +82,7 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 			c := contents[i]
 			fileName := c.Name()
 			// check if package
-			packageDir := regexp.MustCompile("^([a-z|A-Z|0-9|_]+)-(([0-9]+?\\.){2,3})dist-info$")
+			packageDir := regexp.MustCompile("^([a-z|A-Z|0-9|_]+)-(([0-9]+?\\.){2,3})(dist-info|egg-info)$")
 			packageMatch := packageDir.FindStringSubmatch(fileName)
 			if len(packageMatch) != 0 {
 				packageName := packageMatch[1]
@@ -91,7 +96,6 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 					size = pkgutil.GetSize(packagePath)
 				} else if i+1 < len(contents) && contents[i+1].Name() == packageName+".py" {
 					size = contents[i+1].Size()
-
 				} else {
 					glog.Errorf("Could not find Python package %s for corresponding metadata info", packageName)
 					continue
