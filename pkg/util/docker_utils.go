@@ -74,9 +74,13 @@ func unpackDockerSave(tarPath string, target string) error {
 		os.MkdirAll(target, 0777)
 	}
 
-	tempLayerDir := target + "-temp"
-	err := UnTar(tarPath, tempLayerDir)
+	tempLayerDir, err := ioutil.TempDir("", ".container-diff")
 	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tempLayerDir)
+
+	if err := UnTar(tarPath, tempLayerDir); err != nil {
 		errMsg := fmt.Sprintf("Could not unpack saved Docker image %s: %s", tarPath, err)
 		return errors.New(errMsg)
 	}
@@ -93,14 +97,9 @@ func unpackDockerSave(tarPath string, target string) error {
 			glog.Infof("Did not unpack layer %s because no layer.tar found", layer)
 			continue
 		}
-		err = UnTar(layerTar, target)
-		if err != nil {
+		if err = UnTar(layerTar, target); err != nil {
 			glog.Errorf("Could not unpack layer %s: %s", layer, err)
 		}
-	}
-	err = os.RemoveAll(tempLayerDir)
-	if err != nil {
-		glog.Errorf("Error deleting temp image layer filesystem: %s", err)
 	}
 	return nil
 }

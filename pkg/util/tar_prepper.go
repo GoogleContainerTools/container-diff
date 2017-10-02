@@ -22,7 +22,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/containers/image/docker/tarfile"
 	"github.com/docker/docker/client"
@@ -51,10 +50,12 @@ func (p TarPrepper) GetFileSystem() (string, error) {
 }
 
 func (p TarPrepper) GetConfig() (ConfigSchema, error) {
-	tempDir := strings.TrimSuffix(p.Source, filepath.Ext(p.Source)) + "-config"
-	defer os.RemoveAll(tempDir)
-	err := UnTar(p.Source, tempDir)
+	tempDir, err := ioutil.TempDir("", ".container-diff")
 	if err != nil {
+		return ConfigSchema{}, nil
+	}
+	defer os.RemoveAll(tempDir)
+	if err := UnTar(p.Source, tempDir); err != nil {
 		return ConfigSchema{}, err
 	}
 
