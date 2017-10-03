@@ -86,8 +86,7 @@ func TestUnTar(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error opening tar: %s", err)
 		}
-		err := pkgutil.UnTar(r, test.target)
-		if err != nil && !test.err {
+		if err := pkgutil.UnTar(r, test.target); err != nil && !test.err {
 			t.Errorf(test.descrip, "Got unexpected error: %s", err)
 			remove = false
 		}
