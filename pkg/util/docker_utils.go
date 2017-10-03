@@ -70,7 +70,7 @@ func getLayersFromManifest(r io.Reader) ([]string, error) {
 
 func unpackDockerSave(tarPath string, target string) error {
 	if _, ok := os.Stat(target); ok != nil {
-		os.MkdirAll(target, 0644)
+		os.MkdirAll(target, 0775)
 	}
 	f, err := os.Open(tarPath)
 	if err != nil {

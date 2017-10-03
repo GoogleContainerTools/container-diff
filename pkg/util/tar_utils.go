@@ -97,7 +97,7 @@ func unpackTar(tr *tar.Reader, path string) error {
 // Only untars one level, does not untar nested tars.
 func UnTar(r io.Reader, target string) error {
 	if _, ok := os.Stat(target); ok != nil {
-		os.MkdirAll(target, 0644)
+		os.MkdirAll(target, 0775)
 	}
 
 	tr := tar.NewReader(r)
