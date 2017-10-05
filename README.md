@@ -19,22 +19,22 @@ This tool can help you as a developer better understand what is changing within 
 
 ### macOS
 ```shell
-curl -LO https://storage.googleapis.com/container-diff/v0.2.0/container-diff-amd64-darwin && chmod +x container-diff-amd64-darwin && sudo mv container-diff-amd64-darwin /usr/local/bin/container-diff
+curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-darwin-amd64 && chmod +x container-diff-darwin-amd64 && sudo mv container-diff-darwin-amd64 /usr/local/bin/container-diff
 ```
 
 ### Linux
 ```shell
-curl -LO https://storage.googleapis.com/container-diff/v0.2.0/container-diff-amd64-linux && chmod +x container-diff-amd64-linux && sudo mv container-diff-amd64-linux /usr/local/bin/container-diff
+curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64 && chmod +x container-diff-linux-amd64 && sudo mv container-diff-linux-amd64 /usr/local/bin/container-diff
 ```
 
 OR, if you want to avoid using sudo:
 
 ```shell
-curl -LO https://storage.googleapis.com/container-diff/v0.2.0/container-diff-linux-amd64 && chmod +x container-diff-linux-amd64 && mkdir $HOME/bin && export PATH=$PATH:$HOME/bin && mv container-diff-linux-amd64 $HOME/bin/container-diff
+curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64 && chmod +x container-diff-linux-amd64 && mkdir $HOME/bin && export PATH=$PATH:$HOME/bin && mv container-diff-linux-amd64 $HOME/bin/container-diff
 ```
 
 ### Windows
-Download the [container-diff-windows-amd64.exe](https://storage.googleapis.com/container-diff/v0.2.0/container-diff-amd64-windows.exe) file, rename it to `container-diff.exe` and add it to your path
+Download the [container-diff-windows-amd64.exe](https://storage.googleapis.com/container-diff/latest/container-diff-windows-amd64.exe) file, rename it to `container-diff.exe` and add it to your path
 
 
 ## Quickstart
