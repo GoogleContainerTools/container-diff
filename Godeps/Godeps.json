@@ -307,6 +307,11 @@
 			"Rev": "c605e284fe17294bda444b34710735b29d1a9d90"
 		},
 		{
+			"ImportPath": "github.com/pkg/profile",
+			"Comment": "v1.2.0-7-g3a8809b",
+			"Rev": "3a8809bd8a80f8ecfe4ee1b34b3f37194968617c"
+		},
+		{
 			"ImportPath": "github.com/pmezard/go-difflib/difflib",
 			"Comment": "v1.0.0",
 			"Rev": "792786c7400a136282c1664665ae0a8db921c6c2"

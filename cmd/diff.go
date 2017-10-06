@@ -26,6 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/container-diff/differs"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/golang/glog"
+	"github.com/pkg/profile"
 	"github.com/spf13/cobra"
 )
 
@@ -43,6 +44,9 @@ var diffCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if os.Getenv(containerDiffEnvPrefix) == "1" {
+			defer profile.Start(profile.TraceProfile).Stop()
+		}
 		if err := diffImages(args[0], args[1], strings.Split(types, ",")); err != nil {
 			glog.Error(err)
 			os.Exit(1)

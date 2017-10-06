@@ -41,6 +41,8 @@ type validatefxn func(args []string) error
 const (
 	DaemonPrefix = "daemon://"
 	RemotePrefix = "remote://"
+
+	containerDiffEnvPrefix = "CONTAINER_DIFF_ENABLE_PROFILING"
 )
 
 var RootCmd = &cobra.Command{
