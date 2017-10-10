@@ -77,6 +77,13 @@ All of the analyzer flags with their long versions can be seen below:
 | apt-get installed packages| -a 	 | --apt      |
 
 
+## Image Sources
+
+container-diff supports Docker images located in both a local Docker daemon and a remote registry. To explicitly specify a local image, use the `daemon://` prefix on the image name; similarly, for an explicitly remote image, use the `remote://` prefix.
+
+```container-diff diff daemon://modified_debian:latest remote://gcr.io/google-appengine/debian8:latest```
+
+Additionally, tarballs can be provided to the tool directly. Make sure your file has a valid tar extension (.tar, .tar.gz, .tgz).
 
 
 ## Other Flags
@@ -223,6 +230,7 @@ type MultiVersionInfo struct {
 ## Known issues
 
 To run container-diff using image IDs, docker must be installed.
+Tarballs provided directly to the tool must be in the Docker format (i.e. have a manifest.json file for layer ordering)
 
 
 ## Example Run
