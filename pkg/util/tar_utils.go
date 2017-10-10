@@ -95,19 +95,13 @@ func unpackTar(tr *tar.Reader, path string) error {
 
 // UnTar takes in a path to a tar file and writes the untarred version to the provided target.
 // Only untars one level, does not untar nested tars.
-func UnTar(filename string, target string) error {
+func UnTar(r io.Reader, target string) error {
 	if _, ok := os.Stat(target); ok != nil {
-		os.MkdirAll(target, 0777)
+		os.MkdirAll(target, 0775)
 	}
-	file, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	tr := tar.NewReader(file)
-	err = unpackTar(tr, target)
-	if err != nil {
-		glog.Error(err)
+
+	tr := tar.NewReader(r)
+	if err := unpackTar(tr, target); err != nil {
 		return err
 	}
 	return nil

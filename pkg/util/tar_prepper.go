@@ -55,7 +55,12 @@ func (p TarPrepper) GetConfig() (ConfigSchema, error) {
 		return ConfigSchema{}, nil
 	}
 	defer os.RemoveAll(tempDir)
-	if err := UnTar(p.Source, tempDir); err != nil {
+	f, err := os.Open(p.Source)
+	if err != nil {
+		return ConfigSchema{}, err
+	}
+	defer f.Close()
+	if err := UnTar(f, tempDir); err != nil {
 		return ConfigSchema{}, err
 	}
 
