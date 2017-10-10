@@ -19,6 +19,7 @@ go_library(
     deps = [
         "//cmd:go_default_library",
         "//vendor/github.com/golang/glog:go_default_library",
+        "//vendor/github.com/pkg/profile:go_default_library",
     ],
 )
 
