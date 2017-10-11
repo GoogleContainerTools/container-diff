@@ -20,6 +20,7 @@ import (
 	"errors"
 	goflag "flag"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 
@@ -27,7 +28,7 @@ import (
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/docker/docker/client"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -35,6 +36,8 @@ import (
 var json bool
 var save bool
 var types string
+
+var LogLevel string
 
 type validatefxn func(args []string) error
 
@@ -54,6 +57,14 @@ To specify a remote image, prefix the image ID with 'remote://', e.g. 'remote://
 If no prefix is specified, the local daemon will be checked first.
 
 Tarballs can also be specified by simply providing the path to the .tar, .tar.gz, or .tgz file.`,
+	PersistentPreRun: func(c *cobra.Command, s []string) {
+		ll, err := logrus.ParseLevel(LogLevel)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		logrus.SetLevel(ll)
+	},
 }
 
 func outputResults(resultMap map[string]util.Result) {
@@ -72,14 +83,14 @@ func outputResults(resultMap map[string]util.Result) {
 		} else {
 			err := result.OutputText(analyzerType)
 			if err != nil {
-				glog.Error(err)
+				logrus.Error(err)
 			}
 		}
 	}
 	if json {
 		err := util.JSONify(results)
 		if err != nil {
-			glog.Error(err)
+			logrus.Error(err)
 		}
 	}
 }
@@ -131,6 +142,7 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 }
 
 func init() {
+	RootCmd.PersistentFlags().StringVarP(&LogLevel, "verbosity", "v", "warning", "This flag controls the verbosity of container-diff.")
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 }
 

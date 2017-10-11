@@ -22,7 +22,7 @@ import (
 	"github.com/containers/image/docker/daemon"
 
 	"github.com/docker/docker/client"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 type DaemonPrepper struct {
@@ -61,7 +61,7 @@ func (p DaemonPrepper) GetConfig() (ConfigSchema, error) {
 func (p DaemonPrepper) GetHistory() []ImageHistoryItem {
 	history, err := p.Client.ImageHistory(context.Background(), p.Source)
 	if err != nil {
-		glog.Error("Could not obtain image history for %s: %s", p.Source, err)
+		logrus.Error("Could not obtain image history for %s: %s", p.Source, err)
 	}
 	historyItems := []ImageHistoryItem{}
 	for _, item := range history {

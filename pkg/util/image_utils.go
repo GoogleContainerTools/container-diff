@@ -23,14 +23,14 @@ import (
 	"path/filepath"
 
 	"github.com/docker/docker/pkg/system"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 func GetImageLayers(pathToImage string) []string {
 	layers := []string{}
 	contents, err := ioutil.ReadDir(pathToImage)
 	if err != nil {
-		glog.Error(err.Error())
+		logrus.Error(err.Error())
 	}
 
 	for _, file := range contents {

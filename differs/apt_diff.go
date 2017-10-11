@@ -25,7 +25,7 @@ import (
 
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 type AptAnalyzer struct {
@@ -86,7 +86,7 @@ func parseLine(text string, currPackage string, packages map[string]util.Package
 			return value
 		case "Version":
 			if packages[currPackage].Version != "" {
-				glog.Warningln("Multiple versions of same package detected.  Diffing such multi-versioning not yet supported.")
+				logrus.Warningln("Multiple versions of same package detected.  Diffing such multi-versioning not yet supported.")
 				return currPackage
 			}
 			modifiedValue := strings.Replace(value, "+", " ", 1)
@@ -107,7 +107,7 @@ func parseLine(text string, currPackage string, packages map[string]util.Package
 			var err error
 			size, err = strconv.ParseInt(value, 10, 64)
 			if err != nil {
-				glog.Errorf("Could not get size for %s: %s", currPackage, err)
+				logrus.Errorf("Could not get size for %s: %s", currPackage, err)
 				size = -1
 			}
 			// Installed-Size is in KB, so we convert it to bytes to keep consistent with the tool's size units

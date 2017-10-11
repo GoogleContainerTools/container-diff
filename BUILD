@@ -16,11 +16,7 @@ go_library(
     name = "go_default_library",
     srcs = ["main.go"],
     visibility = ["//visibility:private"],
-    deps = [
-        "//cmd:go_default_library",
-        "//vendor/github.com/golang/glog:go_default_library",
-        "//vendor/github.com/pkg/profile:go_default_library",
-    ],
+    deps = ["//cmd:go_default_library"],
 )
 
 go_binary(

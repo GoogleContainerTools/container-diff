@@ -16,8 +16,8 @@ go_library(
     deps = [
         "//pkg/util:go_default_library",
         "//vendor/code.cloudfoundry.org/bytefmt:go_default_library",
-        "//vendor/github.com/golang/glog:go_default_library",
         "//vendor/github.com/pmezard/go-difflib/difflib:go_default_library",
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
     ],
 )
 

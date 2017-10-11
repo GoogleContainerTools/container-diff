@@ -21,7 +21,7 @@ import (
 
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 type DiffRequest struct {
@@ -59,7 +59,7 @@ func (req DiffRequest) GetDiff() (map[string]util.Result, error) {
 		if diff, err := differ.Diff(img1, img2); err == nil {
 			results[differ.Name()] = diff
 		} else {
-			glog.Errorf("Error getting diff with %s: %s", differ.Name(), err)
+			logrus.Errorf("Error getting diff with %s: %s", differ.Name(), err)
 		}
 	}
 
@@ -83,7 +83,7 @@ func (req SingleRequest) GetAnalysis() (map[string]util.Result, error) {
 		if analysis, err := analyzer.Analyze(img); err == nil {
 			results[analyzeName] = analysis
 		} else {
-			glog.Errorf("Error getting analysis with %s: %s", analyzeName, err)
+			logrus.Errorf("Error getting analysis with %s: %s", analyzeName, err)
 		}
 	}
 

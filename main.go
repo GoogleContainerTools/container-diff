@@ -17,25 +17,29 @@ limitations under the License.
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
 	"github.com/GoogleCloudPlatform/container-diff/cmd"
+<<<<<<< HEAD
 	"github.com/golang/glog"
 	"github.com/pkg/profile"
+=======
+>>>>>>> Switch to logrus.
 )
 
 const containerDiffEnvPrefix = "CONTAINER_DIFF_ENABLE_PROFILING"
 
 func main() {
+<<<<<<< HEAD
 	flag.Parse()
 	if os.Getenv(containerDiffEnvPrefix) == "1" {
 		defer profile.Start(profile.TraceProfile).Stop()
 	}
+=======
+>>>>>>> Switch to logrus.
 	if err := cmd.RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	glog.Flush()
 }
