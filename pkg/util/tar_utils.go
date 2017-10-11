@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 func unpackTar(tr *tar.Reader, path string) error {
@@ -34,20 +34,18 @@ func unpackTar(tr *tar.Reader, path string) error {
 			break
 		}
 		if err != nil {
-			glog.Error("Error getting next tar header")
+			logrus.Error("Error getting next tar header")
 			return err
 		}
 
 		if strings.Contains(header.Name, ".wh.") {
 			rmPath := filepath.Join(path, header.Name)
 			newName := strings.Replace(rmPath, ".wh.", "", 1)
-			err := os.Remove(rmPath)
-			if err != nil {
-				glog.Info(err)
+			if err := os.Remove(rmPath); err != nil {
+				logrus.Error(err)
 			}
-			err = os.RemoveAll(newName)
-			if err != nil {
-				glog.Info(err)
+			if err = os.RemoveAll(newName); err != nil {
+				logrus.Error(err)
 			}
 			continue
 		}
@@ -79,7 +77,7 @@ func unpackTar(tr *tar.Reader, path string) error {
 			}
 			currFile, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
 			if err != nil {
-				glog.Errorf("Error opening file %s", target)
+				logrus.Errorf("Error opening file %s", target)
 				return err
 			}
 			_, err = io.Copy(currFile, tr)
@@ -118,7 +116,7 @@ func CheckTar(image string) bool {
 		return false
 	}
 	if _, err := os.Stat(image); err != nil {
-		glog.Errorf("%s does not exist", image)
+		logrus.Errorf("%s does not exist", image)
 		return false
 	}
 	return true

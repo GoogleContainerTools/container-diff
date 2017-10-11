@@ -46,7 +46,7 @@ set -e
 #        ex: image = "@//target/to:image.tar"
 #     diff_base: Tag or digest in a remote registry you want to diff against
 #        ex: diff_base = "gcr.io/google-appengine/debian8:latest"
-#     diff_types: Types flag to pass to container diff 
+#     diff_types: Types flag to pass to container diff
 #        ex: ["pip", "file"]
 
 docker_diff = rule(
@@ -58,14 +58,14 @@ docker_diff = rule(
         ),
         "diff_base": attr.string(mandatory = True),
         "diff_types": attr.string_list(
-          allow_empty = True,
+            allow_empty = True,
         ),
         "_container_diff": attr.label(
-          default = Label("//:container-diff"),
-          executable = True,
-          cfg = "host",
+            default = Label("//:container-diff"),
+            executable = True,
+            cfg = "host",
         ),
     },
-    implementation = _impl,
     executable = True,
+    implementation = _impl,
 )

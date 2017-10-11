@@ -28,7 +28,6 @@ import (
 	"strings"
 
 	"github.com/docker/docker/client"
-	"github.com/golang/glog"
 )
 
 type Event struct {
@@ -121,16 +120,4 @@ func unpackDockerSave(tarPath string, target string) error {
 		}
 	}
 	return nil
-}
-
-// ImageToTar writes an image to a .tar file
-func saveImageToTar(cli client.APIClient, image, tarName string) (string, error) {
-	glog.Info("Saving image")
-	imgBytes, err := cli.ImageSave(context.Background(), []string{image})
-	if err != nil {
-		return "", err
-	}
-	defer imgBytes.Close()
-	newpath := tarName + ".tar"
-	return newpath, copyToFile(newpath, imgBytes)
 }

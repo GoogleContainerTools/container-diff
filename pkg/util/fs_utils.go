@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 // Directory stores a representation of a file directory.
@@ -40,13 +40,13 @@ type DirectoryEntry struct {
 func GetSize(path string) int64 {
 	stat, err := os.Stat(path)
 	if err != nil {
-		glog.Errorf("Could not obtain size for %s: %s", path, err)
+		logrus.Errorf("Could not obtain size for %s: %s", path, err)
 		return -1
 	}
 	if stat.IsDir() {
 		size, err := getDirectorySize(path)
 		if err != nil {
-			glog.Errorf("Could not obtain directory size for %s: %s", path, err)
+			logrus.Errorf("Could not obtain directory size for %s: %s", path, err)
 		}
 		return size
 	}
