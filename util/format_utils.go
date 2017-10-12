@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 var templates = map[string]string{
@@ -60,19 +60,19 @@ func getTemplate(templateType string) (string, error) {
 func TemplateOutput(diff interface{}, templateType string) error {
 	outputTmpl, err := getTemplate(templateType)
 	if err != nil {
-		glog.Error(err)
+		logrus.Error(err)
 
 	}
 	funcs := template.FuncMap{"join": strings.Join}
 	tmpl, err := template.New("tmpl").Funcs(funcs).Parse(outputTmpl)
 	if err != nil {
-		glog.Error(err)
+		logrus.Error(err)
 		return err
 	}
 	w := tabwriter.NewWriter(os.Stdout, 8, 8, 8, ' ', 0)
 	err = tmpl.Execute(w, diff)
 	if err != nil {
-		glog.Error(err)
+		logrus.Error(err)
 		return err
 	}
 	w.Flush()

@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 func unpackTar(tr *tar.Reader, path string) error {
@@ -34,7 +34,7 @@ func unpackTar(tr *tar.Reader, path string) error {
 			break
 		}
 		if err != nil {
-			glog.Error("Error getting next tar header")
+			logrus.Error("Error getting next tar header")
 			return err
 		}
 
@@ -43,11 +43,10 @@ func unpackTar(tr *tar.Reader, path string) error {
 			newName := strings.Replace(rmPath, ".wh.", "", 1)
 			err := os.Remove(rmPath)
 			if err != nil {
-				glog.Info(err)
+				return err
 			}
-			err = os.RemoveAll(newName)
-			if err != nil {
-				glog.Info(err)
+			if err = os.RemoveAll(newName); err != nil {
+				return err
 			}
 			continue
 		}
@@ -79,7 +78,7 @@ func unpackTar(tr *tar.Reader, path string) error {
 			}
 			currFile, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
 			if err != nil {
-				glog.Errorf("Error opening file %s", target)
+				logrus.Errorf("Error opening file %s", target)
 				return err
 			}
 			_, err = io.Copy(currFile, tr)
@@ -99,9 +98,21 @@ func UnTar(r io.Reader, target string) error {
 	if _, ok := os.Stat(target); ok != nil {
 		os.MkdirAll(target, 0775)
 	}
+<<<<<<< HEAD
 
 	tr := tar.NewReader(r)
 	if err := unpackTar(tr, target); err != nil {
+=======
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	tr := tar.NewReader(file)
+	err = unpackTar(tr, target)
+	if err != nil {
+		logrus.Error(err)
+>>>>>>> Switch to logrus.
 		return err
 	}
 	return nil
@@ -118,7 +129,7 @@ func CheckTar(image string) bool {
 		return false
 	}
 	if _, err := os.Stat(image); err != nil {
-		glog.Errorf("%s does not exist", image)
+		logrus.Errorf("%s does not exist", image)
 		return false
 	}
 	return true

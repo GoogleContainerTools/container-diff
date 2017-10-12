@@ -23,7 +23,7 @@ import (
 	"sort"
 
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 	"github.com/pmezard/go-difflib/difflib"
 )
 
@@ -131,12 +131,12 @@ func GetModifiedEntries(d1, d2 pkgutil.Directory) []string {
 
 		f1stat, err := os.Stat(f1path)
 		if err != nil {
-			glog.Errorf("Error checking directory entry %s: %s\n", f, err)
+			logrus.Errorf("Error checking directory entry %s: %s\n", f, err)
 			continue
 		}
 		f2stat, err := os.Stat(f2path)
 		if err != nil {
-			glog.Errorf("Error checking directory entry %s: %s\n", f, err)
+			logrus.Errorf("Error checking directory entry %s: %s\n", f, err)
 			continue
 		}
 
@@ -153,7 +153,7 @@ func GetModifiedEntries(d1, d2 pkgutil.Directory) []string {
 		if !f1stat.IsDir() {
 			same, err := pkgutil.CheckSameFile(f1path, f2path)
 			if err != nil {
-				glog.Errorf("Error diffing contents of %s and %s: %s\n", f1path, f2path, err)
+				logrus.Errorf("Error diffing contents of %s and %s: %s\n", f1path, f2path, err)
 				continue
 			}
 			if !same {

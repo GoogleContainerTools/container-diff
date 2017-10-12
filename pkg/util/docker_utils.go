@@ -28,7 +28,7 @@ import (
 	"strings"
 
 	"github.com/docker/docker/client"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 type Event struct {
@@ -91,6 +91,7 @@ func unpackDockerSave(tarPath string, target string) error {
 			return err
 		}
 
+<<<<<<< HEAD
 		// Docker save contains files and directories. Ignore the directories.
 		// We care about the layers and the manifest. The layers look like:
 		// $SHA/layer.tar
@@ -109,28 +110,27 @@ func unpackDockerSave(tarPath string, target string) error {
 				}
 			}
 		case tar.TypeDir:
+=======
+	for _, layer := range layers {
+		layerTar := filepath.Join(tempLayerDir, layer)
+		if _, err := os.Stat(layerTar); err != nil {
+			logrus.Infof("Did not unpack layer %s because no layer.tar found", layer)
+>>>>>>> Switch to logrus.
 			continue
 		default:
 			return fmt.Errorf("unsupported file type %v found in file %s tar %s", t, hdr.Name, tarPath)
 		}
+<<<<<<< HEAD
 	}
 
 	for _, layer := range layers {
 		if err = UnTar(bytes.NewReader(layerMap[layer]), target); err != nil {
 			return fmt.Errorf("Could not unpack layer %s: %s", layer, err)
+=======
+		if err = UnTar(layerTar, target); err != nil {
+			logrus.Errorf("Could not unpack layer %s: %s", layer, err)
+>>>>>>> Switch to logrus.
 		}
 	}
 	return nil
-}
-
-// ImageToTar writes an image to a .tar file
-func saveImageToTar(cli client.APIClient, image, tarName string) (string, error) {
-	glog.Info("Saving image")
-	imgBytes, err := cli.ImageSave(context.Background(), []string{image})
-	if err != nil {
-		return "", err
-	}
-	defer imgBytes.Close()
-	newpath := tarName + ".tar"
-	return newpath, copyToFile(newpath, imgBytes)
 }
