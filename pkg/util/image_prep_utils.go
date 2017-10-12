@@ -58,7 +58,7 @@ type ConfigSchema struct {
 }
 
 func getImage(p Prepper) (Image, error) {
-	fmt.Printf("Retrieving image %s from source %s\n", p.GetSource(), p.Name())
+	fmt.Fprintf(os.Stderr, "Retrieving image %s from source %s\n", p.GetSource(), p.Name())
 	imgPath, err := p.GetFileSystem()
 	if err != nil {
 		return Image{}, err

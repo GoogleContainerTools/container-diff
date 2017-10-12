@@ -71,7 +71,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	fmt.Printf("Starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
+	fmt.Fprintf(os.Stderr, "Starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
 
 	imageMap := map[string]*pkgutil.Image{
 		image1Arg: {},
@@ -101,7 +101,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
 	}
 
-	fmt.Println("Computing diffs")
+	fmt.Fprintln(os.Stderr, "Computing diffs")
 	req := differs.DiffRequest{*imageMap[image1Arg], *imageMap[image2Arg], diffTypes}
 	diffs, err := req.GetDiff()
 	if err != nil {
