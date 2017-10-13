@@ -17,6 +17,7 @@ limitations under the License.
 package util
 
 import (
+	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	"github.com/containers/image/docker"
 	"github.com/docker/docker/client"
 )
@@ -25,6 +26,7 @@ import (
 type CloudPrepper struct {
 	Source string
 	Client *client.Client
+	Cache  cache.Cache
 }
 
 func (p CloudPrepper) Name() string {
@@ -45,7 +47,7 @@ func (p CloudPrepper) GetFileSystem() (string, error) {
 		return "", err
 	}
 
-	return getFileSystemFromReference(ref, p.Source)
+	return getFileSystemFromReference(ref, p.Source, p.Cache)
 }
 
 func (p CloudPrepper) GetConfig() (ConfigSchema, error) {
