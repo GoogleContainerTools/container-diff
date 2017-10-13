@@ -35,6 +35,7 @@ import (
 var json bool
 var save bool
 var types string
+var filename string
 
 type validatefxn func(args []string) error
 
@@ -106,6 +107,11 @@ func checkIfValidAnalyzer(flagtypes string) error {
 	return nil
 }
 
+func checkIfTypesFlagSet(cmd *cobra.Command) bool {
+	flag := cmd.Flags().Lookup("types")
+	return flag.Changed
+}
+
 func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 	cli, err := client.NewEnvClient()
 	if err != nil {
@@ -139,4 +145,5 @@ func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&types, "types", "t", "apt", "This flag sets the list of analyzer types to use.  It expects a comma separated list of supported analyzers.")
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
+	cmd.Flags().StringVarP(&filename, "filename", "f", "", "View the diff of a file in both containers (can only be used with container-diff diff)")
 }

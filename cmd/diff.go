@@ -19,14 +19,14 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/GoogleCloudPlatform/container-diff/differs"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleCloudPlatform/container-diff/util"
+	"github.com/golang/glog"
+	"github.com/spf13/cobra"
 	"os"
 	"strings"
 	"sync"
-
-	"github.com/GoogleCloudPlatform/container-diff/differs"
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/golang/glog"
-	"github.com/spf13/cobra"
 )
 
 var diffCmd = &cobra.Command{
@@ -43,7 +43,8 @@ var diffCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := diffImages(args[0], args[1], strings.Split(types, ",")); err != nil {
+		typesFlag := checkIfTypesFlagSet(cmd)
+		if err := diffImages(args[0], args[1], strings.Split(types, ","), typesFlag); err != nil {
 			glog.Error(err)
 			os.Exit(1)
 		}
@@ -57,7 +58,7 @@ func checkDiffArgNum(args []string) error {
 	return nil
 }
 
-func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
+func diffImages(image1Arg, image2Arg string, diffArgs []string, typesFlag bool) error {
 	diffTypes, err := differs.GetAnalyzers(diffArgs)
 	if err != nil {
 		return err
@@ -106,6 +107,17 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	if err != nil {
 		return fmt.Errorf("Could not retrieve diff: %s", err)
 	}
+
+	if filename != "" {
+		err := diffFile(imageMap, image1Arg, image2Arg)
+		if err != nil {
+			return err
+		}
+		if !typesFlag {
+			return nil
+		}
+	}
+
 	glog.Info("Retrieving diffs")
 	outputResults(diffs)
 
@@ -113,6 +125,20 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		glog.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
 			imageMap[image2Arg].FSPath)
 	}
+	return nil
+}
+
+func diffFile(imageMap map[string]*pkgutil.Image, image1Arg, image2Arg string) error {
+
+	image1FilePath := imageMap[image1Arg].FSPath + filename
+	image2FilePath := imageMap[image2Arg].FSPath + filename
+
+	diff, err := util.DiffFile(image1FilePath, image2FilePath, image1Arg, image2Arg)
+	if err != nil {
+		return err
+	}
+	diff.Filename = filename
+	util.TemplateOutput(diff, "FileNameDiff")
 	return nil
 }
 

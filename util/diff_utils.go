@@ -33,6 +33,11 @@ type DirDiff struct {
 	Mods []EntryDiff
 }
 
+type FileNameDiff struct {
+	Filename string
+	Diff     string
+}
+
 type EntryDiff struct {
 	Name  string
 	Size1 int64
@@ -115,6 +120,36 @@ func DiffDirectory(d1, d2 pkgutil.Directory) (DirDiff, bool) {
 	}
 
 	return DirDiff{addedEntries, deletedEntries, modifiedEntries}, same
+}
+
+//DiffFile diffs within a file
+func DiffFile(path1, path2, image1, image2 string) (FileNameDiff, error) {
+
+	var result FileNameDiff
+
+	image1Contents, err := pkgutil.GetFileContents(path1)
+	if err != nil {
+		return result, err
+	}
+	image2Contents, err := pkgutil.GetFileContents(path2)
+
+	if err != nil {
+		return result, err
+	}
+
+	diff := difflib.UnifiedDiff{
+		A:        image1Contents,
+		B:        image2Contents,
+		FromFile: image1,
+		ToFile:   image2,
+	}
+
+	text, err := difflib.GetUnifiedDiffString(diff)
+
+	if err != nil {
+		return result, err
+	}
+	return FileNameDiff{Diff: text}, nil
 }
 
 // Checks for content differences between files of the same name from different directories

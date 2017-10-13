@@ -20,10 +20,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
-	"html/template"
 	"os"
 	"strings"
 	"text/tabwriter"
+	"text/template"
 
 	"github.com/golang/glog"
 )
@@ -33,6 +33,7 @@ var templates = map[string]string{
 	"MultiVersionPackageDiff":     MultiVersionDiffOutput,
 	"HistDiff":                    HistoryDiffOutput,
 	"DirDiff":                     FSDiffOutput,
+	"FileNameDiff":                FilenameDiffOutput,
 	"ListAnalyze":                 ListAnalysisOutput,
 	"FileAnalyze":                 FileAnalysisOutput,
 	"MultiVersionPackageAnalyze":  MultiVersionPackageOutput,

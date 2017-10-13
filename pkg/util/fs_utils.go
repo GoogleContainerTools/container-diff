@@ -18,6 +18,7 @@ package util
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -51,6 +52,24 @@ func GetSize(path string) int64 {
 		return size
 	}
 	return stat.Size()
+}
+
+//GetFileContents returns the contents of a file at the specified path
+func GetFileContents(path string) ([]string, error) {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if stat.IsDir() {
+		return nil, errors.New("--filename is a directory, not a file")
+	}
+	contents, err := ioutil.ReadFile(path)
+
+	if err != nil {
+		return nil, err
+	}
+	return []string{string(contents)}, nil
 }
 
 func getDirectorySize(path string) (int64, error) {

@@ -36,6 +36,9 @@ var analyzeCmd = &cobra.Command{
 		if err := validateArgs(args, checkAnalyzeArgNum); err != nil {
 			return err
 		}
+		if err := checkAnalyzeFilenameFlag(); err != nil {
+			return err
+		}
 		if err := checkIfValidAnalyzer(types); err != nil {
 			return err
 		}
@@ -52,6 +55,13 @@ var analyzeCmd = &cobra.Command{
 func checkAnalyzeArgNum(args []string) error {
 	if len(args) != 1 {
 		return errors.New("'analyze' requires one image as an argument: container-diff analyze [image]")
+	}
+	return nil
+}
+
+func checkAnalyzeFilenameFlag() error {
+	if filename != "" {
+		return errors.New("please remove --filename flag, incompatible with analyze")
 	}
 	return nil
 }
