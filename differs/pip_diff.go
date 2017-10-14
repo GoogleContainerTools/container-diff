@@ -24,7 +24,7 @@ import (
 
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 type PipAnalyzer struct {
@@ -97,7 +97,7 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 				} else if i+1 < len(contents) && contents[i+1].Name() == packageName+".py" {
 					size = contents[i+1].Size()
 				} else {
-					glog.Errorf("Could not find Python package %s for corresponding metadata info", packageName)
+					logrus.Errorf("Could not find Python package %s for corresponding metadata info", packageName)
 					continue
 				}
 				currPackage := util.PackageInfo{Version: version, Size: size}

@@ -22,7 +22,6 @@ import (
 	"os"
 
 	"github.com/GoogleCloudPlatform/container-diff/cmd"
-	"github.com/golang/glog"
 	"github.com/pkg/profile"
 )
 
@@ -37,5 +36,4 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	glog.Flush()
 }

@@ -25,7 +25,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -44,7 +44,7 @@ var diffCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := diffImages(args[0], args[1], strings.Split(types, ",")); err != nil {
-			glog.Error(err)
+			logrus.Error(err)
 			os.Exit(1)
 		}
 	},
@@ -71,7 +71,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	glog.Infof("Starting diff on images %s and %s, using differs: %s", image1Arg, image2Arg, diffArgs)
+	fmt.Fprintf(os.Stderr, "Starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
 
 	imageMap := map[string]*pkgutil.Image{
 		image1Arg: {},
@@ -84,13 +84,13 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 
 			prepper, err := getPrepperForImage(imageName)
 			if err != nil {
-				glog.Error(err)
+				logrus.Error(err)
 				return
 			}
 			image, err := prepper.GetImage()
 			imageMap[imageName] = &image
 			if err != nil {
-				glog.Warningf("Diff may be inaccurate: %s", err)
+				logrus.Warningf("Diff may be inaccurate: %s", err)
 			}
 		}(imageArg, imageMap)
 	}
@@ -101,16 +101,16 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
 	}
 
+	fmt.Fprintln(os.Stderr, "Computing diffs")
 	req := differs.DiffRequest{*imageMap[image1Arg], *imageMap[image2Arg], diffTypes}
 	diffs, err := req.GetDiff()
 	if err != nil {
 		return fmt.Errorf("Could not retrieve diff: %s", err)
 	}
-	glog.Info("Retrieving diffs")
 	outputResults(diffs)
 
 	if save {
-		glog.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
+		logrus.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
 			imageMap[image2Arg].FSPath)
 	}
 	return nil
