@@ -29,6 +29,8 @@ import (
 	"sync"
 )
 
+var filename string
+
 var diffCmd = &cobra.Command{
 	Use:   "diff",
 	Short: "Compare two images: [image1] [image2]",
@@ -106,7 +108,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string, typesFlagSet boo
 
 	if filename != "" {
 		fmt.Fprintln(os.Stderr, "Computing filename diffs")
-		err := diffFile(imageMap, image1Arg, image2Arg)
+		err := diffFile(imageMap[image1Arg], imageMap[image2Arg])
 		if err != nil {
 			return err
 		}
@@ -130,21 +132,17 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string, typesFlagSet boo
 	return nil
 }
 
-func diffFile(imageMap map[string]*pkgutil.Image, image1Arg, image2Arg string) error {
-
-	image1FilePath := imageMap[image1Arg].FSPath + filename
-	image2FilePath := imageMap[image2Arg].FSPath + filename
-
-	diff, err := util.DiffFile(image1FilePath, image2FilePath, image1Arg, image2Arg)
+func diffFile(image1, image2 *pkgutil.Image) error {
+	diff, err := util.DiffFile(image1, image2, filename)
 	if err != nil {
 		return err
 	}
-	diff.Filename = filename
-	util.TemplateOutput(diff, "FileNameDiff")
+	util.TemplateOutput(diff, "FilenameDiff")
 	return nil
 }
 
 func init() {
+	diffCmd.Flags().StringVarP(&filename, "filename", "f", "", "Set this flag to the path of a file in both containers to view the diff of the file")
 	RootCmd.AddCommand(diffCmd)
 	addSharedFlags(diffCmd)
 }

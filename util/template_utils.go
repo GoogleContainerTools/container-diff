@@ -67,6 +67,7 @@ Docker history lines found only in {{.Image2}}:{{if not .Diff.Dels}} None{{else}
 `
 const FilenameDiffOutput = `
 -----Diff of {{.Filename}}-----
+{{.Description}}
 
 {{.Diff}}
 `
