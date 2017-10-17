@@ -25,7 +25,7 @@ import (
 
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 type NodeAnalyzer struct {
@@ -55,7 +55,7 @@ func (a NodeAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]ut
 	}
 	layerStems, err := buildNodePaths(path)
 	if err != nil {
-		glog.Warningf("Error building JSON paths at %s: %s\n", path, err)
+		logrus.Warningf("Error building JSON paths at %s: %s\n", path, err)
 		return packages, err
 	}
 
@@ -68,7 +68,7 @@ func (a NodeAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]ut
 			}
 			packageJSON, err := readPackageJSON(currPackage)
 			if err != nil {
-				glog.Warningf("Error reading package JSON at %s: %s\n", currPackage, err)
+				logrus.Warningf("Error reading package JSON at %s: %s\n", currPackage, err)
 				return packages, err
 			}
 			// Build PackageInfo for this package occurence

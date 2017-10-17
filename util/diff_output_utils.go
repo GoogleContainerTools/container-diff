@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 type DiffResult struct {
@@ -35,7 +35,7 @@ type MultiVersionPackageDiffResult DiffResult
 func (r MultiVersionPackageDiffResult) OutputStruct() interface{} {
 	diff, valid := r.Diff.(MultiVersionPackageDiff)
 	if !valid {
-		glog.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
+		logrus.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
 		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
 	}
 
@@ -55,7 +55,7 @@ func (r MultiVersionPackageDiffResult) OutputStruct() interface{} {
 func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
 	diff, valid := r.Diff.(MultiVersionPackageDiff)
 	if !valid {
-		glog.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
+		logrus.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
 		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
 	}
 
@@ -101,7 +101,7 @@ type SingleVersionPackageDiffResult DiffResult
 func (r SingleVersionPackageDiffResult) OutputStruct() interface{} {
 	diff, valid := r.Diff.(PackageDiff)
 	if !valid {
-		glog.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
+		logrus.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
 		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
 	}
 
@@ -121,7 +121,7 @@ func (r SingleVersionPackageDiffResult) OutputStruct() interface{} {
 func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
 	diff, valid := r.Diff.(PackageDiff)
 	if !valid {
-		glog.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
+		logrus.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
 		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
 	}
 
@@ -177,7 +177,7 @@ type DirDiffResult DiffResult
 func (r DirDiffResult) OutputStruct() interface{} {
 	diff, valid := r.Diff.(DirDiff)
 	if !valid {
-		glog.Error("Unexpected structure of Diff.  Should follow the DirDiff struct")
+		logrus.Error("Unexpected structure of Diff.  Should follow the DirDiff struct")
 		return errors.New("Could not output FileAnalyzer diff result")
 	}
 
@@ -188,7 +188,7 @@ func (r DirDiffResult) OutputStruct() interface{} {
 func (r DirDiffResult) OutputText(diffType string) error {
 	diff, valid := r.Diff.(DirDiff)
 	if !valid {
-		glog.Error("Unexpected structure of Diff.  Should follow the DirDiff struct")
+		logrus.Error("Unexpected structure of Diff.  Should follow the DirDiff struct")
 		return errors.New("Could not output FileAnalyzer diff result")
 	}
 	diff = sortDirDiff(diff)

@@ -24,7 +24,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +46,7 @@ var analyzeCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := analyzeImage(args[0], strings.Split(types, ",")); err != nil {
-			glog.Error(err)
+			logrus.Error(err)
 			os.Exit(1)
 		}
 	},
@@ -98,11 +98,11 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		return fmt.Errorf("Error performing image analysis: %s", err)
 	}
 
-	glog.Info("Retrieving analyses")
+	fmt.Fprintln(os.Stderr, "Retrieving analyses")
 	outputResults(analyses)
 
 	if save {
-		glog.Infof("Image was saved at %s", image.FSPath)
+		logrus.Infof("Image was saved at %s", image.FSPath)
 	}
 
 	return nil

@@ -22,14 +22,18 @@ import (
 	"os"
 
 	"github.com/GoogleCloudPlatform/container-diff/cmd"
-	"github.com/golang/glog"
+	"github.com/pkg/profile"
 )
+
+const containerDiffEnvPrefix = "CONTAINER_DIFF_ENABLE_PROFILING"
 
 func main() {
 	flag.Parse()
+	if os.Getenv(containerDiffEnvPrefix) == "1" {
+		defer profile.Start(profile.TraceProfile).Stop()
+	}
 	if err := cmd.RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	glog.Flush()
 }

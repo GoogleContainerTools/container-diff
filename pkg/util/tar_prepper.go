@@ -25,7 +25,7 @@ import (
 
 	"github.com/containers/image/docker/tarfile"
 	"github.com/docker/docker/client"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 type TarPrepper struct {
@@ -55,7 +55,12 @@ func (p TarPrepper) GetConfig() (ConfigSchema, error) {
 		return ConfigSchema{}, nil
 	}
 	defer os.RemoveAll(tempDir)
-	if err := UnTar(p.Source, tempDir); err != nil {
+	f, err := os.Open(p.Source)
+	if err != nil {
+		return ConfigSchema{}, err
+	}
+	defer f.Close()
+	if err := UnTar(f, tempDir); err != nil {
 		return ConfigSchema{}, err
 	}
 
@@ -79,12 +84,12 @@ func (p TarPrepper) GetConfig() (ConfigSchema, error) {
 	cfgFilename := filepath.Join(tempDir, manifests[0].Config)
 	file, err := ioutil.ReadFile(cfgFilename)
 	if err != nil {
-		glog.Errorf("Could not read config file %s: %s", cfgFilename, err)
+		logrus.Errorf("Could not read config file %s: %s", cfgFilename, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
 	}
 	err = json.Unmarshal(file, &config)
 	if err != nil {
-		glog.Errorf("Could not marshal config file %s: %s", cfgFilename, err)
+		logrus.Errorf("Could not marshal config file %s: %s", cfgFilename, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
 	}
 

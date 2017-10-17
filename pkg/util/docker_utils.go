@@ -17,16 +17,17 @@ limitations under the License.
 package util
 
 import (
+	"archive/tar"
+	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
+	"strings"
 
 	"github.com/docker/docker/client"
-	"github.com/golang/glog"
 )
 
 type Event struct {
@@ -49,69 +50,74 @@ func NewClient() (*client.Client, error) {
 	return cli, nil
 }
 
-func getLayersFromManifest(manifestPath string) ([]string, error) {
+func getLayersFromManifest(r io.Reader) ([]string, error) {
 	type Manifest struct {
 		Layers []string
 	}
 
-	manifestJSON, err := ioutil.ReadFile(manifestPath)
+	manifestJSON, err := ioutil.ReadAll(r)
 	if err != nil {
-		errMsg := fmt.Sprintf("Could not open manifest to get layer order: %s", err)
-		return []string{}, errors.New(errMsg)
+		return nil, err
 	}
 
 	var imageManifest []Manifest
-	err = json.Unmarshal(manifestJSON, &imageManifest)
-	if err != nil {
-		errMsg := fmt.Sprintf("Could not unmarshal manifest to get layer order: %s", err)
-		return []string{}, errors.New(errMsg)
+	if err := json.Unmarshal(manifestJSON, &imageManifest); err != nil {
+		return []string{}, fmt.Errorf("Could not unmarshal manifest to get layer order: %s", err)
 	}
 	return imageManifest[0].Layers, nil
 }
 
 func unpackDockerSave(tarPath string, target string) error {
 	if _, ok := os.Stat(target); ok != nil {
-		os.MkdirAll(target, 0777)
+		os.MkdirAll(target, 0775)
 	}
-
-	tempLayerDir, err := ioutil.TempDir("", ".container-diff")
+	f, err := os.Open(tarPath)
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(tempLayerDir)
 
-	if err := UnTar(tarPath, tempLayerDir); err != nil {
-		errMsg := fmt.Sprintf("Could not unpack saved Docker image %s: %s", tarPath, err)
-		return errors.New(errMsg)
-	}
+	tr := tar.NewReader(f)
 
-	manifest := filepath.Join(tempLayerDir, "manifest.json")
-	layers, err := getLayersFromManifest(manifest)
-	if err != nil {
-		return err
+	// Unpack the layers into a map, since we need to sort out the order later.
+	var layers []string
+	layerMap := map[string][]byte{}
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		// Docker save contains files and directories. Ignore the directories.
+		// We care about the layers and the manifest. The layers look like:
+		// $SHA/layer.tar
+		// and they are referenced that way in the manifest.
+		switch t := hdr.Typeflag; t {
+		case tar.TypeReg:
+			if hdr.Name == "manifest.json" {
+				layers, err = getLayersFromManifest(tr)
+				if err != nil {
+					return err
+				}
+			} else if strings.HasSuffix(hdr.Name, ".tar") {
+				layerMap[hdr.Name], err = ioutil.ReadAll(tr)
+				if err != nil {
+					return err
+				}
+			}
+		case tar.TypeDir:
+			continue
+		default:
+			return fmt.Errorf("unsupported file type %v found in file %s tar %s", t, hdr.Name, tarPath)
+		}
 	}
 
 	for _, layer := range layers {
-		layerTar := filepath.Join(tempLayerDir, layer)
-		if _, err := os.Stat(layerTar); err != nil {
-			glog.Infof("Did not unpack layer %s because no layer.tar found", layer)
-			continue
-		}
-		if err = UnTar(layerTar, target); err != nil {
-			glog.Errorf("Could not unpack layer %s: %s", layer, err)
+		if err = UnTar(bytes.NewReader(layerMap[layer]), target); err != nil {
+			return fmt.Errorf("Could not unpack layer %s: %s", layer, err)
 		}
 	}
 	return nil
-}
-
-// ImageToTar writes an image to a .tar file
-func saveImageToTar(cli client.APIClient, image, tarName string) (string, error) {
-	glog.Info("Saving image")
-	imgBytes, err := cli.ImageSave(context.Background(), []string{image})
-	if err != nil {
-		return "", err
-	}
-	defer imgBytes.Close()
-	newpath := tarName + ".tar"
-	return newpath, copyToFile(newpath, imgBytes)
 }

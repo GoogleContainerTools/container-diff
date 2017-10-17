@@ -20,13 +20,14 @@ import (
 	"archive/tar"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/containers/image/pkg/compression"
 	"github.com/containers/image/types"
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 type Prepper interface {
@@ -57,7 +58,7 @@ type ConfigSchema struct {
 }
 
 func getImage(p Prepper) (Image, error) {
-	glog.Infof("Retrieving image %s from source %s", p.GetSource(), p.Name())
+	fmt.Fprintf(os.Stderr, "Retrieving image %s from source %s\n", p.GetSource(), p.Name())
 	imgPath, err := p.GetFileSystem()
 	if err != nil {
 		return Image{}, err
@@ -65,10 +66,10 @@ func getImage(p Prepper) (Image, error) {
 
 	config, err := p.GetConfig()
 	if err != nil {
-		glog.Error("Error retrieving History: ", err)
+		logrus.Error("Error retrieving History: ", err)
 	}
 
-	glog.Infof("Finished prepping image %s", p.GetSource())
+	logrus.Infof("Finished prepping image %s", p.GetSource())
 	return Image{
 		Source: p.GetSource(),
 		FSPath: imgPath,
@@ -77,7 +78,7 @@ func getImage(p Prepper) (Image, error) {
 }
 
 func getImageFromTar(tarPath string) (string, error) {
-	glog.Info("Extracting image tar to obtain image file system")
+	logrus.Info("Extracting image tar to obtain image file system")
 	tempPath, err := ioutil.TempDir("", ".container-diff")
 	if err != nil {
 		return "", err
@@ -96,41 +97,41 @@ func getFileSystemFromReference(ref types.ImageReference, imageName string) (str
 
 	img, err := ref.NewImage(nil)
 	if err != nil {
-		glog.Error(err)
+		logrus.Error(err)
 		return "", err
 	}
 	defer img.Close()
 
 	imgSrc, err := ref.NewImageSource(nil, nil)
 	if err != nil {
-		glog.Error(err)
+		logrus.Error(err)
 		return "", err
 	}
 
 	for _, b := range img.LayerInfos() {
 		bi, _, err := imgSrc.GetBlob(b)
 		if err != nil {
-			glog.Errorf("Failed to pull image layer: %s", err)
+			logrus.Errorf("Failed to pull image layer: %s", err)
 			return "", err
 		}
 		// try and detect layer compression
 		f, reader, err := compression.DetectCompression(bi)
 		if err != nil {
-			glog.Errorf("Failed to detect image compression: %s", err)
+			logrus.Errorf("Failed to detect image compression: %s", err)
 			return "", err
 		}
 		if f != nil {
 			// decompress if necessary
 			reader, err = f(reader)
 			if err != nil {
-				glog.Errorf("Failed to decompress image: %s", err)
+				logrus.Errorf("Failed to decompress image: %s", err)
 				return "", err
 			}
 		}
 		tr := tar.NewReader(reader)
 		err = unpackTar(tr, path)
 		if err != nil {
-			glog.Errorf("Failed to untar layer with error: %s", err)
+			logrus.Errorf("Failed to untar layer with error: %s", err)
 		}
 	}
 	return path, nil
@@ -139,21 +140,21 @@ func getFileSystemFromReference(ref types.ImageReference, imageName string) (str
 func getConfigFromReference(ref types.ImageReference, source string) (ConfigSchema, error) {
 	img, err := ref.NewImage(nil)
 	if err != nil {
-		glog.Errorf("Error referencing image %s from registry: %s", source, err)
+		logrus.Errorf("Error referencing image %s from registry: %s", source, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
 	}
 	defer img.Close()
 
 	configBlob, err := img.ConfigBlob()
 	if err != nil {
-		glog.Errorf("Error obtaining config blob for image %s from registry: %s", source, err)
+		logrus.Errorf("Error obtaining config blob for image %s from registry: %s", source, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
 	}
 
 	var config ConfigSchema
 	err = json.Unmarshal(configBlob, &config)
 	if err != nil {
-		glog.Errorf("Error with config file struct for image %s: %s", source, err)
+		logrus.Errorf("Error with config file struct for image %s: %s", source, err)
 		return ConfigSchema{}, errors.New("Could not obtain image config")
 	}
 	return config, nil
@@ -161,9 +162,9 @@ func getConfigFromReference(ref types.ImageReference, source string) (ConfigSche
 
 func CleanupImage(image Image) {
 	if image.FSPath != "" {
-		glog.Infof("Removing image filesystem directory %s from system", image.FSPath)
+		logrus.Infof("Removing image filesystem directory %s from system", image.FSPath)
 		if err := os.RemoveAll(image.FSPath); err != nil {
-			glog.Error(err.Error())
+			logrus.Error(err.Error())
 		}
 	}
 }

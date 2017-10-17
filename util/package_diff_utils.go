@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/golang/glog"
+	"github.com/sirupsen/logrus"
 )
 
 // MultiVersionPackageDiff stores the difference information between two images which could have multi-version packages.
@@ -131,7 +131,7 @@ func GetMultiVersionMapDiff(map1, map2 map[string]map[string]PackageInfo) MultiV
 func diffMaps(map1, map2 interface{}) interface{} {
 	mapType, multiV, err := checkPackageMapType(map1, map2)
 	if err != nil {
-		glog.Error(err)
+		logrus.Error(err)
 	}
 
 	map1Value := reflect.ValueOf(map1)

@@ -21,6 +21,6 @@ go_library(
         "//vendor/github.com/containers/image/types:go_default_library",
         "//vendor/github.com/docker/docker/client:go_default_library",
         "//vendor/github.com/docker/docker/pkg/system:go_default_library",
-        "//vendor/github.com/golang/glog:go_default_library",
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
     ],
 )
