@@ -42,11 +42,13 @@ var diffCmd = &cobra.Command{
 		if err := checkIfValidAnalyzer(types); err != nil {
 			return err
 		}
+		if err := checkFilenameFlag(types); err != nil {
+			return err
+		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		typesFlagSet := checkIfTypesFlagSet(cmd)
-		if err := diffImages(args[0], args[1], strings.Split(types, ","), typesFlagSet); err != nil {
+		if err := diffImages(args[0], args[1], strings.Split(types, ",")); err != nil {
 			logrus.Error(err)
 			os.Exit(1)
 		}
@@ -60,7 +62,16 @@ func checkDiffArgNum(args []string) error {
 	return nil
 }
 
-func diffImages(image1Arg, image2Arg string, diffArgs []string, typesFlagSet bool) error {
+func checkFilenameFlag(types string) error {
+	if filename != "" {
+		if !strings.Contains(types, "file") {
+			return errors.New("Please include --types=file with the --filename flag")
+		}
+	}
+	return nil
+}
+
+func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	diffTypes, err := differs.GetAnalyzers(diffArgs)
 	if err != nil {
 		return err
@@ -74,9 +85,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string, typesFlagSet boo
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	if typesFlagSet || filename == "" {
-		fmt.Fprintf(os.Stderr, "Starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
-	}
+	fmt.Fprintf(os.Stderr, "Starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
 
 	imageMap := map[string]*pkgutil.Image{
 		image1Arg: {},
@@ -106,17 +115,6 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string, typesFlagSet boo
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
 	}
 
-	if filename != "" {
-		fmt.Fprintln(os.Stderr, "Computing filename diffs")
-		err := diffFile(imageMap[image1Arg], imageMap[image2Arg])
-		if err != nil {
-			return err
-		}
-		if !typesFlagSet {
-			return nil
-		}
-	}
-
 	fmt.Fprintln(os.Stderr, "Computing diffs")
 	req := differs.DiffRequest{*imageMap[image1Arg], *imageMap[image2Arg], diffTypes}
 	diffs, err := req.GetDiff()
@@ -124,6 +122,14 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string, typesFlagSet boo
 		return fmt.Errorf("Could not retrieve diff: %s", err)
 	}
 	outputResults(diffs)
+
+	if filename != "" {
+		fmt.Fprintln(os.Stderr, "Computing filename diffs")
+		err := diffFile(imageMap[image1Arg], imageMap[image2Arg])
+		if err != nil {
+			return err
+		}
+	}
 
 	if save {
 		logrus.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
@@ -142,7 +148,7 @@ func diffFile(image1, image2 *pkgutil.Image) error {
 }
 
 func init() {
-	diffCmd.Flags().StringVarP(&filename, "filename", "f", "", "Set this flag to the path of a file in both containers to view the diff of the file")
+	diffCmd.Flags().StringVarP(&filename, "filename", "f", "", "Set this flag to the path of a file in both containers to view the diff of the file. Must be used with --types=file flag.")
 	RootCmd.AddCommand(diffCmd)
 	addSharedFlags(diffCmd)
 }

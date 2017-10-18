@@ -117,11 +117,6 @@ func checkIfValidAnalyzer(flagtypes string) error {
 	return nil
 }
 
-func checkIfTypesFlagSet(cmd *cobra.Command) bool {
-	flag := cmd.Flags().Lookup("types")
-	return flag.Changed
-}
-
 func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 	cli, err := client.NewEnvClient()
 	if err != nil {
