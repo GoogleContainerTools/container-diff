@@ -49,7 +49,12 @@ type ImageHistoryItem struct {
 }
 
 type ConfigObject struct {
-	Env []string `json:"Env"`
+	Env          []string            `json:"Env"`
+	Entrypoint   []string            `json:"Entrypoint"`
+	ExposedPorts map[string]struct{} `json:"ExposedPorts"`
+	Cmd          []string            `json:"Cmd"`
+	Volumes      map[string]struct{} `json:"Volumes"`
+	Workdir      string              `json:"WorkingDir"`
 }
 
 type ConfigSchema struct {
