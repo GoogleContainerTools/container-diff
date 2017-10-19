@@ -66,6 +66,12 @@ You can similarly run many analyzers at once:
 container-diff diff <img1> <img2> --types=history,apt,node
 ```
 
+To view the diff of an individual file in two different images, you can use the filename flag in conjuction with the file system diff analyzer.
+
+```
+container-diff diff <img1> <img2> --types=file --filename=/path/to/file
+```
+
 All of the analyzer flags with their long versions can be seen below:
 
 | Differ                    | Short flag | Long Flag  |
@@ -265,6 +271,37 @@ Packages found only in gcr.io/google-appengine/python:2017-06-29-190410: None
 Version differences: None
 
 ```
+```
+$ container-diff diff file1.tar file2.tar --types=file --filename=go/src/app/file.txt
+Starting diff on images file1.tar and file2.tar, using differs: [file]
+Retrieving image file2.tar from source Tar Archive
+Retrieving image file1.tar from source Tar Archive
+Computing diffs
+
+-----File-----
+
+These entries have been added to file1.tar: None
+
+These entries have been deleted from file1.tar: None
+
+These entries have been changed between file1.tar and file2.tar:
+FILE                        SIZE1        SIZE2
+/go/src/app/file.txt        30B          30B
+
+Computing filename diffs
+
+-----Diff of go/src/app/file.txt-----
+
+
+--- file1.tar
++++ file2.tar
+@@ -1 +1 @@
+-This is file 1
+This is a file
++This is file 2
+This is a file
+```
+
 ## Example Run with JSON post-processing
 The following example demonstrates how one might selectively display the output of their diff, such that version differences are ignored and only package absence/presence is displayed and the packages present in only one image are sorted by size in descending order. A small piece of the JSON being post-processed can be seen below:
 ```
