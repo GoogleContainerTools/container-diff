@@ -19,14 +19,14 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
+	"sync"
+
 	"github.com/GoogleCloudPlatform/container-diff/differs"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"os"
-	"strings"
-	"sync"
 )
 
 var filename string
@@ -36,19 +36,13 @@ var diffCmd = &cobra.Command{
 	Short: "Compare two images: [image1] [image2]",
 	Long:  `Compares two images using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if err := validateArgs(args, checkDiffArgNum); err != nil {
-			return err
-		}
-		if err := checkIfValidAnalyzer(types); err != nil {
-			return err
-		}
-		if err := checkFilenameFlag(types); err != nil {
+		if err := validateArgs(args, checkDiffArgNum, checkIfValidAnalyzer, checkFilenameFlag); err != nil {
 			return err
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := diffImages(args[0], args[1], strings.Split(types, ",")); err != nil {
+		if err := diffImages(args[0], args[1], types); err != nil {
 			logrus.Error(err)
 			os.Exit(1)
 		}
@@ -62,13 +56,16 @@ func checkDiffArgNum(args []string) error {
 	return nil
 }
 
-func checkFilenameFlag(types string) error {
-	if filename != "" {
-		if !strings.Contains(types, "file") {
-			return errors.New("Please include --types=file with the --filename flag")
+func checkFilenameFlag(_ []string) error {
+	if filename == "" {
+		return nil
+	}
+	for _, t := range types {
+		if t == "file" {
+			return nil
 		}
 	}
-	return nil
+	return errors.New("Please include --types=file with the --filename flag")
 }
 
 func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
