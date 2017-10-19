@@ -34,6 +34,12 @@ type DirDiff struct {
 	Mods []EntryDiff
 }
 
+type FileNameDiff struct {
+	Filename    string
+	Description string
+	Diff        string
+}
+
 type EntryDiff struct {
 	Name  string
 	Size1 int64
@@ -116,6 +122,64 @@ func DiffDirectory(d1, d2 pkgutil.Directory) (DirDiff, bool) {
 	}
 
 	return DirDiff{addedEntries, deletedEntries, modifiedEntries}, same
+}
+
+func DiffFile(image1, image2 *pkgutil.Image, filename string) (*FileNameDiff, error) {
+	//Join paths
+	image1FilePath := filepath.Join(image1.FSPath, filename)
+	image2FilePath := filepath.Join(image2.FSPath, filename)
+
+	//Get contents of files
+	image1FileContents, err := pkgutil.GetFileContents(image1FilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	image2FileContents, err := pkgutil.GetFileContents(image2FilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	description := ""
+	//Check if file contents are empty or if they are the same
+	if image1FileContents == nil && image2FileContents == nil {
+		description := "Both files are empty"
+		return &FileNameDiff{filename, description, ""}, nil
+	}
+
+	if image1FileContents == nil {
+		description := fmt.Sprintf("%s contains an empty file, the contents of %s are:", image1.Source, image2.Source)
+		return &FileNameDiff{filename, description, *image2FileContents}, nil
+	}
+
+	if image2FileContents == nil {
+		description := fmt.Sprintf("%s contains an empty file, the contents of %s are:", image2.Source, image1.Source)
+		return &FileNameDiff{filename, description, *image1FileContents}, nil
+	}
+
+	if *image1FileContents == *image2FileContents {
+		description := "Both files are the same, the contents are:"
+		return &FileNameDiff{filename, description, *image1FileContents}, nil
+	}
+
+	//Carry on with diffing, make string array for difflib requirements
+	image1Contents := []string{string(*image1FileContents)}
+	image2Contents := []string{string(*image2FileContents)}
+
+	//Run diff
+	diff := difflib.UnifiedDiff{
+		A:        image1Contents,
+		B:        image2Contents,
+		FromFile: image1.Source,
+		ToFile:   image2.Source,
+	}
+
+	text, err := difflib.GetUnifiedDiffString(diff)
+
+	if err != nil {
+		return nil, err
+	}
+	return &FileNameDiff{filename, description, text}, nil
 }
 
 // Checks for content differences between files of the same name from different directories

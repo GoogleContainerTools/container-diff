@@ -19,15 +19,17 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/GoogleCloudPlatform/container-diff/differs"
+	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleCloudPlatform/container-diff/util"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"os"
 	"strings"
 	"sync"
-
-	"github.com/GoogleCloudPlatform/container-diff/differs"
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 )
+
+var filename string
 
 var diffCmd = &cobra.Command{
 	Use:   "diff",
@@ -38,6 +40,9 @@ var diffCmd = &cobra.Command{
 			return err
 		}
 		if err := checkIfValidAnalyzer(types); err != nil {
+			return err
+		}
+		if err := checkFilenameFlag(types); err != nil {
 			return err
 		}
 		return nil
@@ -53,6 +58,15 @@ var diffCmd = &cobra.Command{
 func checkDiffArgNum(args []string) error {
 	if len(args) != 2 {
 		return errors.New("'diff' requires two images as arguments: container-diff diff [image1] [image2]")
+	}
+	return nil
+}
+
+func checkFilenameFlag(types string) error {
+	if filename != "" {
+		if !strings.Contains(types, "file") {
+			return errors.New("Please include --types=file with the --filename flag")
+		}
 	}
 	return nil
 }
@@ -109,6 +123,14 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	}
 	outputResults(diffs)
 
+	if filename != "" {
+		fmt.Fprintln(os.Stderr, "Computing filename diffs")
+		err := diffFile(imageMap[image1Arg], imageMap[image2Arg])
+		if err != nil {
+			return err
+		}
+	}
+
 	if save {
 		logrus.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
 			imageMap[image2Arg].FSPath)
@@ -116,7 +138,17 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	return nil
 }
 
+func diffFile(image1, image2 *pkgutil.Image) error {
+	diff, err := util.DiffFile(image1, image2, filename)
+	if err != nil {
+		return err
+	}
+	util.TemplateOutput(diff, "FilenameDiff")
+	return nil
+}
+
 func init() {
+	diffCmd.Flags().StringVarP(&filename, "filename", "f", "", "Set this flag to the path of a file in both containers to view the diff of the file. Must be used with --types=file flag.")
 	RootCmd.AddCommand(diffCmd)
 	addSharedFlags(diffCmd)
 }

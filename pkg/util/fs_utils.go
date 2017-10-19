@@ -53,6 +53,25 @@ func GetSize(path string) int64 {
 	return stat.Size()
 }
 
+//GetFileContents returns the contents of a file at the specified path
+func GetFileContents(path string) (*string, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil, err
+	}
+
+	contents, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	strContents := string(contents)
+	//If file is empty, return nil
+	if strContents == "" {
+		return nil, nil
+	}
+	return &strContents, nil
+}
+
 func getDirectorySize(path string) (int64, error) {
 	var size int64
 	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
