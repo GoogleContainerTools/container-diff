@@ -18,7 +18,6 @@ package util
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -52,14 +51,12 @@ func cacheAndTest(c *cache.FileCache, t *testing.T, testStr string, layerId stri
 func TestCache(t *testing.T) {
 	cacheDir, err := ioutil.TempDir("", ".cache")
 	if err != nil {
-		fmt.Printf(err.Error())
-		os.Exit(1)
+		t.Fatalf("error when creating cache directory: %s", err.Error())
 	}
 	defer os.RemoveAll(cacheDir)
 	c, err := cache.NewFileCache(cacheDir)
 	if err != nil {
-		fmt.Printf(err.Error())
-		os.Exit(1)
+		t.Fatalf("error when creating cache: %s", err.Error())
 	}
 	testRuns := []struct {
 		Name    string
