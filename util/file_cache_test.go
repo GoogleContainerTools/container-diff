@@ -26,18 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 )
 
-var c *cache.FileCache
-
-func TestCacheData(t *testing.T) {
-	data := "this is a test of caching some bytes. this could be any data."
-	cacheAndTest(t, data, "sha256:realdata")
-}
-
-func TestCacheEmpty(t *testing.T) {
-	cacheAndTest(t, "", "sha256:emptydata")
-}
-
-func cacheAndTest(t *testing.T, testStr string, layerId string) {
+func cacheAndTest(c *cache.FileCache, t *testing.T, testStr string, layerId string) {
 	byteArr := []byte(testStr)
 	r := bytes.NewReader(byteArr)
 
@@ -60,18 +49,29 @@ func cacheAndTest(t *testing.T, testStr string, layerId string) {
 	}
 }
 
-func TestMain(m *testing.M) {
-	var err error
+func TestCache(t *testing.T) {
 	cacheDir, err := ioutil.TempDir("", ".cache")
 	if err != nil {
 		fmt.Printf(err.Error())
 		os.Exit(1)
 	}
 	defer os.RemoveAll(cacheDir)
-	c, err = cache.NewFileCache(cacheDir)
+	c, err := cache.NewFileCache(cacheDir)
 	if err != nil {
 		fmt.Printf(err.Error())
 		os.Exit(1)
 	}
-	os.Exit(m.Run())
+	testRuns := []struct {
+		Name    string
+		Data    string
+		LayerId string
+	}{
+		{"real data", "this is a test of caching some bytes. this could be any data.", "sha256:realdata"},
+		{"empty data", "", "sha256:emptydata"},
+	}
+	for _, test := range testRuns {
+		t.Run(test.Name, func(t *testing.T) {
+			cacheAndTest(c, t, test.Data, test.LayerId)
+		})
+	}
 }
