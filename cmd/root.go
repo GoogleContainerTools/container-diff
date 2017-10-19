@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	goflag "flag"
 	"fmt"
 	"os"
@@ -35,7 +34,7 @@ import (
 
 var json bool
 var save bool
-var types string
+var types diffTypes
 
 var LogLevel string
 
@@ -104,12 +103,11 @@ func validateArgs(args []string, validatefxns ...validatefxn) error {
 	return nil
 }
 
-func checkIfValidAnalyzer(flagtypes string) error {
-	if flagtypes == "" {
-		return errors.New("Please provide at least one analyzer to run")
+func checkIfValidAnalyzer(_ []string) error {
+	if len(types) == 0 {
+		types = []string{"apt"}
 	}
-	analyzers := strings.Split(flagtypes, ",")
-	for _, name := range analyzers {
+	for _, name := range types {
 		if _, exists := differs.Analyzers[name]; !exists {
 			return fmt.Errorf("Argument %s is not a valid analyzer", name)
 		}
@@ -146,9 +144,35 @@ func init() {
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 }
 
+// Define a type named "diffSlice" as a slice of strings
+type diffTypes []string
+
+// Now, for our new type, implement the two methods of
+// the flag.Value interface...
+// The first method is String() string
+func (d *diffTypes) String() string {
+	return strings.Join(*d, ",")
+}
+
+// The second method is Set(value string) error
+func (d *diffTypes) Set(value string) error {
+	// Dedupe repeated elements.
+	for _, t := range *d {
+		if t == value {
+			return nil
+		}
+	}
+	*d = append(*d, value)
+	return nil
+}
+
+func (d *diffTypes) Type() string {
+	return "Diff Types"
+}
+
 func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&json, "json", "j", false, "JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).")
-	cmd.Flags().StringVarP(&types, "types", "t", "apt", "This flag sets the list of analyzer types to use.  It expects a comma separated list of supported analyzers.")
+	cmd.Flags().VarP(&types, "type", "t", "This flag sets the list of analyzer types to use. Set it repeatedly to use multiple analyzers.")
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 }

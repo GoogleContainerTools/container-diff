@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
@@ -33,16 +32,13 @@ var analyzeCmd = &cobra.Command{
 	Short: "Analyzes an image: [image]",
 	Long:  `Analyzes an image using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if err := validateArgs(args, checkAnalyzeArgNum); err != nil {
-			return err
-		}
-		if err := checkIfValidAnalyzer(types); err != nil {
+		if err := validateArgs(args, checkAnalyzeArgNum, checkIfValidAnalyzer); err != nil {
 			return err
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := analyzeImage(args[0], strings.Split(types, ",")); err != nil {
+		if err := analyzeImage(args[0], types); err != nil {
 			logrus.Error(err)
 			os.Exit(1)
 		}
