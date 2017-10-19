@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	goflag "flag"
 	"fmt"
 	"os"
@@ -35,7 +34,7 @@ import (
 
 var json bool
 var save bool
-var types diffTypes = []string{"apt"}
+var types diffTypes
 
 var LogLevel string
 
@@ -106,7 +105,7 @@ func validateArgs(args []string, validatefxns ...validatefxn) error {
 
 func checkIfValidAnalyzer(_ []string) error {
 	if len(types) == 0 {
-		return errors.New("Please provide at least one analyzer to run")
+		types = []string{"apt"}
 	}
 	for _, name := range types {
 		if _, exists := differs.Analyzers[name]; !exists {

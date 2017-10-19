@@ -23,8 +23,7 @@ def _impl(ctx):
 #!/bin/bash
 set -e
 ./%s diff %s %s""" % (container_diff_loction, image_location, ctx.attr.diff_base)
-  if ctx.attr.diff_types:
-      content += " --types=%s" % (",".join(ctx.attr.diff_types))
+  content += " ".join(["--type=%s" % t for t in ctx.attr.diff_types])
 
   ctx.file_action(
       output = ctx.outputs.executable,

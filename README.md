@@ -41,47 +41,36 @@ To use `container-diff analyze` to perform analysis on a single image, you need 
 
 ```
 container-diff analyze <img>     [Run default analyzers]
-container-diff analyze <img> --types=history  [History]
-container-diff analyze <img> --types=file  [File System]
-container-diff analyze <img> --types=pip  [Pip]
-container-diff analyze <img> --types=apt  [Apt]
-container-diff analyze <img> --types=node  [Node]
-container-diff analyze <img> --types=apt,node  [Apt and Node]
-# --types=<analyzer1>,<analyzer2>,<analyzer3>,...
+container-diff analyze <img> --type=history  [History]
+container-diff analyze <img> --type=file  [File System]
+container-diff analyze <img> --type=pip  [Pip]
+container-diff analyze <img> --type=apt  [Apt]
+container-diff analyze <img> --type=node  [Node]
+container-diff analyze <img> --type=apt --type=node  [Apt and Node]
+# --type=<analyzer1> --type=<analyzer2> --type=<analyzer3>,...
 ```
 
 To use container-diff to perform a diff analysis on two images, you need two Docker images (in the form of an ID, tarball, or URL from a repo). Once you have those images, you can run any of the following differs:
 ```
 container-diff diff <img1> <img2>     [Run all differs]
-container-diff diff <img1> <img2> --types=history  [History]
-container-diff diff <img1> <img2> --types=file  [File System]
-container-diff diff <img1> <img2> --types=pip  [Pip]
-container-diff diff <img1> <img2> --types=apt  [Apt]
-container-diff diff <img1> <img2> --types=node  [Node]
+container-diff diff <img1> <img2> --type=history  [History]
+container-diff diff <img1> <img2> --type=file  [File System]
+container-diff diff <img1> <img2> --type=pip  [Pip]
+container-diff diff <img1> <img2> --type=apt  [Apt]
+container-diff diff <img1> <img2> --type=node  [Node]
 ```
 
 You can similarly run many analyzers at once:
 
 ```
-container-diff diff <img1> <img2> --types=history,apt,node
+container-diff diff <img1> <img2> --type=history --type=apt --type=node
 ```
 
 To view the diff of an individual file in two different images, you can use the filename flag in conjuction with the file system diff analyzer.
 
 ```
-container-diff diff <img1> <img2> --types=file --filename=/path/to/file
+container-diff diff <img1> <img2> --type=file --filename=/path/to/file
 ```
-
-All of the analyzer flags with their long versions can be seen below:
-
-| Differ                    | Short flag | Long Flag  |
-| ------------------------- |:----------:| ----------:|
-| File system diff          | -f         | --file     |
-| History                   | -d 	 | --history  |
-| npm installed packages    | -n 	 | --node     |
-| pip installed packages    | -p 	 | --pip      |
-| apt-get installed packages| -a 	 | --apt      |
-
 
 ## Image Sources
 
@@ -242,7 +231,7 @@ Tarballs provided directly to the tool must be in the Docker format (i.e. have a
 ## Example Run
 
 ```
-$ container-diff diff gcr.io/google-appengine/python:2017-07-21-123058 gcr.io/google-appengine/python:2017-06-29-190410 --types=apt,node,pip
+$ container-diff diff gcr.io/google-appengine/python:2017-07-21-123058 gcr.io/google-appengine/python:2017-06-29-190410 --type=apt --type=node --type=pip
 
 -----AptDiffer-----
 
