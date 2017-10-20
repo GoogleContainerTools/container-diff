@@ -14,6 +14,7 @@ go_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/cache:go_default_library",
         "//vendor/github.com/containers/image/docker:go_default_library",
         "//vendor/github.com/containers/image/docker/daemon:go_default_library",
         "//vendor/github.com/containers/image/docker/tarfile:go_default_library",

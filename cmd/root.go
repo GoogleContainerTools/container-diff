@@ -20,10 +20,13 @@ import (
 	goflag "flag"
 	"fmt"
 	"os"
+	"os/user"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/differs"
+	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/docker/docker/client"
@@ -35,6 +38,7 @@ import (
 var json bool
 var save bool
 var types diffTypes
+var noCache bool
 
 var LogLevel string
 
@@ -120,23 +124,48 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	cacheDir, err := cacheDir()
+	if err != nil {
+		return nil, err
+	}
+	var fsCache cache.Cache
+	if !noCache {
+		fsCache, err = cache.NewFileCache(cacheDir)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	if pkgutil.IsTar(image) {
 		return pkgutil.TarPrepper{
 			Source: image,
 			Client: cli,
+			Cache:  fsCache,
 		}, nil
 
 	} else if strings.HasPrefix(image, DaemonPrefix) {
 		return pkgutil.DaemonPrepper{
 			Source: strings.Replace(image, DaemonPrefix, "", -1),
 			Client: cli,
+			Cache:  fsCache,
 		}, nil
 	}
 	// either has remote prefix or has no prefix, in which case we force remote
 	return pkgutil.CloudPrepper{
 		Source: strings.Replace(image, RemotePrefix, "", -1),
 		Client: cli,
+		Cache:  fsCache,
 	}, nil
+}
+
+func cacheDir() (string, error) {
+	user, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	rootDir := filepath.Join(user.HomeDir, ".container-diff")
+	return filepath.Join(rootDir, "cache"), nil
 }
 
 func init() {
@@ -175,4 +204,5 @@ func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(&types, "type", "t", "This flag sets the list of analyzer types to use. Set it repeatedly to use multiple analyzers.")
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
+	cmd.Flags().BoolVarP(&noCache, "no-cache", "n", false, "Set this to force retrieval of layers on each run.")
 }

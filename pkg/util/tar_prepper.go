@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	"github.com/containers/image/docker/tarfile"
 	"github.com/docker/docker/client"
 	"github.com/sirupsen/logrus"
@@ -31,6 +32,7 @@ import (
 type TarPrepper struct {
 	Source string
 	Client *client.Client
+	Cache  cache.Cache
 }
 
 func (p TarPrepper) Name() string {

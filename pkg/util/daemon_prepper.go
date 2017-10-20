@@ -19,6 +19,7 @@ package util
 import (
 	"context"
 
+	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	"github.com/containers/image/docker/daemon"
 
 	"github.com/docker/docker/client"
@@ -28,6 +29,7 @@ import (
 type DaemonPrepper struct {
 	Source string
 	Client *client.Client
+	Cache  cache.Cache
 }
 
 func (p DaemonPrepper) Name() string {
@@ -47,7 +49,7 @@ func (p DaemonPrepper) GetFileSystem() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return getFileSystemFromReference(ref, p.Source)
+	return getFileSystemFromReference(ref, p.Source, p.Cache)
 }
 
 func (p DaemonPrepper) GetConfig() (ConfigSchema, error) {

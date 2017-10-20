@@ -21,10 +21,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	"github.com/containers/image/pkg/compression"
 	"github.com/containers/image/types"
 	"github.com/sirupsen/logrus"
@@ -91,7 +93,7 @@ func getImageFromTar(tarPath string) (string, error) {
 	return tempPath, unpackDockerSave(tarPath, tempPath)
 }
 
-func getFileSystemFromReference(ref types.ImageReference, imageName string) (string, error) {
+func getFileSystemFromReference(ref types.ImageReference, imageName string, cache cache.Cache) (string, error) {
 	sanitizedName := strings.Replace(imageName, ":", "", -1)
 	sanitizedName = strings.Replace(sanitizedName, "/", "", -1)
 
@@ -113,10 +115,33 @@ func getFileSystemFromReference(ref types.ImageReference, imageName string) (str
 		return "", err
 	}
 
+	var bi io.ReadCloser
 	for _, b := range img.LayerInfos() {
-		bi, _, err := imgSrc.GetBlob(b)
+		layerId := b.Digest.String()
+		if cache == nil {
+			bi, _, err = imgSrc.GetBlob(b)
+			if err != nil {
+				logrus.Errorf("Failed to pull image layer: %s", err)
+				return "", err
+			}
+		} else if cache.HasLayer(layerId) {
+			logrus.Infof("cache hit for layer %s", layerId)
+			bi, err = cache.GetLayer(layerId)
+		} else {
+			logrus.Infof("cache miss for layer %s", layerId)
+			bi, _, err = imgSrc.GetBlob(b)
+			if err != nil {
+				logrus.Errorf("Failed to pull image layer: %s", err)
+				return "", err
+			}
+			bi, err = cache.SetLayer(layerId, bi)
+			if err != nil {
+				logrus.Errorf("error when caching layer %s: %s", layerId, err)
+				cache.Invalidate(layerId)
+			}
+		}
 		if err != nil {
-			logrus.Errorf("Failed to pull image layer: %s", err)
+			logrus.Errorf("Failed to retrieve image layer: %s", err)
 			return "", err
 		}
 		// try and detect layer compression
