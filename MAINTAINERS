@@ -1,0 +1,69 @@
+[Org]
+
+	[Org."Core maintainers"]
+
+	# Current active contributors to the project.
+
+		people = [
+			"aaronprindle",
+			"danlorenc",
+			"mattrickard",
+			"nickkubala",
+			"priyawadhwa"
+		]
+
+	[Org."Alumni"]
+
+	# People who have contributed to the project in the past.
+
+		people = [
+			"abbytisdale",
+			"colettetorres",
+			"douggreiman
+		]
+
+[people]
+
+# Reference list of all people associated with the project. All other sections
+# should refer to people by their key in the people section.
+# Please keep this list alphabetized!
+
+	[people.aaronprindle]
+	Name = "Aaron Prindle"
+	Email = "aprindle@google.com"
+	GitHub = "aprindle"
+
+	[people.abbytisdale]
+	Name = "Abby Tisdale"
+	Email = "atisdale@g.hmc.edu"
+	GitHub = "abbytiz"
+
+	[people.colettetorres]
+	Name = "Colette Torres"
+	Email = "colette.torres@duke.edu"
+	GitHub = "cftorres"
+
+	[people.danlorenc]
+	Name = "Dan Lorenc"
+	Email = "lorenc.d@gmail.com"
+	GitHub = "dlorenc"
+
+	[people.douggreiman]
+	Name = "Doug Greiman"
+	Email = "duggelz@gmail.com"
+	GitHub = "duggelz"
+
+	[people.mattrickard]
+	Name = "Matt Rickard"
+	Email = "mrick@google.com"
+	GitHub = "r2d4"
+
+	[people.nickkubala]
+	Name = "Nick Kubala"
+	Email = "nkubala@google.com"
+	GitHub = "nkubala"
+
+	[people.priyawadhwa]
+	Name = "Priya Wadhwa"
+	Email = "priyawadhwa@google.com"
+	GitHub = "priyawadhwa"
