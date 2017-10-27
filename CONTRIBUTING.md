@@ -21,3 +21,23 @@ All submissions, including submissions by project members, require review. We
 use GitHub pull requests for this purpose. Consult
 [GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
 information on using pull requests.
+
+## Tests
+
+Before sending a PR, please make sure the included tests pass.
+You can run these by running
+
+```shell
+make test integration
+```
+
+from the project root.
+
+You can also configure the included git hook to run tests automatically on commit.
+To do so, run:
+
+```shell
+ln -s $(pwd)/hack/hooks/* .git/hooks
+```
+
+from the project root.
