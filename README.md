@@ -80,6 +80,13 @@ container-diff supports Docker images located in both a local Docker daemon and 
 
 Additionally, tarballs can be provided to the tool directly. Make sure your file has a valid tar extension (.tar, .tar.gz, .tgz).
 
+### Authentication
+
+Container-diff supports docker-credential-helpers for authentication when using a registry as an image source.
+Make sure you have your credential helper configured before using container-diff, and it should work automatically.
+
+For the Google Container Registry, make sure you have the `docker-credential-gcr` binary configured and on your path, following these [instructions](https://github.com/GoogleCloudPlatform/docker-credential-gcr).
+
 
 ## Other Flags
 
