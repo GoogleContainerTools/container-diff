@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "containers.go",
+        "images.go",
+        "layers.go",
+        "lockfile.go",
+        "stat_mtimespec.go",
+        "store.go",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:linux_amd64": [
+            "stat_mtim.go",
+        ],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/BurntSushi/toml:go_default_library",
+        "//vendor/github.com/containers/storage/drivers:go_default_library",
+        "//vendor/github.com/containers/storage/drivers/register:go_default_library",
+        "//vendor/github.com/containers/storage/pkg/archive:go_default_library",
+        "//vendor/github.com/containers/storage/pkg/idtools:go_default_library",
+        "//vendor/github.com/containers/storage/pkg/ioutils:go_default_library",
+        "//vendor/github.com/containers/storage/pkg/stringid:go_default_library",
+        "//vendor/github.com/containers/storage/pkg/truncindex:go_default_library",
+        "//vendor/github.com/opencontainers/go-digest:go_default_library",
+        "//vendor/github.com/pkg/errors:go_default_library",
+        "//vendor/github.com/vbatts/tar-split/tar/asm:go_default_library",
+        "//vendor/github.com/vbatts/tar-split/tar/storage:go_default_library",
+        "//vendor/golang.org/x/sys/unix:go_default_library",
+    ],
+)
