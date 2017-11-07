@@ -6,6 +6,7 @@ go_library(
         "cache.go",
         "file_cache.go",
     ],
+    importpath = "github.com/GoogleCloudPlatform/container-diff/pkg/cache",
     visibility = ["//visibility:public"],
     deps = ["//vendor/github.com/sirupsen/logrus:go_default_library"],
 )

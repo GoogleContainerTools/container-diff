@@ -12,6 +12,7 @@ go_library(
         "sourced.go",
         "unparsed.go",
     ],
+    importpath = "github.com/containers/image/image",
     visibility = ["//visibility:public"],
     deps = [
         "//vendor/github.com/containers/image/docker/reference:go_default_library",

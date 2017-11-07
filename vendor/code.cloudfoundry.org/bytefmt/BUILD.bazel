@@ -6,5 +6,6 @@ go_library(
         "bytes.go",
         "package.go",
     ],
+    importpath = "code.cloudfoundry.org/bytefmt",
     visibility = ["//visibility:public"],
 )

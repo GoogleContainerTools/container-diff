@@ -3,6 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["homedir.go"],
+    importpath = "github.com/containers/storage/pkg/homedir",
     visibility = ["//visibility:public"],
     deps = ["//vendor/github.com/opencontainers/runc/libcontainer/user:go_default_library"],
 )

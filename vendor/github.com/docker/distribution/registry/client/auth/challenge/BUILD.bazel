@@ -6,5 +6,6 @@ go_library(
         "addr.go",
         "authchallenge.go",
     ],
+    importpath = "github.com/docker/distribution/registry/client/auth/challenge",
     visibility = ["//visibility:public"],
 )

@@ -7,6 +7,7 @@ gazelle(
         "containers_image_openpgp",
     ],
     external = "vendored",
+    mode = "fix",
     prefix = "github.com/GoogleCloudPlatform/container-diff",
 )
 
@@ -15,6 +16,7 @@ go_prefix("github.com/GoogleCloudPlatform/container-diff")
 go_library(
     name = "go_default_library",
     srcs = ["main.go"],
+    importpath = "github.com/GoogleCloudPlatform/container-diff",
     visibility = ["//visibility:private"],
     deps = [
         "//cmd:go_default_library",
@@ -24,6 +26,7 @@ go_library(
 
 go_binary(
     name = "container-diff",
+    importpath = "github.com/GoogleCloudPlatform/container-diff",
     library = ":go_default_library",
     visibility = ["//visibility:public"],
 )

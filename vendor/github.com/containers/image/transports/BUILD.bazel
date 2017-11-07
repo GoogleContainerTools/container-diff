@@ -6,6 +6,7 @@ go_library(
         "stub.go",
         "transports.go",
     ],
+    importpath = "github.com/containers/image/transports",
     visibility = ["//visibility:public"],
     deps = ["//vendor/github.com/containers/image/types:go_default_library"],
 )
