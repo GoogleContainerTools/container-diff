@@ -10,6 +10,7 @@ go_library(
         "routes.go",
         "urls.go",
     ],
+    importpath = "github.com/docker/distribution/registry/api/v2",
     visibility = ["//visibility:public"],
     deps = [
         "//vendor/github.com/docker/distribution/reference:go_default_library",

@@ -8,6 +8,7 @@ go_library(
         "src.go",
         "types.go",
     ],
+    importpath = "github.com/containers/image/docker/tarfile",
     visibility = ["//visibility:public"],
     deps = [
         "//vendor/github.com/containers/image/docker/reference:go_default_library",

@@ -7,5 +7,6 @@ go_library(
         "handler.go",
         "register.go",
     ],
+    importpath = "github.com/docker/distribution/registry/api/errcode",
     visibility = ["//visibility:public"],
 )

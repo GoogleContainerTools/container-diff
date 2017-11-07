@@ -7,5 +7,6 @@ go_library(
         "trace.go",
         "trace16.go",
     ],
+    importpath = "github.com/pkg/profile",
     visibility = ["//visibility:public"],
 )
