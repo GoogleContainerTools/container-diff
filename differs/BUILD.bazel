@@ -24,6 +24,7 @@ go_test(
     name = "go_default_test",
     srcs = [
         "apt_diff_test.go",
+        "differs_test.go",
         "node_diff_test.go",
         "pip_diff_test.go",
     ],
