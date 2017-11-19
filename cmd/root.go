@@ -145,8 +145,16 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 		}, nil
 
 	} else if strings.HasPrefix(image, DaemonPrefix) {
+
+		// remove the DaemonPrefix
+		image := strings.Replace(image, DaemonPrefix, "", -1)
+		// see if the image name has tag provided, if not add latest as tag
+		if !strings.Contains(image, ":") {
+			image = image + ":latest"
+		}
+
 		return pkgutil.DaemonPrepper{
-			Source: strings.Replace(image, DaemonPrefix, "", -1),
+			Source: image,
 			Client: cli,
 			Cache:  fsCache,
 		}, nil
