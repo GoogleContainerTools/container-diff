@@ -80,6 +80,8 @@ container-diff supports Docker images located in both a local Docker daemon and 
 
 Additionally, tarballs can be provided to the tool directly. Make sure your file has a valid tar extension (.tar, .tar.gz, .tgz).
 
+**Note**: container-diff does not support references images by Docker ID directly. If your image only has an ID in your local Docker daemon, you'll need to tag it using `docker tag` before using it with container-diff.
+
 ### Authentication
 
 Container-diff supports docker-credential-helpers for authentication when using a registry as an image source.
