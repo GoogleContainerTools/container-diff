@@ -50,9 +50,11 @@ container-diff analyze <img> --type=apt --type=node  [Apt and Node]
 # --type=<analyzer1> --type=<analyzer2> --type=<analyzer3>,...
 ```
 
+By default, with no `--type` flag specified, container-diff will run Apt package analysis.
+
 To use container-diff to perform a diff analysis on two images, you need two Docker images (in the form of an ID, tarball, or URL from a repo). Once you have those images, you can run any of the following differs:
 ```
-container-diff diff <img1> <img2>     [Run all differs]
+container-diff diff <img1> <img2>     [Run default differs]
 container-diff diff <img1> <img2> --type=history  [History]
 container-diff diff <img1> <img2> --type=file  [File System]
 container-diff diff <img1> <img2> --type=pip  [Pip]
@@ -270,7 +272,7 @@ Version differences: None
 
 ```
 ```
-$ container-diff diff file1.tar file2.tar --types=file --filename=go/src/app/file.txt
+$ container-diff diff file1.tar file2.tar --type=file --filename=go/src/app/file.txt
 Starting diff on images file1.tar and file2.tar, using differs: [file]
 Retrieving image file2.tar from source Tar Archive
 Retrieving image file1.tar from source Tar Archive
