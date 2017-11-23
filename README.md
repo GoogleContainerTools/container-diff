@@ -12,6 +12,7 @@ container-diff is a tool for analyzing and comparing container images. container
 - RPM packages
 - pip packages
 - npm packages
+- rubygem packages
 
 These analyses can be performed on a single image, or a diff can be performed on two images to compare. The tool can help users better understand what is changing inside their images, and give them a better look at what their images contain.
 
@@ -49,6 +50,7 @@ container-diff analyze <img> --type=rpm  [RPM]
 container-diff analyze <img> --type=pip  [Pip]
 container-diff analyze <img> --type=apt  [Apt]
 container-diff analyze <img> --type=node  [Node]
+container-diff analyze <img> --type=gem  [Gem]
 container-diff analyze <img> --type=apt --type=node  [Apt and Node]
 # --type=<analyzer1> --type=<analyzer2> --type=<analyzer3>,...
 ```
@@ -64,6 +66,7 @@ container-diff diff <img1> <img2> --type=rpm  [RPM]
 container-diff diff <img1> <img2> --type=pip  [Pip]
 container-diff diff <img1> <img2> --type=apt  [Apt]
 container-diff diff <img1> <img2> --type=node  [Node]
+container-diff diff <img1> <img2> --type=gem  [Gem]
 ```
 
 You can similarly run many analyzers at once:

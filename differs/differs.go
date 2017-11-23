@@ -50,6 +50,7 @@ var Analyzers = map[string]Analyzer{
 	"rpm":      RPMAnalyzer{},
 	"pip":      PipAnalyzer{},
 	"node":     NodeAnalyzer{},
+	"gem":      GemAnalyzer{},
 }
 
 func (req DiffRequest) GetDiff() (map[string]util.Result, error) {
