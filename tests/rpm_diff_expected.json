@@ -1,0 +1,29 @@
+[
+  {
+    "Image1": "valentinrothberg/containerdiff:diff-base",
+    "Image2": "valentinrothberg/containerdiff:diff-modified",
+    "DiffType": "RPM",
+    "Diff": {
+      "Packages1": [
+        {
+          "Name": "git",
+          "Version": "2.13.6",
+          "Size": 3001
+        }
+      ],
+      "Packages2": [
+        {
+          "Name": "nano",
+          "Version": "2.8.5",
+          "Size": 1289435
+        },
+        {
+          "Name": "vim",
+          "Version": "7.4.326",
+          "Size": 2715080
+        }
+      ],
+      "InfoDiff": []
+    }
+  }
+]

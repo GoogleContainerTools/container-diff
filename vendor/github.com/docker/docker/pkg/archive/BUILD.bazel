@@ -1,0 +1,62 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "archive.go",
+        "changes.go",
+        "copy.go",
+        "diff.go",
+        "whiteouts.go",
+        "wrap.go",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:darwin_amd64": [
+            "archive_other.go",
+            "archive_unix.go",
+            "changes_other.go",
+            "changes_unix.go",
+            "copy_unix.go",
+            "time_unsupported.go",
+        ],
+        "@io_bazel_rules_go//go/platform:linux_amd64": [
+            "archive_linux.go",
+            "archive_unix.go",
+            "changes_linux.go",
+            "changes_unix.go",
+            "copy_unix.go",
+            "time_linux.go",
+        ],
+        "@io_bazel_rules_go//go/platform:windows_amd64": [
+            "archive_other.go",
+            "archive_windows.go",
+            "changes_other.go",
+            "changes_windows.go",
+            "copy_windows.go",
+            "time_unsupported.go",
+        ],
+        "//conditions:default": [],
+    }),
+    importpath = "github.com/docker/docker/pkg/archive",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/docker/docker/pkg/fileutils:go_default_library",
+        "//vendor/github.com/docker/docker/pkg/idtools:go_default_library",
+        "//vendor/github.com/docker/docker/pkg/ioutils:go_default_library",
+        "//vendor/github.com/docker/docker/pkg/pools:go_default_library",
+        "//vendor/github.com/docker/docker/pkg/system:go_default_library",
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:darwin_amd64": [
+            "//vendor/github.com/opencontainers/runc/libcontainer/system:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:linux_amd64": [
+            "//vendor/github.com/opencontainers/runc/libcontainer/system:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:windows_amd64": [
+            "//vendor/github.com/docker/docker/pkg/longpath:go_default_library",
+        ],
+        "//conditions:default": [],
+    }),
+)

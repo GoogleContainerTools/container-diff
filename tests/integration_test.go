@@ -41,6 +41,9 @@ const (
 	aptBase     = "gcr.io/gcp-runtimes/apt-base"
 	aptModified = "gcr.io/gcp-runtimes/apt-modified"
 
+	rpmBase     = "valentinrothberg/containerdiff:diff-base"
+	rpmModified = "valentinrothberg/containerdiff:diff-modified"
+
 	// Why is this node-modified:2.0?
 	nodeBase     = "gcr.io/gcp-runtimes/node-modified:2.0"
 	nodeModified = "gcr.io/gcp-runtimes/node-modified"
@@ -109,6 +112,14 @@ func TestDiffAndAnalysis(t *testing.T) {
 			expectedFile: "apt_diff_expected.json",
 		},
 		{
+			description:  "rpm differ",
+			subcommand:   "diff",
+			imageA:       rpmBase,
+			imageB:       rpmModified,
+			differFlags:  []string{"--type=apt"},
+			expectedFile: "rpm_diff_expected.json",
+		},
+		{
 			description:  "node differ",
 			subcommand:   "diff",
 			imageA:       nodeBase,
@@ -154,6 +165,13 @@ func TestDiffAndAnalysis(t *testing.T) {
 			imageA:       aptModified,
 			differFlags:  []string{"--type=apt"},
 			expectedFile: "apt_analysis_expected.json",
+		},
+		{
+			description:  "rpm analysis",
+			subcommand:   "analyze",
+			imageA:       aptModified,
+			differFlags:  []string{"--type=rpm"},
+			expectedFile: "rpm_analysis_expected.json",
 		},
 		{
 			description:  "file sorted analysis",
