@@ -63,7 +63,7 @@ func (p DaemonPrepper) GetConfig() (ConfigSchema, error) {
 func (p DaemonPrepper) GetHistory() []ImageHistoryItem {
 	history, err := p.Client.ImageHistory(context.Background(), p.Source)
 	if err != nil {
-		logrus.Error("Could not obtain image history for %s: %s", p.Source, err)
+		logrus.Errorf("Could not obtain image history for %s: %s", p.Source, err)
 	}
 	historyItems := []ImageHistoryItem{}
 	for _, item := range history {

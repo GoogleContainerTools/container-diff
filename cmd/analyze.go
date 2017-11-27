@@ -78,7 +78,9 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		return fmt.Errorf("Error processing image: %s", err)
 	}
 
-	req := differs.SingleRequest{image, analyzeTypes}
+	req := differs.SingleRequest{
+		Image:        image,
+		AnalyzeTypes: analyzeTypes}
 	analyses, err := req.GetAnalysis()
 	if err != nil {
 		return fmt.Errorf("Error performing image analysis: %s", err)

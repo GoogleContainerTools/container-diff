@@ -88,7 +88,7 @@ func TestParseLine(t *testing.T) {
 			t.Errorf("Expected current package to be: %s, but got: %s.", test.expPackage, currPackage)
 		}
 		if !reflect.DeepEqual(test.packages, test.expected) {
-			t.Errorf("Expected: %s but got: %s", test.expected, test.packages)
+			t.Errorf("Expected: %v but got: %v", test.expected, test.packages)
 		}
 	}
 }
@@ -131,7 +131,7 @@ func TestGetAptPackages(t *testing.T) {
 			t.Errorf("Expected error but got none.")
 		}
 		if !reflect.DeepEqual(packages, test.expected) {
-			t.Errorf("Expected: %s but got: %s", test.expected, packages)
+			t.Errorf("Expected: %v but got: %v", test.expected, packages)
 		}
 	}
 }
