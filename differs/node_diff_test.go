@@ -71,7 +71,7 @@ func TestGetNodePackages(t *testing.T) {
 			t.Errorf("Expected error but got none.")
 		}
 		if !reflect.DeepEqual(packages, test.expected) {
-			t.Errorf("Expected: %s but got: %s", test.expected, packages)
+			t.Errorf("Expected: %v but got: %v", test.expected, packages)
 		}
 	}
 }

@@ -113,7 +113,10 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	}
 
 	fmt.Fprintln(os.Stderr, "Computing diffs")
-	req := differs.DiffRequest{*imageMap[image1Arg], *imageMap[image2Arg], diffTypes}
+	req := differs.DiffRequest{
+		Image1:    *imageMap[image1Arg],
+		Image2:    *imageMap[image2Arg],
+		DiffTypes: diffTypes}
 	diffs, err := req.GetDiff()
 	if err != nil {
 		return fmt.Errorf("Could not retrieve diff: %s", err)
