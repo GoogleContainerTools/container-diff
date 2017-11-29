@@ -22,11 +22,16 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/sirupsen/logrus"
 )
 
 func unpackTar(tr *tar.Reader, path string) error {
+	// drop the umask temporarily to 0, so we can create all files with correct permissions
+	// otherwise the default (022) will cause file permission inconsistencies
+	oldMask := syscall.Umask(0)
+	defer syscall.Umask(oldMask)
 	for {
 		header, err := tr.Next()
 		if err == io.EOF {
