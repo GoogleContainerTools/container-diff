@@ -80,6 +80,11 @@ func unpackTar(tr *tar.Reader, path string) error {
 				logrus.Errorf("Error opening file %s", target)
 				return err
 			}
+			// manually set permissions on file, since the default umask (022) will interfere
+			if err = os.Chmod(target, mode); err != nil {
+				logrus.Errorf("Error updating file permissions on %s", target)
+				return err
+			}
 			_, err = io.Copy(currFile, tr)
 			if err != nil {
 				return err
