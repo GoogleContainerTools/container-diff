@@ -40,10 +40,15 @@ func unpackTar(tr *tar.Reader, path string) error {
 
 		if strings.Contains(header.Name, ".wh.") {
 			rmPath := filepath.Join(path, header.Name)
-			newName := strings.Replace(rmPath, ".wh.", "", 1)
-			if err := os.Remove(rmPath); err != nil {
-				logrus.Error(err)
+			// Remove the .wh file if it was extracted.
+			if _, err := os.Stat(rmPath); !os.IsNotExist(err) {
+				if err := os.Remove(rmPath); err != nil {
+					logrus.Error(err)
+				}
 			}
+
+			// Remove the whited-out path.
+			newName := strings.Replace(rmPath, ".wh.", "", 1)
 			if err = os.RemoveAll(newName); err != nil {
 				logrus.Error(err)
 			}
@@ -71,13 +76,24 @@ func unpackTar(tr *tar.Reader, path string) error {
 			// It's possible for a file to be included before the directory it's in is created.
 			baseDir := filepath.Dir(target)
 			if _, err := os.Stat(baseDir); os.IsNotExist(err) {
+				logrus.Debugf("baseDir %s for file %s does not exist. Creating.", baseDir, target)
 				if err := os.MkdirAll(baseDir, 0755); err != nil {
 					return err
 				}
 			}
-			currFile, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
+
+			// It's possible we end up creating files that can't be overwritten based on their permissions.
+			// Explicitly delete an existing file before continuing.
+			if _, err := os.Stat(target); !os.IsNotExist(err) {
+				logrus.Debugf("Removing %s for overwrite.", target)
+				if err := os.Remove(target); err != nil {
+					return err
+				}
+			}
+
+			currFile, err := os.Create(target)
 			if err != nil {
-				logrus.Errorf("Error opening file %s", target)
+				logrus.Errorf("Error creating file %s %s", target, err)
 				return err
 			}
 			// manually set permissions on file, since the default umask (022) will interfere
