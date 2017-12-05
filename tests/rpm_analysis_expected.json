@@ -1,0 +1,863 @@
+[
+  {
+    "Image": "valentinrothberg/containerdiff:diff-modified",
+    "AnalyzeType": "RPM",
+    "Analysis": [
+      {
+        "Name": "acl",
+        "Version": "2.2.52",
+        "Size": 197878
+      },
+      {
+        "Name": "bash",
+        "Version": "4.3",
+        "Size": 764384
+      },
+      {
+        "Name": "binutils",
+        "Version": "2.26.1",
+        "Size": 33091471
+      },
+      {
+        "Name": "blog",
+        "Version": "2.18",
+        "Size": 132286
+      },
+      {
+        "Name": "bzip2",
+        "Version": "1.0.6",
+        "Size": 66500
+      },
+      {
+        "Name": "ca-certificates",
+        "Version": "1_201403302107",
+        "Size": 28001
+      },
+      {
+        "Name": "ca-certificates-mozilla",
+        "Version": "2.7",
+        "Size": 386472
+      },
+      {
+        "Name": "coreutils",
+        "Version": "8.25",
+        "Size": 6079473
+      },
+      {
+        "Name": "cpio",
+        "Version": "2.11",
+        "Size": 225806
+      },
+      {
+        "Name": "cpp",
+        "Version": "4.8",
+        "Size": 82
+      },
+      {
+        "Name": "cpp48",
+        "Version": "4.8.5",
+        "Size": 13887146
+      },
+      {
+        "Name": "cracklib",
+        "Version": "2.9.0",
+        "Size": 192093
+      },
+      {
+        "Name": "cracklib-dict-small",
+        "Version": "2.9.0",
+        "Size": 248877
+      },
+      {
+        "Name": "device-mapper",
+        "Version": "1.02.97",
+        "Size": 2079471
+      },
+      {
+        "Name": "diffutils",
+        "Version": "3.3",
+        "Size": 464153
+      },
+      {
+        "Name": "dirmngr",
+        "Version": "1.1.1",
+        "Size": 492999
+      },
+      {
+        "Name": "elfutils",
+        "Version": "0.158",
+        "Size": 903615
+      },
+      {
+        "Name": "expat",
+        "Version": "2.1.0",
+        "Size": 156100
+      },
+      {
+        "Name": "fdupes",
+        "Version": "1.61",
+        "Size": 34611
+      },
+      {
+        "Name": "file",
+        "Version": "5.19",
+        "Size": 69048
+      },
+      {
+        "Name": "file-magic",
+        "Version": "5.19",
+        "Size": 3629930
+      },
+      {
+        "Name": "filesystem",
+        "Version": "13.1",
+        "Size": 0
+      },
+      {
+        "Name": "fillup",
+        "Version": "1.42",
+        "Size": 41519
+      },
+      {
+        "Name": "findutils",
+        "Version": "4.5.12",
+        "Size": 674228
+      },
+      {
+        "Name": "gawk",
+        "Version": "4.1.3",
+        "Size": 2835120
+      },
+      {
+        "Name": "gcc",
+        "Version": "4.8",
+        "Size": 0
+      },
+      {
+        "Name": "gcc48",
+        "Version": "4.8.5",
+        "Size": 34654958
+      },
+      {
+        "Name": "git-core",
+        "Version": "2.13.6",
+        "Size": 22232236
+      },
+      {
+        "Name": "glibc",
+        "Version": "2.22",
+        "Size": 6726457
+      },
+      {
+        "Name": "glibc-devel",
+        "Version": "2.22",
+        "Size": 3136075
+      },
+      {
+        "Name": "go",
+        "Version": "1.7.5",
+        "Size": 199586450
+      },
+      {
+        "Name": "gpg-pubkey",
+        "Version": "3dbdc284",
+        "Size": 0
+      },
+      {
+        "Name": "gpg2",
+        "Version": "2.0.24",
+        "Size": 4129190
+      },
+      {
+        "Name": "grep",
+        "Version": "2.16",
+        "Size": 1426235
+      },
+      {
+        "Name": "gzip",
+        "Version": "1.6",
+        "Size": 237727
+      },
+      {
+        "Name": "hardlink",
+        "Version": "1.0",
+        "Size": 15625
+      },
+      {
+        "Name": "info",
+        "Version": "4.13a",
+        "Size": 279406
+      },
+      {
+        "Name": "insserv-compat",
+        "Version": "0.1",
+        "Size": 8605
+      },
+      {
+        "Name": "iputils",
+        "Version": "s20121221",
+        "Size": 242053
+      },
+      {
+        "Name": "kbd-legacy",
+        "Version": "2.0.3",
+        "Size": 528364
+      },
+      {
+        "Name": "kmod-compat",
+        "Version": "17",
+        "Size": 16295
+      },
+      {
+        "Name": "krb5",
+        "Version": "1.12.5",
+        "Size": 1852616
+      },
+      {
+        "Name": "less",
+        "Version": "458",
+        "Size": 277268
+      },
+      {
+        "Name": "libacl1",
+        "Version": "2.2.52",
+        "Size": 35528
+      },
+      {
+        "Name": "libadns1",
+        "Version": "1.4",
+        "Size": 88680
+      },
+      {
+        "Name": "libaio1",
+        "Version": "0.3.109",
+        "Size": 32150
+      },
+      {
+        "Name": "libapparmor1",
+        "Version": "2.10.2",
+        "Size": 69128
+      },
+      {
+        "Name": "libasan0",
+        "Version": "4.8.5",
+        "Size": 170800
+      },
+      {
+        "Name": "libasm1",
+        "Version": "0.158",
+        "Size": 31408
+      },
+      {
+        "Name": "libassuan0",
+        "Version": "2.1.1",
+        "Size": 91594
+      },
+      {
+        "Name": "libatomic1",
+        "Version": "7.1.1+r248970",
+        "Size": 26744
+      },
+      {
+        "Name": "libattr1",
+        "Version": "2.4.47",
+        "Size": 46281
+      },
+      {
+        "Name": "libaudit1",
+        "Version": "2.3.6",
+        "Size": 101058
+      },
+      {
+        "Name": "libaugeas0",
+        "Version": "1.2.0",
+        "Size": 378768
+      },
+      {
+        "Name": "libblkid1",
+        "Version": "2.29.2",
+        "Size": 277600
+      },
+      {
+        "Name": "libbz2-1",
+        "Version": "1.0.6",
+        "Size": 62872
+      },
+      {
+        "Name": "libcap-ng0",
+        "Version": "0.7.3",
+        "Size": 45374
+      },
+      {
+        "Name": "libcap2",
+        "Version": "2.22",
+        "Size": 19024
+      },
+      {
+        "Name": "libcloog-isl4",
+        "Version": "0.18.1",
+        "Size": 161368
+      },
+      {
+        "Name": "libcom_err2",
+        "Version": "1.42.11",
+        "Size": 42064
+      },
+      {
+        "Name": "libcrack2",
+        "Version": "2.9.0",
+        "Size": 39400
+      },
+      {
+        "Name": "libcryptsetup4",
+        "Version": "1.6.4",
+        "Size": 154800
+      },
+      {
+        "Name": "libcurl4",
+        "Version": "7.37.0",
+        "Size": 460136
+      },
+      {
+        "Name": "libdb-4_8",
+        "Version": "4.8.30",
+        "Size": 3256288
+      },
+      {
+        "Name": "libdbus-1-3",
+        "Version": "1.8.22",
+        "Size": 290784
+      },
+      {
+        "Name": "libdw1",
+        "Version": "0.158",
+        "Size": 265648
+      },
+      {
+        "Name": "libedit0",
+        "Version": "3.1.snap20140620",
+        "Size": 253032
+      },
+      {
+        "Name": "libelf1",
+        "Version": "0.158",
+        "Size": 88616
+      },
+      {
+        "Name": "libexpat1",
+        "Version": "2.1.0",
+        "Size": 170200
+      },
+      {
+        "Name": "libfdisk1",
+        "Version": "2.29.2",
+        "Size": 378464
+      },
+      {
+        "Name": "libffi4",
+        "Version": "5.3.1+r233831",
+        "Size": 35312
+      },
+      {
+        "Name": "libfipscheck1",
+        "Version": "1.2.0",
+        "Size": 10513
+      },
+      {
+        "Name": "libgcc_s1",
+        "Version": "7.1.1+r248970",
+        "Size": 92552
+      },
+      {
+        "Name": "libgcrypt20",
+        "Version": "1.6.1",
+        "Size": 967376
+      },
+      {
+        "Name": "libgdbm4",
+        "Version": "1.10",
+        "Size": 159276
+      },
+      {
+        "Name": "libgmp10",
+        "Version": "5.1.3",
+        "Size": 551528
+      },
+      {
+        "Name": "libgomp1",
+        "Version": "7.1.1+r248970",
+        "Size": 257696
+      },
+      {
+        "Name": "libgpg-error0",
+        "Version": "1.27",
+        "Size": 507541
+      },
+      {
+        "Name": "libidn11",
+        "Version": "1.28",
+        "Size": 211568
+      },
+      {
+        "Name": "libisl10",
+        "Version": "0.12.2",
+        "Size": 1317896
+      },
+      {
+        "Name": "libitm1",
+        "Version": "7.1.1+r248970",
+        "Size": 117160
+      },
+      {
+        "Name": "libkeyutils1",
+        "Version": "1.5.9",
+        "Size": 41138
+      },
+      {
+        "Name": "libkmod2",
+        "Version": "17",
+        "Size": 84936
+      },
+      {
+        "Name": "libksba8",
+        "Version": "1.3.0",
+        "Size": 249327
+      },
+      {
+        "Name": "libldap-2_4-2",
+        "Version": "2.4.44",
+        "Size": 710624
+      },
+      {
+        "Name": "liblua5_1",
+        "Version": "5.1.5",
+        "Size": 197232
+      },
+      {
+        "Name": "liblzma5",
+        "Version": "5.2.2",
+        "Size": 165920
+      },
+      {
+        "Name": "libmagic1",
+        "Version": "5.19",
+        "Size": 117648
+      },
+      {
+        "Name": "libmodman1",
+        "Version": "2.0.1",
+        "Size": 31344
+      },
+      {
+        "Name": "libmount1",
+        "Version": "2.29.2",
+        "Size": 305632
+      },
+      {
+        "Name": "libmpc3",
+        "Version": "1.0.2",
+        "Size": 97768
+      },
+      {
+        "Name": "libmpfr4",
+        "Version": "3.1.2",
+        "Size": 373072
+      },
+      {
+        "Name": "libncurses5",
+        "Version": "5.9",
+        "Size": 1053480
+      },
+      {
+        "Name": "libncurses6",
+        "Version": "5.9",
+        "Size": 1045704
+      },
+      {
+        "Name": "libopenssl1_0_0",
+        "Version": "1.0.2j",
+        "Size": 3012856
+      },
+      {
+        "Name": "libp11-kit0",
+        "Version": "0.20.7",
+        "Size": 293659
+      },
+      {
+        "Name": "libpcre1",
+        "Version": "8.39",
+        "Size": 821031
+      },
+      {
+        "Name": "libpopt0",
+        "Version": "1.16",
+        "Size": 120638
+      },
+      {
+        "Name": "libprocps3",
+        "Version": "3.3.9",
+        "Size": 72760
+      },
+      {
+        "Name": "libproxy1",
+        "Version": "0.4.13",
+        "Size": 166158
+      },
+      {
+        "Name": "libpth20",
+        "Version": "2.0.7",
+        "Size": 195872
+      },
+      {
+        "Name": "libpython2_7-1_0",
+        "Version": "2.7.13",
+        "Size": 2016448
+      },
+      {
+        "Name": "libqrencode3",
+        "Version": "3.4.3",
+        "Size": 47792
+      },
+      {
+        "Name": "libreadline6",
+        "Version": "6.3",
+        "Size": 340536
+      },
+      {
+        "Name": "libruby2_1-2_1",
+        "Version": "2.1.9",
+        "Size": 2450464
+      },
+      {
+        "Name": "libsasl2-3",
+        "Version": "2.1.26",
+        "Size": 118552
+      },
+      {
+        "Name": "libseccomp2",
+        "Version": "2.3.1",
+        "Size": 288948
+      },
+      {
+        "Name": "libselinux1",
+        "Version": "2.5",
+        "Size": 147208
+      },
+      {
+        "Name": "libsemanage1",
+        "Version": "2.5",
+        "Size": 246200
+      },
+      {
+        "Name": "libsepol1",
+        "Version": "2.5",
+        "Size": 602904
+      },
+      {
+        "Name": "libsgutils2-2",
+        "Version": "1.43",
+        "Size": 206984
+      },
+      {
+        "Name": "libsmartcols1",
+        "Version": "2.29.2",
+        "Size": 166056
+      },
+      {
+        "Name": "libsolv-tools",
+        "Version": "0.6.27",
+        "Size": 4469096
+      },
+      {
+        "Name": "libssh2-1",
+        "Version": "1.4.3",
+        "Size": 175648
+      },
+      {
+        "Name": "libstdc++6",
+        "Version": "7.1.1+r248970",
+        "Size": 1598552
+      },
+      {
+        "Name": "libsystemd0",
+        "Version": "228",
+        "Size": 798736
+      },
+      {
+        "Name": "libtasn1",
+        "Version": "4.9",
+        "Size": 94100
+      },
+      {
+        "Name": "libtasn1-6",
+        "Version": "4.9",
+        "Size": 76392
+      },
+      {
+        "Name": "libtsan0",
+        "Version": "7.1.1+r248970",
+        "Size": 914488
+      },
+      {
+        "Name": "libudev1",
+        "Version": "228",
+        "Size": 129248
+      },
+      {
+        "Name": "libusb-0_1-4",
+        "Version": "0.1.13",
+        "Size": 69835
+      },
+      {
+        "Name": "libusb-1_0-0",
+        "Version": "1.0.20",
+        "Size": 136084
+      },
+      {
+        "Name": "libustr-1_0-1",
+        "Version": "1.0.4",
+        "Size": 280479
+      },
+      {
+        "Name": "libutempter0",
+        "Version": "1.1.6",
+        "Size": 47780
+      },
+      {
+        "Name": "libuuid1",
+        "Version": "2.29.2",
+        "Size": 18608
+      },
+      {
+        "Name": "libverto1",
+        "Version": "0.2.6",
+        "Size": 21860
+      },
+      {
+        "Name": "libxml2-2",
+        "Version": "2.9.4",
+        "Size": 1630342
+      },
+      {
+        "Name": "libyaml-0-2",
+        "Version": "0.1.6",
+        "Size": 129344
+      },
+      {
+        "Name": "libz1",
+        "Version": "1.2.8",
+        "Size": 88216
+      },
+      {
+        "Name": "libzio1",
+        "Version": "1.00",
+        "Size": 27160
+      },
+      {
+        "Name": "libzypp",
+        "Version": "16.15.6",
+        "Size": 7728371
+      },
+      {
+        "Name": "linux-glibc-devel",
+        "Version": "4.4",
+        "Size": 4636343
+      },
+      {
+        "Name": "make",
+        "Version": "4.0",
+        "Size": 1095171
+      },
+      {
+        "Name": "nano",
+        "Version": "2.8.5",
+        "Size": 1289435
+      },
+      {
+        "Name": "netcfg",
+        "Version": "11.5",
+        "Size": 892002
+      },
+      {
+        "Name": "openSUSE-build-key",
+        "Version": "1.0",
+        "Size": 8379
+      },
+      {
+        "Name": "openSUSE-release",
+        "Version": "42.3",
+        "Size": 601320
+      },
+      {
+        "Name": "openSUSE-release-mini",
+        "Version": "42.3",
+        "Size": 67
+      },
+      {
+        "Name": "openslp",
+        "Version": "2.0.0",
+        "Size": 142476
+      },
+      {
+        "Name": "openssh",
+        "Version": "7.2p2",
+        "Size": 5564632
+      },
+      {
+        "Name": "openssl",
+        "Version": "1.0.2j",
+        "Size": 1602730
+      },
+      {
+        "Name": "p11-kit",
+        "Version": "0.20.7",
+        "Size": 242029
+      },
+      {
+        "Name": "p11-kit-tools",
+        "Version": "0.20.7",
+        "Size": 198824
+      },
+      {
+        "Name": "pam",
+        "Version": "1.3.0",
+        "Size": 1561187
+      },
+      {
+        "Name": "pam-config",
+        "Version": "0.91",
+        "Size": 525147
+      },
+      {
+        "Name": "perl",
+        "Version": "5.18.2",
+        "Size": 39460302
+      },
+      {
+        "Name": "perl-Error",
+        "Version": "0.17021",
+        "Size": 50959
+      },
+      {
+        "Name": "perl-base",
+        "Version": "5.18.2",
+        "Size": 3538180
+      },
+      {
+        "Name": "permissions",
+        "Version": "2015.09.28.1626",
+        "Size": 96965
+      },
+      {
+        "Name": "pigz",
+        "Version": "2.3",
+        "Size": 105680
+      },
+      {
+        "Name": "procps",
+        "Version": "3.3.9",
+        "Size": 592070
+      },
+      {
+        "Name": "python-base",
+        "Version": "2.7.13",
+        "Size": 24116413
+      },
+      {
+        "Name": "rpm",
+        "Version": "4.11.2",
+        "Size": 4648959
+      },
+      {
+        "Name": "rsync",
+        "Version": "3.1.0",
+        "Size": 640482
+      },
+      {
+        "Name": "ruby",
+        "Version": "2.1",
+        "Size": 84
+      },
+      {
+        "Name": "ruby-common",
+        "Version": "2.1",
+        "Size": 36703
+      },
+      {
+        "Name": "ruby2.1",
+        "Version": "2.1.9",
+        "Size": 951682
+      },
+      {
+        "Name": "ruby2.1-rubygem-gem2rpm",
+        "Version": "0.10.1",
+        "Size": 61904
+      },
+      {
+        "Name": "ruby2.1-stdlib",
+        "Version": "2.1.9",
+        "Size": 11757077
+      },
+      {
+        "Name": "sed",
+        "Version": "4.2.2",
+        "Size": 196596
+      },
+      {
+        "Name": "shadow",
+        "Version": "4.2.1",
+        "Size": 3083110
+      },
+      {
+        "Name": "suse-module-tools",
+        "Version": "12.4",
+        "Size": 60975
+      },
+      {
+        "Name": "systemd",
+        "Version": "228",
+        "Size": 20143823
+      },
+      {
+        "Name": "systemd-presets-branding-openSUSE",
+        "Version": "12.2",
+        "Size": 3691
+      },
+      {
+        "Name": "sysvinit-tools",
+        "Version": "2.88+",
+        "Size": 401552
+      },
+      {
+        "Name": "terminfo-base",
+        "Version": "5.9",
+        "Size": 1108542
+      },
+      {
+        "Name": "update-alternatives",
+        "Version": "1.18.4",
+        "Size": 67345
+      },
+      {
+        "Name": "util-linux",
+        "Version": "2.29.2",
+        "Size": 3895167
+      },
+      {
+        "Name": "vim",
+        "Version": "7.4.326",
+        "Size": 2715080
+      },
+      {
+        "Name": "xz",
+        "Version": "5.2.2",
+        "Size": 320685
+      },
+      {
+        "Name": "zypper",
+        "Version": "1.13.32",
+        "Size": 6878631
+      }
+    ]
+  }
+]

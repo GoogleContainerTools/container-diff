@@ -45,6 +45,7 @@ var Analyzers = map[string]Analyzer{
 	"history": HistoryAnalyzer{},
 	"file":    FileAnalyzer{},
 	"apt":     AptAnalyzer{},
+	"rpm":     RPMAnalyzer{},
 	"pip":     PipAnalyzer{},
 	"node":    NodeAnalyzer{},
 }
