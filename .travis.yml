@@ -1,8 +1,6 @@
 language: go
 os: linux
-go:
-  - 1.8.x
-  - 1.9.x
+go: 1.9.x
 
 sudo: required
 
