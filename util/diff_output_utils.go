@@ -36,7 +36,7 @@ func (r MultiVersionPackageDiffResult) OutputStruct() interface{} {
 	diff, valid := r.Diff.(MultiVersionPackageDiff)
 	if !valid {
 		logrus.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
-		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+		return fmt.Errorf("Could not output %s diff result", r.DiffType)
 	}
 
 	diffOutput := struct {
@@ -56,7 +56,7 @@ func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
 	diff, valid := r.Diff.(MultiVersionPackageDiff)
 	if !valid {
 		logrus.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
-		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+		return fmt.Errorf("Could not output %s diff result", r.DiffType)
 	}
 
 	strPackages1 := stringifyPackages(getMultiVersionPackageOutput(diff.Packages1))
@@ -102,7 +102,7 @@ func (r SingleVersionPackageDiffResult) OutputStruct() interface{} {
 	diff, valid := r.Diff.(PackageDiff)
 	if !valid {
 		logrus.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
-		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+		return fmt.Errorf("Could not output %s diff result", r.DiffType)
 	}
 
 	diffOutput := struct {
@@ -122,7 +122,7 @@ func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
 	diff, valid := r.Diff.(PackageDiff)
 	if !valid {
 		logrus.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
-		return errors.New(fmt.Sprintf("Could not output %s diff result", r.DiffType))
+		return fmt.Errorf("Could not output %s diff result", r.DiffType)
 	}
 
 	strPackages1 := stringifyPackages(getSingleVersionPackageOutput(diff.Packages1))

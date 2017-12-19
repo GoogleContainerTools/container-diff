@@ -45,7 +45,7 @@ func (r ListAnalyzeResult) OutputText(resultType string) error {
 	analysis, valid := r.Analysis.([]string)
 	if !valid {
 		logrus.Error("Unexpected structure of Analysis.  Should be of type []string")
-		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+		return fmt.Errorf("Could not output %s analysis result", r.AnalyzeType)
 	}
 	r.Analysis = analysis
 
@@ -58,7 +58,7 @@ func (r MultiVersionPackageAnalyzeResult) OutputStruct() interface{} {
 	analysis, valid := r.Analysis.(map[string]map[string]PackageInfo)
 	if !valid {
 		logrus.Error("Unexpected structure of Analysis.  Should be of type map[string]map[string]PackageInfo")
-		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+		return fmt.Errorf("Could not output %s analysis result", r.AnalyzeType)
 	}
 	analysisOutput := getMultiVersionPackageOutput(analysis)
 	output := struct {
@@ -77,7 +77,7 @@ func (r MultiVersionPackageAnalyzeResult) OutputText(resultType string) error {
 	analysis, valid := r.Analysis.(map[string]map[string]PackageInfo)
 	if !valid {
 		logrus.Error("Unexpected structure of Analysis.  Should be of type map[string]map[string]PackageInfo")
-		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+		return fmt.Errorf("Could not output %s analysis result", r.AnalyzeType)
 	}
 	analysisOutput := getMultiVersionPackageOutput(analysis)
 
@@ -100,7 +100,7 @@ func (r SingleVersionPackageAnalyzeResult) OutputStruct() interface{} {
 	analysis, valid := r.Analysis.(map[string]PackageInfo)
 	if !valid {
 		logrus.Error("Unexpected structure of Analysis.  Should be of type map[string]PackageInfo")
-		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+		return fmt.Errorf("Could not output %s analysis result", r.AnalyzeType)
 	}
 	analysisOutput := getSingleVersionPackageOutput(analysis)
 	output := struct {
@@ -119,7 +119,7 @@ func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string) error {
 	analysis, valid := r.Analysis.(map[string]PackageInfo)
 	if !valid {
 		logrus.Error("Unexpected structure of Analysis.  Should be of type map[string]PackageInfo")
-		return errors.New(fmt.Sprintf("Could not output %s analysis result", r.AnalyzeType))
+		return fmt.Errorf("Could not output %s analysis result", r.AnalyzeType)
 	}
 	analysisOutput := getSingleVersionPackageOutput(analysis)
 
