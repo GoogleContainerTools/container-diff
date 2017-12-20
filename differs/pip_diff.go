@@ -18,6 +18,7 @@ package differs
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -123,13 +124,28 @@ func addToMap(packages map[string]map[string]util.PackageInfo, pack string, path
 
 func getPythonVersion(pathToLayer string) ([]string, error) {
 	matches := []string{}
+
+	// Debian based distros
 	libPath := filepath.Join(pathToLayer, "usr/local/lib")
 	libContents, err := ioutil.ReadDir(libPath)
 	if err != nil {
-		return matches, err
+		logrus.Warnf("Could not find /usr/local/lib to determine Python version, trying /usr/lib: %s", err)
+		libContents = []os.FileInfo{}
 	}
 
-	for _, file := range libContents {
+	// Fedora, CentOS, RHEL, ...
+	libPath = filepath.Join(pathToLayer, "usr/lib")
+	libContents2, err2 := ioutil.ReadDir(libPath)
+	if err2 != nil {
+		if err != nil {
+			logrus.Errorf("Could not find /usr/lib nor /usr/local/lib to determine Python version: %s", err2)
+			return matches, err
+		}
+		logrus.Warnf("Could not find /usr/lib to determine Python version, using /usr/local/lib: %s", err2)
+		libContents2 = []os.FileInfo{}
+	}
+
+	for _, file := range append(libContents, libContents2...) {
 		pattern := regexp.MustCompile("^python[0-9]+\\.[0-9]+$")
 		match := pattern.FindString(file.Name())
 		if match != "" {
