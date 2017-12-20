@@ -33,12 +33,12 @@ func TestGetPythonVersion(t *testing.T) {
 		{
 			layerPath:        "testDirs/pipTests/pythonVersionTests/notAFolder",
 			expectedVersions: []string{},
-			err:              true,
+			err:              false,
 		},
 		{
 			layerPath:        "testDirs/pipTests/pythonVersionTests/noLibLayer",
 			expectedVersions: []string{},
-			err:              true,
+			err:              false,
 		},
 		{
 			layerPath:        "testDirs/pipTests/pythonVersionTests/noPythonLayer",
