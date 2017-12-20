@@ -123,17 +123,21 @@ func addToMap(packages map[string]map[string]util.PackageInfo, pack string, path
 
 func getPythonVersion(pathToLayer string) ([]string, error) {
 	matches := []string{}
-	libPath := filepath.Join(pathToLayer, "usr/local/lib")
-	libContents, err := ioutil.ReadDir(libPath)
-	if err != nil {
-		return matches, err
-	}
+	pattern := regexp.MustCompile("^python[0-9]+\\.[0-9]+$")
 
-	for _, file := range libContents {
-		pattern := regexp.MustCompile("^python[0-9]+\\.[0-9]+$")
-		match := pattern.FindString(file.Name())
-		if match != "" {
-			matches = append(matches, match)
+	libPaths := []string{"usr/local/lib", "usr/lib"}
+	for _, lp := range libPaths {
+		libPath := filepath.Join(pathToLayer, lp)
+		libContents, err := ioutil.ReadDir(libPath)
+		if err != nil {
+			logrus.Debugf("Could not find %s to determine Python version", err)
+			continue
+		}
+		for _, file := range libContents {
+			match := pattern.FindString(file.Name())
+			if match != "" {
+				matches = append(matches, match)
+			}
 		}
 	}
 	return matches, nil
