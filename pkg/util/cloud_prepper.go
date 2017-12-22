@@ -38,7 +38,9 @@ func (p CloudPrepper) GetSource() string {
 }
 
 func (p CloudPrepper) GetImage() (Image, error) {
-	return getImage(p)
+	image, err := getImage(p)
+	image.Type = ImageTypeCloud
+	return image, err
 }
 
 func (p CloudPrepper) GetFileSystem() (string, error) {

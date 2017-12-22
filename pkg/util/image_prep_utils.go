@@ -27,6 +27,8 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
+	"github.com/containers/image/docker"
+	"github.com/containers/image/manifest"
 	"github.com/containers/image/pkg/compression"
 	"github.com/containers/image/types"
 	"github.com/sirupsen/logrus"
@@ -40,10 +42,43 @@ type Prepper interface {
 	GetSource() string
 }
 
+type ImageType int
+
+const (
+	ImageTypeTar ImageType = iota
+	ImageTypeDaemon
+	ImageTypeCloud
+)
+
 type Image struct {
 	Source string
 	FSPath string
 	Config ConfigSchema
+	Type   ImageType
+}
+
+func (i *Image) IsTar() bool {
+	return i.Type == ImageTypeTar
+}
+
+func (i *Image) IsDaemon() bool {
+	return i.Type == ImageTypeDaemon
+}
+
+func (i *Image) IsCloud() bool {
+	return i.Type == ImageTypeCloud
+}
+
+func (i *Image) GetRemoteDigest() (string, error) {
+	ref, err := docker.ParseReference("//" + i.Source)
+	if err != nil {
+		return "", err
+	}
+	return getDigestFromReference(ref, i.Source)
+}
+
+func (i *Image) GetName() string {
+	return strings.Split(i.Source, ":")[0]
 }
 
 type ImageHistoryItem struct {
@@ -165,6 +200,29 @@ func getFileSystemFromReference(ref types.ImageReference, imageName string, cach
 		}
 	}
 	return path, nil
+}
+
+func getDigestFromReference(ref types.ImageReference, source string) (string, error) {
+	img, err := ref.NewImage(nil)
+	if err != nil {
+		logrus.Errorf("Error referencing image %s from registry: %s", source, err)
+		return "", errors.New("Could not obtain image digest")
+	}
+	defer img.Close()
+
+	rawManifest, _, err := img.Manifest()
+	if err != nil {
+		logrus.Errorf("Error referencing image %s from registry: %s", source, err)
+		return "", errors.New("Could not obtain image digest")
+	}
+
+	digest, err := manifest.Digest(rawManifest)
+	if err != nil {
+		logrus.Errorf("Error referencing image %s from registry: %s", source, err)
+		return "", errors.New("Could not obtain image digest")
+	}
+
+	return digest.String(), nil
 }
 
 func getConfigFromReference(ref types.ImageReference, source string) (ConfigSchema, error) {

@@ -44,7 +44,9 @@ func (p TarPrepper) GetSource() string {
 }
 
 func (p TarPrepper) GetImage() (Image, error) {
-	return getImage(p)
+	image, err := getImage(p)
+	image.Type = ImageTypeTar
+	return image, err
 }
 
 func (p TarPrepper) GetFileSystem() (string, error) {
