@@ -1,0 +1,68 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "context.go",
+        "digests.go",
+        "groups_unix.go",
+        "hardlinks.go",
+        "ioutils.go",
+        "manifest.go",
+        "resource.go",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:darwin_amd64": [
+            "hardlinks_unix.go",
+            "resource_unix.go",
+        ],
+        "@io_bazel_rules_go//go/platform:linux_amd64": [
+            "hardlinks_unix.go",
+            "resource_unix.go",
+        ],
+        "@io_bazel_rules_go//go/platform:windows_amd64": [
+            "hardlinks_windows.go",
+            "resource_windows.go",
+        ],
+        "//conditions:default": [],
+    }),
+    importpath = "github.com/containerd/continuity",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/containerd/continuity/devices:go_default_library",
+        "//vendor/github.com/containerd/continuity/driver:go_default_library",
+        "//vendor/github.com/containerd/continuity/pathdriver:go_default_library",
+        "//vendor/github.com/containerd/continuity/proto:go_default_library",
+        "//vendor/github.com/golang/protobuf/proto:go_default_library",
+        "//vendor/github.com/opencontainers/go-digest:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "digests_test.go",
+        "resource_test.go",
+        "testutil_test.go",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:darwin_amd64": [
+            "manifest_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:linux_amd64": [
+            "manifest_test.go",
+        ],
+        "//conditions:default": [],
+    }),
+    importpath = "github.com/containerd/continuity",
+    library = ":go_default_library",
+    deps = [
+        "//vendor/github.com/opencontainers/go-digest:go_default_library",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:darwin_amd64": [
+            "//vendor/github.com/containerd/continuity/devices:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:linux_amd64": [
+            "//vendor/github.com/containerd/continuity/devices:go_default_library",
+        ],
+        "//conditions:default": [],
+    }),
+)

@@ -21,9 +21,9 @@ const (
 	TERABYTE = 1024 * GIGABYTE
 )
 
-var bytesPattern *regexp.Regexp = regexp.MustCompile(`(?i)^(-?\d+(?:\.\d+)?)([KMGT]B?|B)$`)
+var bytesPattern *regexp.Regexp = regexp.MustCompile(`(?i)^(-?\d+(?:\.\d+)?)([KMGT]i?B?|B)$`)
 
-var invalidByteQuantityError = errors.New("Byte quantity must be a positive integer with a unit of measurement like M, MB, G, or GB")
+var invalidByteQuantityError = errors.New("Byte quantity must be a positive integer with a unit of measurement like M, MB, MiB, G, GiB, or GB")
 
 // ByteSize returns a human-readable byte string of the form 10M, 12.5K, and so forth.  The following units are available:
 //	T: Terabyte
@@ -70,7 +70,11 @@ func ToMegabytes(s string) (uint64, error) {
 	return bytes / MEGABYTE, nil
 }
 
-// ToBytes parses a string formatted by ByteSize as bytes.
+// ToBytes parses a string formatted by ByteSize as bytes. Note binary-prefixed and SI prefixed units both mean a base-2 units
+// KB = K = KiB	= 1024
+// MB = M = MiB = 1024 * K
+// GB = G = GiB = 1024 * M
+// TB = T = TiB = 1024 * G
 func ToBytes(s string) (uint64, error) {
 	parts := bytesPattern.FindStringSubmatch(strings.TrimSpace(s))
 	if len(parts) < 3 {

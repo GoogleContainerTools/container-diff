@@ -1,1 +1,1 @@
-package bytefmt
+package bytefmt // import "code.cloudfoundry.org/bytefmt"
