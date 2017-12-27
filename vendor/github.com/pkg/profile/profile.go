@@ -16,6 +16,7 @@ import (
 const (
 	cpuMode = iota
 	memMode
+	mutexMode
 	blockMode
 	traceMode
 )
@@ -79,6 +80,12 @@ func MemProfileRate(rate int) func(*Profile) {
 		p.mode = memMode
 	}
 }
+
+// MutexProfile enables mutex profiling.
+// It disables any previous profiling settings.
+//
+// Mutex profiling is a no-op before go1.8.
+func MutexProfile(p *Profile) { p.mode = mutexMode }
 
 // BlockProfile enables block (contention) profiling.
 // It disables any previous profiling settings.
@@ -170,6 +177,23 @@ func Start(options ...func(*Profile)) interface {
 			f.Close()
 			runtime.MemProfileRate = old
 			logf("profile: memory profiling disabled, %s", fn)
+		}
+
+	case mutexMode:
+		fn := filepath.Join(path, "mutex.pprof")
+		f, err := os.Create(fn)
+		if err != nil {
+			log.Fatalf("profile: could not create mutex profile %q: %v", fn, err)
+		}
+		enableMutexProfile()
+		logf("profile: mutex profiling enabled, %s", fn)
+		prof.closer = func() {
+			if mp := pprof.Lookup("mutex"); mp != nil {
+				mp.WriteTo(f, 0)
+			}
+			f.Close()
+			disableMutexProfile()
+			logf("profile: mutex profiling disabled, %s", fn)
 		}
 
 	case blockMode:

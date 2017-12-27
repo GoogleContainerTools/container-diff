@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
@@ -7,6 +7,7 @@ go_library(
         "errors.go",
         "exitcode.go",
         "init.go",
+        "lcow.go",
         "meminfo.go",
         "path.go",
         "rm.go",
@@ -14,11 +15,11 @@ go_library(
         "@io_bazel_rules_go//go/platform:darwin_amd64": [
             "chtimes_unix.go",
             "filesys.go",
+            "init_unix.go",
             "lcow_unix.go",
             "lstat_unix.go",
             "meminfo_unsupported.go",
             "mknod.go",
-            "path_unix.go",
             "process_unix.go",
             "stat_darwin.go",
             "stat_unix.go",
@@ -29,11 +30,11 @@ go_library(
         "@io_bazel_rules_go//go/platform:linux_amd64": [
             "chtimes_unix.go",
             "filesys.go",
+            "init_unix.go",
             "lcow_unix.go",
             "lstat_unix.go",
             "meminfo_linux.go",
             "mknod.go",
-            "path_unix.go",
             "process_unix.go",
             "stat_linux.go",
             "stat_unix.go",
@@ -50,7 +51,7 @@ go_library(
             "lstat_windows.go",
             "meminfo_windows.go",
             "mknod_windows.go",
-            "path_windows.go",
+            "process_windows.go",
             "stat_windows.go",
             "syscall_windows.go",
             "umask_windows.go",
@@ -59,11 +60,12 @@ go_library(
         ],
         "//conditions:default": [],
     }),
-    cgo = True,
     importpath = "github.com/docker/docker/pkg/system",
     visibility = ["//visibility:public"],
     deps = [
+        "//vendor/github.com/containerd/continuity/pathdriver:go_default_library",
         "//vendor/github.com/docker/docker/pkg/mount:go_default_library",
+        "//vendor/github.com/opencontainers/image-spec/specs-go/v1:go_default_library",
         "//vendor/github.com/pkg/errors:go_default_library",
     ] + select({
         "@io_bazel_rules_go//go/platform:darwin_amd64": [
@@ -77,6 +79,45 @@ go_library(
             "//vendor/github.com/Microsoft/go-winio:go_default_library",
             "//vendor/github.com/sirupsen/logrus:go_default_library",
             "//vendor/golang.org/x/sys/windows:go_default_library",
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "chtimes_test.go",
+        "rm_test.go",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:darwin_amd64": [
+            "chtimes_unix_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:linux_amd64": [
+            "chtimes_unix_test.go",
+            "lstat_unix_test.go",
+            "meminfo_unix_test.go",
+            "stat_unix_test.go",
+            "utimes_unix_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:windows_amd64": [
+            "chtimes_windows_test.go",
+            "path_windows_test.go",
+            "syscall_windows_test.go",
+        ],
+        "//conditions:default": [],
+    }),
+    importpath = "github.com/docker/docker/pkg/system",
+    library = ":go_default_library",
+    deps = [
+        "//vendor/github.com/docker/docker/pkg/mount:go_default_library",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:linux_amd64": [
+            "//vendor/github.com/docker/go-units:go_default_library",
+            "//vendor/github.com/stretchr/testify/require:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:windows_amd64": [
+            "//vendor/github.com/containerd/continuity/pathdriver:go_default_library",
         ],
         "//conditions:default": [],
     }),
