@@ -41,3 +41,10 @@ ln -s $(pwd)/hack/hooks/* .git/hooks
 ```
 
 from the project root.
+
+## Dependencies
+
+This project uses [dep](https://github.com/golang/dep) for managing dependencies and the `vendor` directory.
+You should not need to know about this tool unless you are trying to add a new dependency or update an existing one.
+
+See the [dep documentation](https://github.com/golang/dep#adding-a-dependency) for information on how to add a dependency.
