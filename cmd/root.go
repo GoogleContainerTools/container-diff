@@ -20,7 +20,6 @@ import (
 	goflag "flag"
 	"fmt"
 	"os"
-	"os/user"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -30,6 +29,7 @@ import (
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
 	"github.com/docker/docker/client"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -168,11 +168,11 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 }
 
 func cacheDir() (string, error) {
-	user, err := user.Current()
+	dir, err := homedir.Dir()
 	if err != nil {
 		return "", err
 	}
-	rootDir := filepath.Join(user.HomeDir, ".container-diff")
+	rootDir := filepath.Join(dir, ".container-diff")
 	return filepath.Join(rootDir, "cache"), nil
 }
 
