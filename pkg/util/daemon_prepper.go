@@ -41,7 +41,9 @@ func (p DaemonPrepper) GetSource() string {
 }
 
 func (p DaemonPrepper) GetImage() (Image, error) {
-	return getImage(p)
+	image, err := getImage(p)
+	image.Type = ImageTypeDaemon
+	return image, err
 }
 
 func (p DaemonPrepper) GetFileSystem() (string, error) {
