@@ -60,9 +60,9 @@ go_library(
     importpath = "github.com/docker/docker/opts",
     visibility = ["//visibility:public"],
     deps = [
-        "//vendor/github.com/docker/docker/api/types:go_default_library",
-        "//vendor/github.com/docker/go-units:go_default_library",
-        "//vendor/github.com/pkg/errors:go_default_library",
+        "@com_github_docker_docker//api/types:go_default_library",
+        "@com_github_docker_go_units//:go_default_library",
+        "@com_github_pkg_errors//:go_default_library",
     ],
 )
 
@@ -79,7 +79,7 @@ go_test(
     embed = [":go_default_library"],
     importpath = "github.com/docker/docker/opts",
     deps = [
-        "//vendor/github.com/docker/go-units:go_default_library",
-        "//vendor/github.com/stretchr/testify/assert:go_default_library",
+        "@com_github_docker_go_units//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
 )

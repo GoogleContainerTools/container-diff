@@ -497,25 +497,25 @@ go_test(
     importpath = "golang.org/x/sys/unix_test",
     deps = select({
         "@io_bazel_rules_go//go/platform:darwin": [
-            ":go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:dragonfly": [
-            ":go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:freebsd": [
-            ":go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:linux": [
-            ":go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:netbsd": [
-            ":go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:openbsd": [
-            ":go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:solaris": [
-            ":go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "//conditions:default": [],
     }),

@@ -24,5 +24,5 @@ go_test(
     name = "go_default_xtest",
     srcs = ["withtimeout_test.go"],
     importpath = "golang.org/x/net/context_test",
-    deps = [":go_default_library"],
+    deps = ["@org_golang_x_net//context:go_default_library"],
 )

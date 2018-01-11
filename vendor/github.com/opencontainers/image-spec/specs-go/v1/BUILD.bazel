@@ -14,7 +14,7 @@ go_library(
     importpath = "github.com/opencontainers/image-spec/specs-go/v1",
     visibility = ["//visibility:public"],
     deps = [
-        "//vendor/github.com/opencontainers/go-digest:go_default_library",
-        "//vendor/github.com/opencontainers/image-spec/specs-go:go_default_library",
+        "@com_github_opencontainers_go_digest//:go_default_library",
+        "@com_github_opencontainers_image_spec//specs-go:go_default_library",
     ],
 )

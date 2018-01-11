@@ -13,10 +13,10 @@ go_library(
     importpath = "github.com/docker/distribution/registry/api/v2",
     visibility = ["//visibility:public"],
     deps = [
-        "//vendor/github.com/docker/distribution/reference:go_default_library",
-        "//vendor/github.com/docker/distribution/registry/api/errcode:go_default_library",
-        "//vendor/github.com/gorilla/mux:go_default_library",
-        "//vendor/github.com/opencontainers/go-digest:go_default_library",
+        "@com_github_docker_distribution//reference:go_default_library",
+        "@com_github_docker_distribution//registry/api/errcode:go_default_library",
+        "@com_github_gorilla_mux//:go_default_library",
+        "@com_github_opencontainers_go_digest//:go_default_library",
     ],
 )
 
@@ -30,7 +30,7 @@ go_test(
     embed = [":go_default_library"],
     importpath = "github.com/docker/distribution/registry/api/v2",
     deps = [
-        "//vendor/github.com/docker/distribution/reference:go_default_library",
-        "//vendor/github.com/gorilla/mux:go_default_library",
+        "@com_github_docker_distribution//reference:go_default_library",
+        "@com_github_gorilla_mux//:go_default_library",
     ],
 )

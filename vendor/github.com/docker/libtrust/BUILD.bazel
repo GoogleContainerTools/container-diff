@@ -33,5 +33,5 @@ go_test(
     ],
     embed = [":go_default_library"],
     importpath = "github.com/docker/libtrust",
-    deps = ["//vendor/github.com/docker/libtrust/testutil:go_default_library"],
+    deps = ["@com_github_docker_libtrust//testutil:go_default_library"],
 )

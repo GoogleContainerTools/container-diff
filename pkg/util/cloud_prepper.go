@@ -17,16 +17,19 @@ limitations under the License.
 package util
 
 import (
-	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
+	"io/ioutil"
+	"strings"
+
 	"github.com/containers/image/docker"
+	"github.com/containers/image/types"
 	"github.com/docker/docker/client"
 )
 
 // CloudPrepper prepares images sourced from a Cloud registry
 type CloudPrepper struct {
-	Source string
-	Client *client.Client
-	Cache  cache.Cache
+	Source      string
+	Client      *client.Client
+	ImageSource types.ImageSource
 }
 
 func (p CloudPrepper) Name() string {
@@ -48,8 +51,15 @@ func (p CloudPrepper) GetFileSystem() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	sanitizedName := strings.Replace(p.Source, ":", "", -1)
+	sanitizedName = strings.Replace(sanitizedName, "/", "", -1)
 
-	return getFileSystemFromReference(ref, p.Source, p.Cache)
+	path, err := ioutil.TempDir("", sanitizedName)
+	if err != nil {
+		return "", err
+	}
+
+	return path, getFileSystemFromReference(ref, p.ImageSource, path)
 }
 
 func (p CloudPrepper) GetConfig() (ConfigSchema, error) {

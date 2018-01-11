@@ -59,9 +59,9 @@ go_test(
     ],
     importpath = "github.com/gogo/protobuf/proto_test",
     deps = [
-        ":go_default_library",
-        "//vendor/github.com/gogo/protobuf/proto/proto3_proto:go_default_library",
-        "//vendor/github.com/gogo/protobuf/proto/testdata:go_default_library",
-        "//vendor/github.com/gogo/protobuf/types:go_default_library",
+        "@com_github_gogo_protobuf//proto:go_default_library",
+        "@com_github_gogo_protobuf//proto/proto3_proto:go_default_library",
+        "@com_github_gogo_protobuf//proto/testdata:go_default_library",
+        "@com_github_gogo_protobuf//types:go_default_library",
     ],
 )

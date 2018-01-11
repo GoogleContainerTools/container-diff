@@ -1,13 +1,8 @@
-load("@io_bazel_rules_go//go:def.bzl", "gazelle", "go_binary", "go_library", "go_prefix")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_prefix")
+load("@bazel_gazelle//:def.bzl", "gazelle")
 
 gazelle(
     name = "gazelle",
-    build_tags = [
-        "container_image_ostree_stub",
-        "containers_image_openpgp",
-    ],
-    external = "vendored",
-    mode = "fix",
     prefix = "github.com/GoogleCloudPlatform/container-diff",
 )
 

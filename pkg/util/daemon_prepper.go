@@ -18,18 +18,20 @@ package util
 
 import (
 	"context"
+	"io/ioutil"
+	"strings"
 
-	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	"github.com/containers/image/docker/daemon"
+	"github.com/containers/image/types"
 
 	"github.com/docker/docker/client"
 	"github.com/sirupsen/logrus"
 )
 
 type DaemonPrepper struct {
-	Source string
-	Client *client.Client
-	Cache  cache.Cache
+	Source      string
+	Client      *client.Client
+	ImageSource types.ImageSource
 }
 
 func (p DaemonPrepper) Name() string {
@@ -51,7 +53,15 @@ func (p DaemonPrepper) GetFileSystem() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return getFileSystemFromReference(ref, p.Source, p.Cache)
+
+	sanitizedName := strings.Replace(p.Source, ":", "", -1)
+	sanitizedName = strings.Replace(sanitizedName, "/", "", -1)
+
+	path, err := ioutil.TempDir("", sanitizedName)
+	if err != nil {
+		return "", err
+	}
+	return path, getFileSystemFromReference(ref, p.ImageSource, path)
 }
 
 func (p DaemonPrepper) GetConfig() (ConfigSchema, error) {

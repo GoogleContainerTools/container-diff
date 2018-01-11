@@ -28,6 +28,7 @@ import (
 	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
+	"github.com/containers/image/docker"
 	"github.com/docker/docker/client"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
@@ -126,26 +127,24 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 		return nil, err
 	}
 
-	cacheDir, err := cacheDir()
-	if err != nil {
-		return nil, err
-	}
-	var fsCache cache.Cache
-	if !noCache {
-		fsCache, err = cache.NewFileCache(cacheDir)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	if pkgutil.IsTar(image) {
 		return pkgutil.TarPrepper{
 			Source: image,
 			Client: cli,
-			Cache:  fsCache,
 		}, nil
 
-	} else if strings.HasPrefix(image, DaemonPrefix) {
+	}
+
+	ref, err := docker.ParseReference("//" + image)
+	if err != nil {
+		return nil, err
+	}
+	src, err := ref.NewImageSource(nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.HasPrefix(image, DaemonPrefix) {
 
 		// remove the DaemonPrefix
 		image := strings.Replace(image, DaemonPrefix, "", -1)
@@ -155,17 +154,31 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 		}
 
 		return pkgutil.DaemonPrepper{
-			Source: image,
-			Client: cli,
-			Cache:  fsCache,
+			Source:      image,
+			Client:      cli,
+			ImageSource: src,
 		}, nil
 	}
 	// either has remote prefix or has no prefix, in which case we force remote
+
+	if !noCache {
+		cacheDir, err := cacheDir()
+		if err != nil {
+			return nil, err
+		}
+
+		src, err = cache.NewFileCache(cacheDir, ref, src)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return pkgutil.CloudPrepper{
-		Source: strings.Replace(image, RemotePrefix, "", -1),
-		Client: cli,
-		Cache:  fsCache,
+		Source:      strings.Replace(image, RemotePrefix, "", -1),
+		Client:      cli,
+		ImageSource: src,
 	}, nil
+
 }
 
 func cacheDir() (string, error) {
