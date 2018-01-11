@@ -52,7 +52,7 @@ func (r MultiVersionPackageDiffResult) OutputStruct() interface{} {
 	return r
 }
 
-func (r MultiVersionPackageDiffResult) OutputText(diffType string, format string) error {
+func (r MultiVersionPackageDiffResult) OutputText(diffType string) error {
 	diff, valid := r.Diff.(MultiVersionPackageDiff)
 	if !valid {
 		logrus.Error("Unexpected structure of Diff.  Should follow the MultiVersionPackageDiff struct")
@@ -84,7 +84,7 @@ func (r MultiVersionPackageDiffResult) OutputText(diffType string, format string
 			InfoDiff:  strInfoDiff,
 		},
 	}
-	return TemplateOutputFromFormat(strResult, "MultiVersionPackageDiff", format)
+	return TemplateOutput(strResult, "MultiVersionPackageDiff")
 }
 
 func getMultiVersionInfoDiffOutput(infoDiff []MultiVersionInfo) []MultiVersionInfo {
@@ -118,7 +118,7 @@ func (r SingleVersionPackageDiffResult) OutputStruct() interface{} {
 	return r
 }
 
-func (r SingleVersionPackageDiffResult) OutputText(diffType string, format string) error {
+func (r SingleVersionPackageDiffResult) OutputText(diffType string) error {
 	diff, valid := r.Diff.(PackageDiff)
 	if !valid {
 		logrus.Error("Unexpected structure of Diff.  Should follow the PackageDiff struct")
@@ -150,7 +150,7 @@ func (r SingleVersionPackageDiffResult) OutputText(diffType string, format strin
 			InfoDiff:  strInfoDiff,
 		},
 	}
-	return TemplateOutputFromFormat(strResult, "SingleVersionPackageDiff", format)
+	return TemplateOutput(strResult, "SingleVersionPackageDiff")
 }
 
 func getSingleVersionInfoDiffOutput(infoDiff []Info) []Info {
@@ -168,8 +168,8 @@ func (r HistDiffResult) OutputStruct() interface{} {
 	return r
 }
 
-func (r HistDiffResult) OutputText(diffType string, format string) error {
-	return TemplateOutputFromFormat(r, "HistDiff", format)
+func (r HistDiffResult) OutputText(diffType string) error {
+	return TemplateOutput(r, "HistDiff")
 }
 
 type DirDiffResult DiffResult
@@ -185,7 +185,7 @@ func (r DirDiffResult) OutputStruct() interface{} {
 	return r
 }
 
-func (r DirDiffResult) OutputText(diffType string, format string) error {
+func (r DirDiffResult) OutputText(diffType string) error {
 	diff, valid := r.Diff.(DirDiff)
 	if !valid {
 		logrus.Error("Unexpected structure of Diff.  Should follow the DirDiff struct")
@@ -218,5 +218,5 @@ func (r DirDiffResult) OutputText(diffType string, format string) error {
 			Mods: strMods,
 		},
 	}
-	return TemplateOutputFromFormat(strResult, "DirDiff", format)
+	return TemplateOutput(strResult, "DirDiff")
 }

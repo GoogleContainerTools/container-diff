@@ -39,9 +39,9 @@ var json bool
 var save bool
 var types diffTypes
 var noCache bool
+var quiet bool
 
 var LogLevel string
-var format string
 
 type validatefxn func(args []string) error
 
@@ -85,7 +85,7 @@ func outputResults(resultMap map[string]util.Result) {
 		if json {
 			results[i] = result.OutputStruct()
 		} else {
-			err := result.OutputText(analyzerType, format)
+			err := result.OutputText(analyzerType)
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -179,7 +179,6 @@ func cacheDir() (string, error) {
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&LogLevel, "verbosity", "v", "warning", "This flag controls the verbosity of container-diff.")
-	RootCmd.PersistentFlags().StringVarP(&format, "format", "", "", "Format to output diff in.")
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 }
 
@@ -211,6 +210,7 @@ func (d *diffTypes) Type() string {
 
 func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&json, "json", "j", false, "JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).")
+	cmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "Suppress output to stderr.")
 	cmd.Flags().VarP(&types, "type", "t", "This flag sets the list of analyzer types to use. Set it repeatedly to use multiple analyzers.")
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
