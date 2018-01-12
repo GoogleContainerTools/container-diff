@@ -87,14 +87,13 @@ func TemplateOutputFromFormat(diff interface{}, templateType string, format stri
 	funcs := template.FuncMap{"join": strings.Join}
 	tmpl, err := template.New("tmpl").Funcs(funcs).Parse(format)
 	if err != nil {
-		logrus.Info("User specified format resulted in error, printing default output.")
+		logrus.Warningf("User specified format resulted in error, printing default output.")
 		logrus.Error(err)
 		return TemplateOutput(diff, templateType)
 	}
 	w := tabwriter.NewWriter(os.Stdout, 8, 8, 8, ' ', 0)
 	err = tmpl.Execute(w, diff)
 	if err != nil {
-		logrus.Error(err)
 		return err
 	}
 	w.Flush()
