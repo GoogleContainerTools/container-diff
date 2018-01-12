@@ -38,6 +38,7 @@ var analyzeCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		pkgutil.SetQuiet(quiet)
 		if err := analyzeImage(args[0], types); err != nil {
 			logrus.Error(err)
 			os.Exit(1)
@@ -86,7 +87,7 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		return fmt.Errorf("Error performing image analysis: %s", err)
 	}
 
-	fmt.Fprintln(os.Stderr, "Retrieving analyses")
+	pkgutil.PrintToStdErr("Retrieving analyses")
 	outputResults(analyses)
 
 	if save {
