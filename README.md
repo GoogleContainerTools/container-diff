@@ -111,6 +111,10 @@ To order files and packages by size (in descending order) when performing file s
 container-diff analyze remote://gcr.io/gcp-runtimes/multi-modified --type=pip --order
 ```
 
+To suppress output to stderr, add a `-q` or `--quiet` flag.
+```shell
+container-diff analyze file1.tar --type=file --quiet
+```
 
 ## Analysis Result Format
 

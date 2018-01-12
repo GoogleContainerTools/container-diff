@@ -14,21 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package output
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"os"
 )
 
-var quiet = false
+var quiet bool
 
+// PrintToStdErr prints to stderr if quiet flag isn't enabled
 func PrintToStdErr(output string, vars ...interface{}) {
 	if !quiet {
 		fmt.Fprintf(os.Stderr, output, vars...)
 	}
 }
 
-func SetQuiet(q bool) {
-	quiet = q
+// AddFlags adds quiet flag to suppress output to stderr
+func AddFlags(cmd *cobra.Command) {
+	cmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "Suppress output to stderr.")
 }

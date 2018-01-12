@@ -25,6 +25,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/container-diff/cmd/util/output"
 	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	"github.com/containers/image/docker"
 	"github.com/containers/image/manifest"
@@ -99,7 +100,7 @@ type ConfigSchema struct {
 }
 
 func getImage(p Prepper) (Image, error) {
-	PrintToStdErr("Retrieving image %s from source %s\n", p.GetSource(), p.Name())
+	output.PrintToStdErr("Retrieving image %s from source %s\n", p.GetSource(), p.Name())
 	imgPath, err := p.GetFileSystem()
 	if err != nil {
 		return Image{}, err
