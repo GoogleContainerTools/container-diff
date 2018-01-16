@@ -41,6 +41,7 @@ var types diffTypes
 var noCache bool
 
 var LogLevel string
+var format string
 
 type validatefxn func(args []string) error
 
@@ -84,7 +85,7 @@ func outputResults(resultMap map[string]util.Result) {
 		if json {
 			results[i] = result.OutputStruct()
 		} else {
-			err := result.OutputText(analyzerType)
+			err := result.OutputText(analyzerType, format)
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -178,6 +179,7 @@ func cacheDir() (string, error) {
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&LogLevel, "verbosity", "v", "warning", "This flag controls the verbosity of container-diff.")
+	RootCmd.PersistentFlags().StringVarP(&format, "format", "", "", "Format to output diff in.")
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 }
 
