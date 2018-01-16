@@ -26,7 +26,7 @@ import (
 
 type Result interface {
 	OutputStruct() interface{}
-	OutputText(resultType string) error
+	OutputText(resultType string, format string) error
 }
 
 type AnalyzeResult struct {
@@ -41,15 +41,15 @@ func (r ListAnalyzeResult) OutputStruct() interface{} {
 	return r
 }
 
-func (r ListAnalyzeResult) OutputText(resultType string) error {
+func (r ListAnalyzeResult) OutputText(resultType string, format string) error {
 	analysis, valid := r.Analysis.([]string)
 	if !valid {
 		logrus.Error("Unexpected structure of Analysis.  Should be of type []string")
 		return fmt.Errorf("Could not output %s analysis result", r.AnalyzeType)
 	}
 	r.Analysis = analysis
+	return TemplateOutputFromFormat(r, "ListAnalyze", format)
 
-	return TemplateOutput(r, "ListAnalyze")
 }
 
 type MultiVersionPackageAnalyzeResult AnalyzeResult
@@ -73,7 +73,7 @@ func (r MultiVersionPackageAnalyzeResult) OutputStruct() interface{} {
 	return output
 }
 
-func (r MultiVersionPackageAnalyzeResult) OutputText(resultType string) error {
+func (r MultiVersionPackageAnalyzeResult) OutputText(resultType string, format string) error {
 	analysis, valid := r.Analysis.(map[string]map[string]PackageInfo)
 	if !valid {
 		logrus.Error("Unexpected structure of Analysis.  Should be of type map[string]map[string]PackageInfo")
@@ -91,7 +91,7 @@ func (r MultiVersionPackageAnalyzeResult) OutputText(resultType string) error {
 		AnalyzeType: r.AnalyzeType,
 		Analysis:    strAnalysis,
 	}
-	return TemplateOutput(strResult, "MultiVersionPackageAnalyze")
+	return TemplateOutputFromFormat(strResult, "MultiVersionPackageAnalyze", format)
 }
 
 type SingleVersionPackageAnalyzeResult AnalyzeResult
@@ -115,7 +115,7 @@ func (r SingleVersionPackageAnalyzeResult) OutputStruct() interface{} {
 	return output
 }
 
-func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string) error {
+func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string, format string) error {
 	analysis, valid := r.Analysis.(map[string]PackageInfo)
 	if !valid {
 		logrus.Error("Unexpected structure of Analysis.  Should be of type map[string]PackageInfo")
@@ -133,7 +133,7 @@ func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string) error {
 		AnalyzeType: r.AnalyzeType,
 		Analysis:    strAnalysis,
 	}
-	return TemplateOutput(strResult, "SingleVersionPackageAnalyze")
+	return TemplateOutputFromFormat(strResult, "SingleVersionPackageAnalyze", format)
 }
 
 type PackageOutput struct {
@@ -191,7 +191,7 @@ func (r FileAnalyzeResult) OutputStruct() interface{} {
 	return r
 }
 
-func (r FileAnalyzeResult) OutputText(analyzeType string) error {
+func (r FileAnalyzeResult) OutputText(analyzeType string, format string) error {
 	analysis, valid := r.Analysis.([]util.DirectoryEntry)
 	if !valid {
 		logrus.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
@@ -214,5 +214,5 @@ func (r FileAnalyzeResult) OutputText(analyzeType string) error {
 		AnalyzeType: r.AnalyzeType,
 		Analysis:    strAnalysis,
 	}
-	return TemplateOutput(strResult, "FileAnalyze")
+	return TemplateOutputFromFormat(strResult, "FileAnalyze", format)
 }
