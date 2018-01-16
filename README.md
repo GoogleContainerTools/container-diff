@@ -243,6 +243,42 @@ type MultiVersionInfo struct {
 }
 ```
 
+## User Customized Output
+Users can customize the format of the output of diffs with the`--format` flag. The flag takes a Go template string, which specifies the format the diff should be output in. This template string uses the structs described above, depending on the differ used, to format output.  The default template strings container-diff uses can be found [here](https://github.com/GoogleCloudPlatform/container-diff/blob/master/util/template_utils.go).
+
+An example using the pip package analyzer is shown below, in which only package names are printed (some are repeated because of version differences).
+
+```shell
+$ container-diff analyze gcr.io/google-appengine/python:latest --type=pip --format='
+-----{{.AnalyzeType}}-----
+Packages found in {{.Image}}:{{if not .Analysis}} None{{else}}
+{{range .Analysis}}{{"\n"}}{{.Name}}{{end}}
+{{end}}
+'
+Retrieving image gcr.io/google-appengine/python:latest from source Cloud Registry
+Retrieving analyses
+
+-----Pip-----
+Packages found in gcr.io/google-appengine/python:latest:
+
+chardet
+colorama
+html5lib
+mercurial
+pip
+pip
+pip
+requests
+setuptools
+setuptools
+setuptools
+six
+urllib3
+virtualenv
+wheel
+wheel
+```
+
 ## Known issues
 
 To run container-diff using image IDs, docker must be installed.
@@ -426,7 +462,7 @@ If using existing package tools, you should create the appropriate structs (e.g.
 ```go
 type Result interface {
 	OutputStruct() interface{}
-	OutputText(resultType string) error
+	OutputText(resultType string, format string) error
 }
 ```
 
