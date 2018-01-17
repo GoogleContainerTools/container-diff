@@ -22,6 +22,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/GoogleCloudPlatform/container-diff/cmd/util/output"
 	"github.com/GoogleCloudPlatform/container-diff/differs"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/GoogleCloudPlatform/container-diff/util"
@@ -82,7 +83,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	fmt.Fprintf(os.Stderr, "Starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
+	output.PrintToStdErr("Starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
 
 	imageMap := map[string]*pkgutil.Image{
 		image1Arg: {},
@@ -112,7 +113,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
 	}
 
-	fmt.Fprintln(os.Stderr, "Computing diffs")
+	output.PrintToStdErr("Computing diffs")
 	req := differs.DiffRequest{
 		Image1:    *imageMap[image1Arg],
 		Image2:    *imageMap[image2Arg],
@@ -124,7 +125,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	outputResults(diffs)
 
 	if filename != "" {
-		fmt.Fprintln(os.Stderr, "Computing filename diffs")
+		output.PrintToStdErr("Computing filename diffs")
 		err := diffFile(imageMap[image1Arg], imageMap[image2Arg])
 		if err != nil {
 			return err
@@ -151,4 +152,5 @@ func init() {
 	diffCmd.Flags().StringVarP(&filename, "filename", "f", "", "Set this flag to the path of a file in both containers to view the diff of the file. Must be used with --types=file flag.")
 	RootCmd.AddCommand(diffCmd)
 	addSharedFlags(diffCmd)
+	output.AddFlags(diffCmd)
 }

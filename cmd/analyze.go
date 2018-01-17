@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/GoogleCloudPlatform/container-diff/cmd/util/output"
 	"github.com/GoogleCloudPlatform/container-diff/differs"
 	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
 	"github.com/sirupsen/logrus"
@@ -86,7 +87,7 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		return fmt.Errorf("Error performing image analysis: %s", err)
 	}
 
-	fmt.Fprintln(os.Stderr, "Retrieving analyses")
+	output.PrintToStdErr("Retrieving analyses")
 	outputResults(analyses)
 
 	if save {
@@ -99,4 +100,5 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 func init() {
 	RootCmd.AddCommand(analyzeCmd)
 	addSharedFlags(analyzeCmd)
+	output.AddFlags(analyzeCmd)
 }

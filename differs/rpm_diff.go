@@ -112,7 +112,7 @@ func rpmDataFromContainer(image pkgutil.Image) (map[string]util.PackageInfo, err
 
 		archive, err := generateNewArchive(imageName)
 		if err != nil {
-			fmt.Println(err.Error())
+			logrus.Errorf(err.Error())
 		}
 		defer os.Remove(archive)
 
