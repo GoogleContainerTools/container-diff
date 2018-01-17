@@ -26,7 +26,7 @@ go_library(
 
 go_binary(
     name = "container-diff",
+    embed = [":go_default_library"],
     importpath = "github.com/GoogleCloudPlatform/container-diff",
-    library = ":go_default_library",
     visibility = ["//visibility:public"],
 )

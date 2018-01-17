@@ -6,10 +6,19 @@ go_library(
         "delete.go",
         "main.go",
     ] + select({
-        "@io_bazel_rules_go//go/platform:darwin_amd64": [
+        "@io_bazel_rules_go//go/platform:android": [
             "main_unsupported.go",
         ],
-        "@io_bazel_rules_go//go/platform:linux_amd64": [
+        "@io_bazel_rules_go//go/platform:darwin": [
+            "main_unsupported.go",
+        ],
+        "@io_bazel_rules_go//go/platform:dragonfly": [
+            "main_unsupported.go",
+        ],
+        "@io_bazel_rules_go//go/platform:freebsd": [
+            "main_unsupported.go",
+        ],
+        "@io_bazel_rules_go//go/platform:linux": [
             "checkpoint.go",
             "events.go",
             "exec.go",
@@ -26,7 +35,22 @@ go_library(
             "tty.go",
             "utils.go",
         ],
-        "@io_bazel_rules_go//go/platform:windows_amd64": [
+        "@io_bazel_rules_go//go/platform:nacl": [
+            "main_unsupported.go",
+        ],
+        "@io_bazel_rules_go//go/platform:netbsd": [
+            "main_unsupported.go",
+        ],
+        "@io_bazel_rules_go//go/platform:openbsd": [
+            "main_unsupported.go",
+        ],
+        "@io_bazel_rules_go//go/platform:plan9": [
+            "main_unsupported.go",
+        ],
+        "@io_bazel_rules_go//go/platform:solaris": [
+            "main_unsupported.go",
+        ],
+        "@io_bazel_rules_go//go/platform:windows": [
             "main_unsupported.go",
         ],
         "//conditions:default": [],
@@ -39,7 +63,7 @@ go_library(
         "//vendor/github.com/opencontainers/runc/libcontainer:go_default_library",
         "//vendor/github.com/opencontainers/runtime-spec/specs-go:go_default_library",
     ] + select({
-        "@io_bazel_rules_go//go/platform:linux_amd64": [
+        "@io_bazel_rules_go//go/platform:linux": [
             "//vendor/github.com/coreos/go-systemd/activation:go_default_library",
             "//vendor/github.com/docker/docker/pkg/term:go_default_library",
             "//vendor/github.com/opencontainers/runc/libcontainer/cgroups/systemd:go_default_library",
@@ -55,7 +79,7 @@ go_library(
 
 go_binary(
     name = "runc",
+    embed = [":go_default_library"],
     importpath = "github.com/opencontainers/runc",
-    library = ":go_default_library",
     visibility = ["//visibility:public"],
 )

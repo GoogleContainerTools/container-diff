@@ -43,8 +43,8 @@ go_test(
         "lookaside_test.go",
         "wwwauthenticate_test.go",
     ],
+    embed = [":go_default_library"],
     importpath = "github.com/containers/image/docker",
-    library = ":go_default_library",
     deps = [
         "//vendor/github.com/containers/image/docker/reference:go_default_library",
         "//vendor/github.com/containers/image/types:go_default_library",

@@ -13,13 +13,37 @@ go_library(
         "lockfile.go",
         "store.go",
     ] + select({
-        "@io_bazel_rules_go//go/platform:darwin_amd64": [
+        "@io_bazel_rules_go//go/platform:android": [
             "stat_mtimespec.go",
         ],
-        "@io_bazel_rules_go//go/platform:linux_amd64": [
+        "@io_bazel_rules_go//go/platform:darwin": [
+            "stat_mtimespec.go",
+        ],
+        "@io_bazel_rules_go//go/platform:dragonfly": [
+            "stat_mtimespec.go",
+        ],
+        "@io_bazel_rules_go//go/platform:freebsd": [
+            "stat_mtimespec.go",
+        ],
+        "@io_bazel_rules_go//go/platform:linux": [
             "stat_mtim.go",
         ],
-        "@io_bazel_rules_go//go/platform:windows_amd64": [
+        "@io_bazel_rules_go//go/platform:nacl": [
+            "stat_mtimespec.go",
+        ],
+        "@io_bazel_rules_go//go/platform:netbsd": [
+            "stat_mtimespec.go",
+        ],
+        "@io_bazel_rules_go//go/platform:openbsd": [
+            "stat_mtimespec.go",
+        ],
+        "@io_bazel_rules_go//go/platform:plan9": [
+            "stat_mtimespec.go",
+        ],
+        "@io_bazel_rules_go//go/platform:solaris": [
+            "stat_mtim.go",
+        ],
+        "@io_bazel_rules_go//go/platform:windows": [
             "stat_mtimespec.go",
         ],
         "//conditions:default": [],
