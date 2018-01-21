@@ -12,6 +12,7 @@ container-diff is a tool for analyzing and comparing container images. container
 - RPM packages
 - pip packages
 - npm packages
+
 These analyses can be performed on a single image, or a diff can be performed on two images to compare. The tool can help users better understand what is changing inside their images, and give them a better look at what their images contain.
 
 ## Installation
