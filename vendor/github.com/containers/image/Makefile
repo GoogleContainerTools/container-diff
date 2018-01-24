@@ -1,4 +1,4 @@
-.PHONY: all tools test validate lint
+.PHONY: all tools test validate lint .gitvalidation fmt
 
 # Which github repostiory and branch to use for testing with skopeo
 SKOPEO_REPO = projectatomic/skopeo
@@ -13,6 +13,8 @@ BUILDTAGS = btrfs_noversion libdm_no_deferred_remove $(DARWIN_BUILD_TAG)
 BUILDFLAGS := -tags "$(BUILDTAGS)"
 
 PACKAGES := $(shell go list $(BUILDFLAGS) ./... | grep -v github.com/containers/image/vendor)
+SOURCE_DIRS = $(shell echo $(PACKAGES) | awk 'BEGIN{FS="/"; RS=" "}{print $$4}' | uniq)
+
 # On macOS, (brew install gpgme) installs it within /usr/local, but /usr/local/include is not in the default search path.
 # Rather than hard-code this directory, use gpgme-config. Sadly that must be done at the top-level user
 # instead of locally in the gpgme subpackage, because cgo supports only pkg-config, not general shell scripts,
@@ -21,7 +23,10 @@ PACKAGES := $(shell go list $(BUILDFLAGS) ./... | grep -v github.com/containers/
 # (and the user will probably find out because the cgo compilation will fail).
 GPGME_ENV = CGO_CFLAGS="$(shell gpgme-config --cflags 2>/dev/null)" CGO_LDFLAGS="$(shell gpgme-config --libs 2>/dev/null)"
 
-all: tools .gitvalidation test validate
+all: tools test validate .gitvalidation
+
+build: vendor
+	@$(GPGME_ENV) go build $(BUILDFLAGS) $(PACKAGES)
 
 tools: tools.timestamp
 
@@ -58,6 +63,9 @@ test-skopeo:
 		$(SUDO) make BUILDTAGS="$(BUILDTAGS)" check && \
 		rm -rf $${skopeo_path}
 
+fmt:
+	@gofmt -l -s -w $(SOURCE_DIRS)
+
 validate: lint
 	@go vet $(PACKAGES)
 	@test -z "$$(gofmt -s -l . | grep -ve '^vendor' | tee /dev/stderr)"
@@ -68,8 +76,6 @@ lint:
 		echo "$$out"; \
 		exit 1; \
 	fi
-
-.PHONY: .gitvalidation
 
 EPOCH_TEST_COMMIT ?= e68e0e1110e64f906f9b482e548f17d73e02e6b1
 

@@ -20,24 +20,10 @@ import (
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/client"
 	"github.com/opencontainers/go-digest"
+	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
-
-var manifestMIMETypes = []string{
-	// TODO(runcom): we'll add OCI as part of another PR here
-	manifest.DockerV2Schema2MediaType,
-	manifest.DockerV2Schema1SignedMediaType,
-	manifest.DockerV2Schema1MediaType,
-}
-
-func supportedManifestMIMETypesMap() map[string]bool {
-	m := make(map[string]bool, len(manifestMIMETypes))
-	for _, mt := range manifestMIMETypes {
-		m[mt] = true
-	}
-	return m
-}
 
 type dockerImageDestination struct {
 	ref dockerReference
@@ -48,7 +34,7 @@ type dockerImageDestination struct {
 
 // newImageDestination creates a new ImageDestination for the specified image reference.
 func newImageDestination(ctx *types.SystemContext, ref dockerReference) (types.ImageDestination, error) {
-	c, err := newDockerClient(ctx, ref, true, "pull,push")
+	c, err := newDockerClientFromRef(ctx, ref, true, "pull,push")
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +56,12 @@ func (d *dockerImageDestination) Close() error {
 }
 
 func (d *dockerImageDestination) SupportedManifestMIMETypes() []string {
-	return manifestMIMETypes
+	return []string{
+		imgspecv1.MediaTypeImageManifest,
+		manifest.DockerV2Schema2MediaType,
+		manifest.DockerV2Schema1SignedMediaType,
+		manifest.DockerV2Schema1MediaType,
+	}
 }
 
 // SupportsSignatures returns an error (to be displayed to the user) if the destination certainly can't store signatures.
@@ -140,7 +131,7 @@ func (d *dockerImageDestination) PutBlob(stream io.Reader, inputInfo types.BlobI
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusAccepted {
 		logrus.Debugf("Error initiating layer upload, response %#v", *res)
-		return types.BlobInfo{}, errors.Errorf("Error initiating layer upload to %s, status %d", uploadPath, res.StatusCode)
+		return types.BlobInfo{}, errors.Wrapf(client.HandleErrorResponse(res), "Error initiating layer upload to %s", uploadPath)
 	}
 	uploadLocation, err := res.Location()
 	if err != nil {
@@ -176,7 +167,7 @@ func (d *dockerImageDestination) PutBlob(stream io.Reader, inputInfo types.BlobI
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusCreated {
 		logrus.Debugf("Error uploading layer, response %#v", *res)
-		return types.BlobInfo{}, errors.Errorf("Error uploading layer to %s, status %d", uploadLocation, res.StatusCode)
+		return types.BlobInfo{}, errors.Wrapf(client.HandleErrorResponse(res), "Error uploading layer to %s", uploadLocation)
 	}
 
 	logrus.Debugf("Upload of layer %s complete", computedDigest)
@@ -245,7 +236,7 @@ func (d *dockerImageDestination) PutManifest(m []byte) error {
 		return err
 	}
 	defer res.Body.Close()
-	if res.StatusCode != http.StatusCreated {
+	if !successStatus(res.StatusCode) {
 		err = errors.Wrapf(client.HandleErrorResponse(res), "Error uploading manifest to %s", path)
 		if isManifestInvalidError(errors.Cause(err)) {
 			err = types.ManifestTypeRejectedError{Err: err}
@@ -253,6 +244,12 @@ func (d *dockerImageDestination) PutManifest(m []byte) error {
 		return err
 	}
 	return nil
+}
+
+// successStatus returns true if the argument is a successful HTTP response
+// code (in the range 200 - 399 inclusive).
+func successStatus(status int) bool {
+	return status >= 200 && status <= 399
 }
 
 // isManifestInvalidError returns true iff err from client.HandleErrorReponse is a “manifest invalid” error.
@@ -450,7 +447,7 @@ sigExists:
 				logrus.Debugf("Error body %s", string(body))
 			}
 			logrus.Debugf("Error uploading signature, status %d, %#v", res.StatusCode, res)
-			return errors.Errorf("Error uploading signature to %s, status %d", path, res.StatusCode)
+			return errors.Wrapf(client.HandleErrorResponse(res), "Error uploading signature to %s", path)
 		}
 	}
 

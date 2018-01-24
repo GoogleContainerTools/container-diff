@@ -39,25 +39,25 @@ go_library(
     importpath = "github.com/sirupsen/logrus",
     visibility = ["//visibility:public"],
     deps = [
-        "@org_golang_x_crypto//ssh/terminal:go_default_library",
+        "//vendor/golang.org/x/crypto/ssh/terminal:go_default_library",
     ] + select({
         "@io_bazel_rules_go//go/platform:darwin": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:dragonfly": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:freebsd": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:linux": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:netbsd": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:openbsd": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "//conditions:default": [],
     }),
@@ -77,7 +77,7 @@ go_test(
     ],
     embed = [":go_default_library"],
     importpath = "github.com/sirupsen/logrus",
-    deps = ["@com_github_stretchr_testify//assert:go_default_library"],
+    deps = ["//vendor/github.com/stretchr/testify/assert:go_default_library"],
 )
 
 go_test(
@@ -88,7 +88,7 @@ go_test(
     ],
     importpath = "github.com/sirupsen/logrus_test",
     deps = [
-        "@com_github_sirupsen_logrus//:go_default_library",
-        "@in_gopkg_gemnasium_logrus_airbrake_hook_v2//:go_default_library",
+        ":go_default_library",
+        "//vendor/gopkg.in/gemnasium/logrus-airbrake-hook.v2:go_default_library",
     ],
 )

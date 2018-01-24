@@ -69,38 +69,38 @@ go_library(
     visibility = ["//visibility:public"],
     deps = select({
         "@io_bazel_rules_go//go/platform:android": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:darwin": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:dragonfly": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:freebsd": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:linux": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:nacl": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:netbsd": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:openbsd": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:plan9": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:solaris": [
-            "@org_golang_x_sys//unix:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:windows": [
-            "@com_github_Azure_go_ansiterm//winterm:go_default_library",
-            "@com_github_docker_docker//pkg/term/windows:go_default_library",
+            "//vendor/github.com/Azure/go-ansiterm/winterm:go_default_library",
+            "//vendor/github.com/docker/docker/pkg/term/windows:go_default_library",
         ],
         "//conditions:default": [],
     }),
@@ -120,7 +120,7 @@ go_test(
     embed = [":go_default_library"],
     importpath = "github.com/docker/docker/pkg/term",
     deps = [
-        "@com_github_stretchr_testify//assert:go_default_library",
-        "@com_github_stretchr_testify//require:go_default_library",
+        "//vendor/github.com/stretchr/testify/assert:go_default_library",
+        "//vendor/github.com/stretchr/testify/require:go_default_library",
     ],
 )

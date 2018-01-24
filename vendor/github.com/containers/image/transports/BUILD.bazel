@@ -8,7 +8,7 @@ go_library(
     ],
     importpath = "github.com/containers/image/transports",
     visibility = ["//visibility:public"],
-    deps = ["@com_github_containers_image//types:go_default_library"],
+    deps = ["//vendor/github.com/containers/image/types:go_default_library"],
 )
 
 go_test(
@@ -16,5 +16,5 @@ go_test(
     srcs = ["stub_test.go"],
     embed = [":go_default_library"],
     importpath = "github.com/containers/image/transports",
-    deps = ["@com_github_stretchr_testify//assert:go_default_library"],
+    deps = ["//vendor/github.com/stretchr/testify/assert:go_default_library"],
 )

@@ -26,5 +26,5 @@ go_test(
     name = "go_default_xtest",
     srcs = ["example_test.go"],
     importpath = "github.com/pkg/errors_test",
-    deps = ["@com_github_pkg_errors//:go_default_library"],
+    deps = [":go_default_library"],
 )

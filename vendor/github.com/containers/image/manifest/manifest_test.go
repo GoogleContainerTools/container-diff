@@ -123,3 +123,18 @@ func TestAddDummyV2S1Signature(t *testing.T) {
 	_, err = AddDummyV2S1Signature([]byte("}this is invalid JSON"))
 	assert.Error(t, err)
 }
+
+func TestMIMETypeIsMultiImage(t *testing.T) {
+	for _, c := range []struct {
+		mt       string
+		expected bool
+	}{
+		{DockerV2ListMediaType, true},
+		{DockerV2Schema1MediaType, false},
+		{DockerV2Schema1SignedMediaType, false},
+		{DockerV2Schema2MediaType, false},
+	} {
+		res := MIMETypeIsMultiImage(c.mt)
+		assert.Equal(t, c.expected, res, c.mt)
+	}
+}

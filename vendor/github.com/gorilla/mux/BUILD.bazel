@@ -12,7 +12,7 @@ go_library(
     ],
     importpath = "github.com/gorilla/mux",
     visibility = ["//visibility:public"],
-    deps = ["@com_github_gorilla_context//:go_default_library"],
+    deps = ["//vendor/github.com/gorilla/context:go_default_library"],
 )
 
 go_test(
@@ -26,5 +26,5 @@ go_test(
     ],
     embed = [":go_default_library"],
     importpath = "github.com/gorilla/mux",
-    deps = ["@com_github_gorilla_context//:go_default_library"],
+    deps = ["//vendor/github.com/gorilla/context:go_default_library"],
 )

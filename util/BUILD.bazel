@@ -16,9 +16,9 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/util:go_default_library",
-        "@com_github_pmezard_go_difflib//difflib:go_default_library",
-        "@com_github_sirupsen_logrus//:go_default_library",
-        "@org_cloudfoundry_code_bytefmt//:go_default_library",
+        "//vendor/code.cloudfoundry.org/bytefmt:go_default_library",
+        "//vendor/github.com/pmezard/go-difflib/difflib:go_default_library",
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
     ],
 )
 
@@ -36,7 +36,7 @@ go_test(
     deps = [
         "//pkg/cache:go_default_library",
         "//pkg/util:go_default_library",
-        "@com_github_containers_image//types:go_default_library",
-        "@com_github_opencontainers_go_digest//:go_default_library",
+        "//vendor/github.com/containers/image/types:go_default_library",
+        "//vendor/github.com/opencontainers/go-digest:go_default_library",
     ],
 )

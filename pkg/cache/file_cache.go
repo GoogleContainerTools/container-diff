@@ -85,8 +85,8 @@ func (c *FileCache) Close() error {
 	return nil
 }
 
-func (c *FileCache) GetManifest() ([]byte, string, error) {
-	return c.src.GetManifest()
+func (c *FileCache) GetManifest(d *digest.Digest) ([]byte, string, error) {
+	return c.src.GetManifest(d)
 }
 
 func (c *FileCache) GetTargetManifest(digest digest.Digest) ([]byte, string, error) {
@@ -113,6 +113,10 @@ func (c *FileCache) GetBlob(bi types.BlobInfo) (io.ReadCloser, int64, error) {
 }
 
 // GetSignatures returns the image's signatures.  It may use a remote (= slow) service.
-func (c *FileCache) GetSignatures(ctx context.Context) ([][]byte, error) {
-	return c.src.GetSignatures(ctx)
+func (c *FileCache) GetSignatures(ctx context.Context, d *digest.Digest) ([][]byte, error) {
+	return c.src.GetSignatures(ctx, d)
+}
+
+func (c *FileCache) LayerInfosForCopy() []types.BlobInfo {
+	return nil
 }

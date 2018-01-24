@@ -18,8 +18,8 @@ go_test(
     ],
     importpath = "code.cloudfoundry.org/bytefmt_test",
     deps = [
-        "@com_github_onsi_ginkgo//:go_default_library",
-        "@com_github_onsi_gomega//:go_default_library",
-        "@org_cloudfoundry_code_bytefmt//:go_default_library",
+        ":go_default_library",
+        "//vendor/github.com/onsi/ginkgo:go_default_library",
+        "//vendor/github.com/onsi/gomega:go_default_library",
     ],
 )
