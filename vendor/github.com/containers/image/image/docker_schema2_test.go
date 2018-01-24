@@ -29,16 +29,16 @@ func (f unusedImageSource) Reference() types.ImageReference {
 func (f unusedImageSource) Close() error {
 	panic("Unexpected call to a mock function")
 }
-func (f unusedImageSource) GetManifest() ([]byte, string, error) {
-	panic("Unexpected call to a mock function")
-}
-func (f unusedImageSource) GetTargetManifest(digest digest.Digest) ([]byte, string, error) {
+func (f unusedImageSource) GetManifest(*digest.Digest) ([]byte, string, error) {
 	panic("Unexpected call to a mock function")
 }
 func (f unusedImageSource) GetBlob(info types.BlobInfo) (io.ReadCloser, int64, error) {
 	panic("Unexpected call to a mock function")
 }
-func (f unusedImageSource) GetSignatures(context.Context) ([][]byte, error) {
+func (f unusedImageSource) GetSignatures(context.Context, *digest.Digest) ([][]byte, error) {
+	panic("Unexpected call to a mock function")
+}
+func (f unusedImageSource) LayerInfosForCopy() []types.BlobInfo {
 	panic("Unexpected call to a mock function")
 }
 
@@ -52,11 +52,11 @@ func manifestSchema2FromFixture(t *testing.T, src types.ImageSource, fixture str
 }
 
 func manifestSchema2FromComponentsLikeFixture(configBlob []byte) genericManifest {
-	return manifestSchema2FromComponents(descriptor{
+	return manifestSchema2FromComponents(manifest.Schema2Descriptor{
 		MediaType: "application/octet-stream",
 		Size:      5940,
 		Digest:    "sha256:9ca4bda0a6b3727a6ffcc43e981cad0f24e2ec79d338f6ba325b4dfd0756fb8f",
-	}, nil, configBlob, []descriptor{
+	}, nil, configBlob, []manifest.Schema2Descriptor{
 		{
 			MediaType: "application/vnd.docker.image.rootfs.diff.tar.gzip",
 			Digest:    "sha256:6a5a5368e0c2d3e5909184fa28ddfd56072e7ff3ee9a945876f7eee5896ef5bb",
@@ -271,7 +271,13 @@ func TestManifestSchema2ImageInspectInfo(t *testing.T) {
 		Labels:        map[string]string{},
 		Architecture:  "amd64",
 		Os:            "linux",
-		Layers:        nil,
+		Layers: []string{
+			"sha256:6a5a5368e0c2d3e5909184fa28ddfd56072e7ff3ee9a945876f7eee5896ef5bb",
+			"sha256:1bbf5d58d24c47512e234a5623474acf65ae00d4d1414272a893204f44cc680c",
+			"sha256:8f5dc8a4b12c307ac84de90cdd9a7f3915d1be04c9388868ca118831099c67a9",
+			"sha256:bbd6b22eb11afce63cc76f6bc41042d99f10d6024c96b655dafba930b8d25909",
+			"sha256:960e52ecf8200cbd84e70eb2ad8678f4367e50d14357021872c10fa3fc5935fa",
+		},
 	}, *ii)
 
 	// nil configBlob will trigger an error in m.ConfigBlob()
@@ -323,10 +329,10 @@ func (ref refImageReferenceMock) PolicyConfigurationIdentity() string {
 func (ref refImageReferenceMock) PolicyConfigurationNamespaces() []string {
 	panic("unexpected call to a mock function")
 }
-func (ref refImageReferenceMock) NewImage(ctx *types.SystemContext) (types.Image, error) {
+func (ref refImageReferenceMock) NewImage(ctx *types.SystemContext) (types.ImageCloser, error) {
 	panic("unexpected call to a mock function")
 }
-func (ref refImageReferenceMock) NewImageSource(ctx *types.SystemContext, requestedManifestMIMETypes []string) (types.ImageSource, error) {
+func (ref refImageReferenceMock) NewImageSource(ctx *types.SystemContext) (types.ImageSource, error) {
 	panic("unexpected call to a mock function")
 }
 func (ref refImageReferenceMock) NewImageDestination(ctx *types.SystemContext) (types.ImageDestination, error) {

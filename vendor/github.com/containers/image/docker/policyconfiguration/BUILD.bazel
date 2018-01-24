@@ -6,8 +6,8 @@ go_library(
     importpath = "github.com/containers/image/docker/policyconfiguration",
     visibility = ["//visibility:public"],
     deps = [
-        "@com_github_containers_image//docker/reference:go_default_library",
-        "@com_github_pkg_errors//:go_default_library",
+        "//vendor/github.com/containers/image/docker/reference:go_default_library",
+        "//vendor/github.com/pkg/errors:go_default_library",
     ],
 )
 
@@ -17,8 +17,8 @@ go_test(
     embed = [":go_default_library"],
     importpath = "github.com/containers/image/docker/policyconfiguration",
     deps = [
-        "@com_github_containers_image//docker/reference:go_default_library",
-        "@com_github_stretchr_testify//assert:go_default_library",
-        "@com_github_stretchr_testify//require:go_default_library",
+        "//vendor/github.com/containers/image/docker/reference:go_default_library",
+        "//vendor/github.com/stretchr/testify/assert:go_default_library",
+        "//vendor/github.com/stretchr/testify/require:go_default_library",
     ],
 )

@@ -29,46 +29,45 @@ func manifestOCI1FromFixture(t *testing.T, src types.ImageSource, fixture string
 }
 
 func manifestOCI1FromComponentsLikeFixture(configBlob []byte) genericManifest {
-	return manifestOCI1FromComponents(descriptorOCI1{
-		descriptor: descriptor{
-			MediaType: imgspecv1.MediaTypeImageConfig,
-			Size:      5940,
-			Digest:    "sha256:9ca4bda0a6b3727a6ffcc43e981cad0f24e2ec79d338f6ba325b4dfd0756fb8f",
-		},
+	return manifestOCI1FromComponents(imgspecv1.Descriptor{
+		MediaType: imgspecv1.MediaTypeImageConfig,
+		Size:      5940,
+		Digest:    "sha256:9ca4bda0a6b3727a6ffcc43e981cad0f24e2ec79d338f6ba325b4dfd0756fb8f",
 		Annotations: map[string]string{
 			"test-annotation-1": "one",
 		},
-	}, nil, configBlob, []descriptorOCI1{
-		{descriptor: descriptor{
+	}, nil, configBlob, []imgspecv1.Descriptor{
+		{
 			MediaType: imgspecv1.MediaTypeImageLayerGzip,
 			Digest:    "sha256:6a5a5368e0c2d3e5909184fa28ddfd56072e7ff3ee9a945876f7eee5896ef5bb",
 			Size:      51354364,
-		}},
-		{descriptor: descriptor{
+		},
+		{
 			MediaType: imgspecv1.MediaTypeImageLayerGzip,
 			Digest:    "sha256:1bbf5d58d24c47512e234a5623474acf65ae00d4d1414272a893204f44cc680c",
 			Size:      150,
-		}},
-		{descriptor: descriptor{
+		},
+		{
 			MediaType: imgspecv1.MediaTypeImageLayerGzip,
 			Digest:    "sha256:8f5dc8a4b12c307ac84de90cdd9a7f3915d1be04c9388868ca118831099c67a9",
 			Size:      11739507,
-		}},
-		{
-			descriptor: descriptor{
-				MediaType: imgspecv1.MediaTypeImageLayerGzip,
-				Digest:    "sha256:bbd6b22eb11afce63cc76f6bc41042d99f10d6024c96b655dafba930b8d25909",
-				Size:      8841833,
+			URLs: []string{
+				"https://layer.url",
 			},
+		},
+		{
+			MediaType: imgspecv1.MediaTypeImageLayerGzip,
+			Digest:    "sha256:bbd6b22eb11afce63cc76f6bc41042d99f10d6024c96b655dafba930b8d25909",
+			Size:      8841833,
 			Annotations: map[string]string{
 				"test-annotation-2": "two",
 			},
 		},
-		{descriptor: descriptor{
+		{
 			MediaType: imgspecv1.MediaTypeImageLayerGzip,
 			Digest:    "sha256:960e52ecf8200cbd84e70eb2ad8678f4367e50d14357021872c10fa3fc5935fa",
 			Size:      291,
-		}},
+		},
 	})
 }
 
@@ -197,16 +196,22 @@ func TestManifestOCI1LayerInfo(t *testing.T) {
 	} {
 		assert.Equal(t, []types.BlobInfo{
 			{
-				Digest: "sha256:6a5a5368e0c2d3e5909184fa28ddfd56072e7ff3ee9a945876f7eee5896ef5bb",
-				Size:   51354364,
+				Digest:    "sha256:6a5a5368e0c2d3e5909184fa28ddfd56072e7ff3ee9a945876f7eee5896ef5bb",
+				Size:      51354364,
+				MediaType: imgspecv1.MediaTypeImageLayerGzip,
 			},
 			{
-				Digest: "sha256:1bbf5d58d24c47512e234a5623474acf65ae00d4d1414272a893204f44cc680c",
-				Size:   150,
+				Digest:    "sha256:1bbf5d58d24c47512e234a5623474acf65ae00d4d1414272a893204f44cc680c",
+				Size:      150,
+				MediaType: imgspecv1.MediaTypeImageLayerGzip,
 			},
 			{
 				Digest: "sha256:8f5dc8a4b12c307ac84de90cdd9a7f3915d1be04c9388868ca118831099c67a9",
 				Size:   11739507,
+				URLs: []string{
+					"https://layer.url",
+				},
+				MediaType: imgspecv1.MediaTypeImageLayerGzip,
 			},
 			{
 				Digest: "sha256:bbd6b22eb11afce63cc76f6bc41042d99f10d6024c96b655dafba930b8d25909",
@@ -214,10 +219,12 @@ func TestManifestOCI1LayerInfo(t *testing.T) {
 				Annotations: map[string]string{
 					"test-annotation-2": "two",
 				},
+				MediaType: imgspecv1.MediaTypeImageLayerGzip,
 			},
 			{
-				Digest: "sha256:960e52ecf8200cbd84e70eb2ad8678f4367e50d14357021872c10fa3fc5935fa",
-				Size:   291,
+				Digest:    "sha256:960e52ecf8200cbd84e70eb2ad8678f4367e50d14357021872c10fa3fc5935fa",
+				Size:      291,
+				MediaType: imgspecv1.MediaTypeImageLayerGzip,
 			},
 		}, m.LayerInfos())
 	}
@@ -251,7 +258,13 @@ func TestManifestOCI1ImageInspectInfo(t *testing.T) {
 		Labels:        map[string]string{},
 		Architecture:  "amd64",
 		Os:            "linux",
-		Layers:        nil,
+		Layers: []string{
+			"sha256:6a5a5368e0c2d3e5909184fa28ddfd56072e7ff3ee9a945876f7eee5896ef5bb",
+			"sha256:1bbf5d58d24c47512e234a5623474acf65ae00d4d1414272a893204f44cc680c",
+			"sha256:8f5dc8a4b12c307ac84de90cdd9a7f3915d1be04c9388868ca118831099c67a9",
+			"sha256:bbd6b22eb11afce63cc76f6bc41042d99f10d6024c96b655dafba930b8d25909",
+			"sha256:960e52ecf8200cbd84e70eb2ad8678f4367e50d14357021872c10fa3fc5935fa",
+		},
 	}, *ii)
 
 	// nil configBlob will trigger an error in m.ConfigBlob()

@@ -2,13 +2,24 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
-    srcs = ["manifest.go"],
+    srcs = [
+        "docker_schema1.go",
+        "docker_schema2.go",
+        "manifest.go",
+        "oci.go",
+    ],
     importpath = "github.com/containers/image/manifest",
     visibility = ["//visibility:public"],
     deps = [
-        "@com_github_docker_libtrust//:go_default_library",
-        "@com_github_opencontainers_go_digest//:go_default_library",
-        "@com_github_opencontainers_image_spec//specs-go/v1:go_default_library",
+        "//vendor/github.com/containers/image/docker/reference:go_default_library",
+        "//vendor/github.com/containers/image/pkg/strslice:go_default_library",
+        "//vendor/github.com/containers/image/types:go_default_library",
+        "//vendor/github.com/docker/docker/api/types/versions:go_default_library",
+        "//vendor/github.com/docker/libtrust:go_default_library",
+        "//vendor/github.com/opencontainers/go-digest:go_default_library",
+        "//vendor/github.com/opencontainers/image-spec/specs-go:go_default_library",
+        "//vendor/github.com/opencontainers/image-spec/specs-go/v1:go_default_library",
+        "//vendor/github.com/pkg/errors:go_default_library",
     ],
 )
 
@@ -21,10 +32,10 @@ go_test(
     embed = [":go_default_library"],
     importpath = "github.com/containers/image/manifest",
     deps = [
-        "@com_github_docker_libtrust//:go_default_library",
-        "@com_github_opencontainers_go_digest//:go_default_library",
-        "@com_github_opencontainers_image_spec//specs-go/v1:go_default_library",
-        "@com_github_stretchr_testify//assert:go_default_library",
-        "@com_github_stretchr_testify//require:go_default_library",
+        "//vendor/github.com/docker/libtrust:go_default_library",
+        "//vendor/github.com/opencontainers/go-digest:go_default_library",
+        "//vendor/github.com/opencontainers/image-spec/specs-go/v1:go_default_library",
+        "//vendor/github.com/stretchr/testify/assert:go_default_library",
+        "//vendor/github.com/stretchr/testify/require:go_default_library",
     ],
 )

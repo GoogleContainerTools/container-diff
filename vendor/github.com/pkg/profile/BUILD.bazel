@@ -27,5 +27,5 @@ go_test(
         "trace_test.go",
     ],
     importpath = "github.com/pkg/profile_test",
-    deps = ["@com_github_pkg_profile//:go_default_library"],
+    deps = [":go_default_library"],
 )

@@ -43,25 +43,16 @@
     "docker/reference",
     "docker/tarfile",
     "image",
+    "internal/tmpdir",
     "manifest",
     "pkg/compression",
+    "pkg/docker/config",
     "pkg/strslice",
+    "pkg/tlsclientconfig",
     "transports",
     "types"
   ]
-  revision = "abb4cd79e3427bb2b02a5930814ef2ad19983c24"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/containers/storage"
-  packages = [
-    "pkg/fileutils",
-    "pkg/homedir",
-    "pkg/idtools",
-    "pkg/mount",
-    "pkg/system"
-  ]
-  revision = "0d32dfce498e06c132c60dac945081bf44c22464"
+  revision = "495da41bd26c50be62fa07ae903ea2ee54c00283"
 
 [[projects]]
   branch = "master"
@@ -291,6 +282,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "010acc1c678071756b27da87a74845e248817c9fbacc6c349f0da7fb05add2bb"
+  inputs-digest = "6e818cd6f09d26d5ae0fe9f66a9dd88de47a87a1b4a5048422947f43e7838f9b"
   solver-name = "gps-cdcl"
   solver-version = 1

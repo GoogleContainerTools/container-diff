@@ -5,7 +5,7 @@ go_library(
     srcs = ["set.go"],
     importpath = "github.com/docker/distribution/digestset",
     visibility = ["//visibility:public"],
-    deps = ["@com_github_opencontainers_go_digest//:go_default_library"],
+    deps = ["//vendor/github.com/opencontainers/go-digest:go_default_library"],
 )
 
 go_test(
@@ -13,5 +13,5 @@ go_test(
     srcs = ["set_test.go"],
     embed = [":go_default_library"],
     importpath = "github.com/docker/distribution/digestset",
-    deps = ["@com_github_opencontainers_go_digest//:go_default_library"],
+    deps = ["//vendor/github.com/opencontainers/go-digest:go_default_library"],
 )

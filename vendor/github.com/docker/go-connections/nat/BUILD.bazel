@@ -20,5 +20,5 @@ go_test(
     ],
     embed = [":go_default_library"],
     importpath = "github.com/docker/go-connections/nat",
-    deps = ["@com_github_stretchr_testify//assert:go_default_library"],
+    deps = ["//vendor/github.com/stretchr/testify/assert:go_default_library"],
 )
