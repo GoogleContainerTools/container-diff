@@ -20,13 +20,11 @@ import (
 	"archive/tar"
 	"encoding/json"
 	"errors"
-	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/cmd/util/output"
-	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
 	"github.com/containers/image/docker"
 	"github.com/containers/image/manifest"
 	"github.com/containers/image/pkg/compression"
@@ -128,78 +126,35 @@ func getImageFromTar(tarPath string) (string, error) {
 	return tempPath, unpackDockerSave(tarPath, tempPath)
 }
 
-func getFileSystemFromReference(ref types.ImageReference, imageName string, cache cache.Cache) (string, error) {
-	sanitizedName := strings.Replace(imageName, ":", "", -1)
-	sanitizedName = strings.Replace(sanitizedName, "/", "", -1)
-
-	path, err := ioutil.TempDir("", sanitizedName)
-	if err != nil {
-		return "", err
-	}
-
+func getFileSystemFromReference(ref types.ImageReference, imgSrc types.ImageSource, path string) error {
 	img, err := ref.NewImage(nil)
 	if err != nil {
-		logrus.Error(err)
-		return "", err
+		return err
 	}
 	defer img.Close()
-
-	imgSrc, err := ref.NewImageSource(nil, nil)
-	if err != nil {
-		logrus.Error(err)
-		return "", err
-	}
-
-	var bi io.ReadCloser
 	for _, b := range img.LayerInfos() {
-		layerId := b.Digest.String()
-		if cache == nil {
-			bi, _, err = imgSrc.GetBlob(b)
-			if err != nil {
-				logrus.Errorf("Failed to pull image layer: %s", err)
-				return "", err
-			}
-		} else if cache.HasLayer(layerId) {
-			logrus.Infof("cache hit for layer %s", layerId)
-			bi, err = cache.GetLayer(layerId)
-		} else {
-			logrus.Infof("cache miss for layer %s", layerId)
-			bi, _, err = imgSrc.GetBlob(b)
-			if err != nil {
-				logrus.Errorf("Failed to pull image layer: %s", err)
-				return "", err
-			}
-			bi, err = cache.SetLayer(layerId, bi)
-			if err != nil {
-				logrus.Errorf("error when caching layer %s: %s", layerId, err)
-				cache.Invalidate(layerId)
-			}
-		}
+		bi, _, err := imgSrc.GetBlob(b)
 		if err != nil {
-			logrus.Errorf("Failed to retrieve image layer: %s", err)
-			return "", err
+			return err
 		}
-		// try and detect layer compression
+		defer bi.Close()
 		f, reader, err := compression.DetectCompression(bi)
 		if err != nil {
-			logrus.Errorf("Failed to detect image compression: %s", err)
-			return "", err
+			return err
 		}
+		// Decompress if necessary.
 		if f != nil {
-			// decompress if necessary
 			reader, err = f(reader)
 			if err != nil {
-				logrus.Errorf("Failed to decompress image: %s", err)
-				return "", err
+				return err
 			}
 		}
 		tr := tar.NewReader(reader)
-		err = unpackTar(tr, path)
-		if err != nil {
-			logrus.Errorf("Failed to untar layer with error: %s", err)
+		if err := unpackTar(tr, path); err != nil {
+			return err
 		}
 	}
-	return path, nil
+	return nil
 }
 
 func getDigestFromReference(ref types.ImageReference, source string) (string, error) {

@@ -22,22 +22,28 @@ import (
 	"os"
 	"testing"
 
+	"github.com/opencontainers/go-digest"
+
 	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
+	"github.com/containers/image/types"
 )
 
 func cacheAndTest(c *cache.FileCache, t *testing.T, testStr string, layerId string) {
 	byteArr := []byte(testStr)
 	r := bytes.NewReader(byteArr)
 
-	if c.HasLayer(layerId) {
+	bi := types.BlobInfo{
+		Digest: digest.Digest(layerId),
+	}
+	if c.HasLayer(bi) {
 		t.Errorf("cache already has test layer %s", layerId)
 	}
-	c.SetLayer(layerId, r)
+	c.SetLayer(bi, r)
 
-	if !c.HasLayer(layerId) {
+	if !c.HasLayer(bi) {
 		t.Errorf("layer %s not successfully cached", layerId)
 	}
-	cachedLayer, err := c.GetLayer(layerId)
+	cachedLayer, err := c.GetLayer(bi)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -54,10 +60,7 @@ func TestCache(t *testing.T) {
 		t.Fatalf("error when creating cache directory: %s", err.Error())
 	}
 	defer os.RemoveAll(cacheDir)
-	c, err := cache.NewFileCache(cacheDir)
-	if err != nil {
-		t.Fatalf("error when creating cache: %s", err.Error())
-	}
+	c := &cache.FileCache{RootDir: cacheDir}
 	testRuns := []struct {
 		Name    string
 		Data    string

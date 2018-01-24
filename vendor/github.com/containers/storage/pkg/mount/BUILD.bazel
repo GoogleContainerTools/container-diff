@@ -75,16 +75,16 @@ go_library(
     importpath = "github.com/containers/storage/pkg/mount",
     visibility = ["//visibility:public"],
     deps = [
-        "//vendor/github.com/containers/storage/pkg/fileutils:go_default_library",
+        "@com_github_containers_storage//pkg/fileutils:go_default_library",
     ] + select({
         "@io_bazel_rules_go//go/platform:freebsd": [
-            "//vendor/golang.org/x/sys/unix:go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:linux": [
-            "//vendor/golang.org/x/sys/unix:go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:solaris": [
-            "//vendor/golang.org/x/sys/unix:go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "//conditions:default": [],
     }),
@@ -129,7 +129,7 @@ go_test(
     importpath = "github.com/containers/storage/pkg/mount",
     deps = select({
         "@io_bazel_rules_go//go/platform:linux": [
-            "//vendor/golang.org/x/sys/unix:go_default_library",
+            "@org_golang_x_sys//unix:go_default_library",
         ],
         "//conditions:default": [],
     }),

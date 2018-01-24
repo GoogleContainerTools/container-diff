@@ -8,7 +8,7 @@ go_library(
     ],
     importpath = "github.com/docker/docker-credential-helpers/client",
     visibility = ["//visibility:public"],
-    deps = ["//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library"],
+    deps = ["@com_github_docker_docker_credential_helpers//credentials:go_default_library"],
 )
 
 go_test(
@@ -16,5 +16,5 @@ go_test(
     srcs = ["client_test.go"],
     embed = [":go_default_library"],
     importpath = "github.com/docker/docker-credential-helpers/client",
-    deps = ["//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library"],
+    deps = ["@com_github_docker_docker_credential_helpers//credentials:go_default_library"],
 )

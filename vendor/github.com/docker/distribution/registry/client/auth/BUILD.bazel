@@ -9,9 +9,9 @@ go_library(
     importpath = "github.com/docker/distribution/registry/client/auth",
     visibility = ["//visibility:public"],
     deps = [
-        "//vendor/github.com/docker/distribution/registry/client:go_default_library",
-        "//vendor/github.com/docker/distribution/registry/client/auth/challenge:go_default_library",
-        "//vendor/github.com/docker/distribution/registry/client/transport:go_default_library",
+        "@com_github_docker_distribution//registry/client:go_default_library",
+        "@com_github_docker_distribution//registry/client/auth/challenge:go_default_library",
+        "@com_github_docker_distribution//registry/client/transport:go_default_library",
     ],
 )
 
@@ -21,8 +21,8 @@ go_test(
     embed = [":go_default_library"],
     importpath = "github.com/docker/distribution/registry/client/auth",
     deps = [
-        "//vendor/github.com/docker/distribution/registry/client/auth/challenge:go_default_library",
-        "//vendor/github.com/docker/distribution/registry/client/transport:go_default_library",
-        "//vendor/github.com/docker/distribution/testutil:go_default_library",
+        "@com_github_docker_distribution//registry/client/auth/challenge:go_default_library",
+        "@com_github_docker_distribution//registry/client/transport:go_default_library",
+        "@com_github_docker_distribution//testutil:go_default_library",
     ],
 )

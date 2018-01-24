@@ -49,7 +49,7 @@ go_test(
     importpath = "golang.org/x/sys/windows_test",
     deps = select({
         "@io_bazel_rules_go//go/platform:windows": [
-            ":go_default_library",
+            "@org_golang_x_sys//windows:go_default_library",
         ],
         "//conditions:default": [],
     }),

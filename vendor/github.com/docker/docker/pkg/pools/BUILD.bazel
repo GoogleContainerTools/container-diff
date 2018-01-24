@@ -5,7 +5,7 @@ go_library(
     srcs = ["pools.go"],
     importpath = "github.com/docker/docker/pkg/pools",
     visibility = ["//visibility:public"],
-    deps = ["//vendor/github.com/docker/docker/pkg/ioutils:go_default_library"],
+    deps = ["@com_github_docker_docker//pkg/ioutils:go_default_library"],
 )
 
 go_test(
@@ -14,7 +14,7 @@ go_test(
     embed = [":go_default_library"],
     importpath = "github.com/docker/docker/pkg/pools",
     deps = [
-        "//vendor/github.com/stretchr/testify/assert:go_default_library",
-        "//vendor/github.com/stretchr/testify/require:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@com_github_stretchr_testify//require:go_default_library",
     ],
 )

@@ -6,8 +6,8 @@ go_library(
     importpath = "github.com/containers/image/types",
     visibility = ["//visibility:public"],
     deps = [
-        "//vendor/github.com/containers/image/docker/reference:go_default_library",
-        "//vendor/github.com/opencontainers/go-digest:go_default_library",
-        "//vendor/github.com/opencontainers/image-spec/specs-go/v1:go_default_library",
+        "@com_github_containers_image//docker/reference:go_default_library",
+        "@com_github_opencontainers_go_digest//:go_default_library",
+        "@com_github_opencontainers_image_spec//specs-go/v1:go_default_library",
     ],
 )
