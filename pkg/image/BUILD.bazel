@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "mutable_source.go",
+        "proxy_types.go",
+    ],
+    importpath = "github.com/GoogleCloudPlatform/container-diff/pkg/image",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/containers/image/manifest:go_default_library",
+        "//vendor/github.com/containers/image/types:go_default_library",
+        "//vendor/github.com/opencontainers/go-digest:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["mutable_source_test.go"],
+    embed = [":go_default_library"],
+    importpath = "github.com/GoogleCloudPlatform/container-diff/pkg/image",
+    deps = [
+        "//vendor/github.com/containers/image/manifest:go_default_library",
+        "//vendor/github.com/containers/image/types:go_default_library",
+        "//vendor/github.com/opencontainers/go-digest:go_default_library",
+    ],
+)

@@ -172,7 +172,7 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 			return nil, err
 		}
 
-		src, err = cache.NewFileCache(cacheDir, ref, src)
+		src, err = cache.NewFileCache(cacheDir, ref)
 		if err != nil {
 			return nil, err
 		}
