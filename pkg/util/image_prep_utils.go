@@ -90,6 +90,7 @@ type ConfigObject struct {
 	Cmd          []string            `json:"Cmd"`
 	Volumes      map[string]struct{} `json:"Volumes"`
 	Workdir      string              `json:"WorkingDir"`
+	Labels       map[string]string   `json:"Labels"`
 }
 
 type ConfigSchema struct {
