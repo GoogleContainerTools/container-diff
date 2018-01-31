@@ -133,18 +133,7 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 			Client: cli,
 		}, nil
 
-	}
-
-	ref, err := docker.ParseReference("//" + image)
-	if err != nil {
-		return nil, err
-	}
-	src, err := ref.NewImageSource(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if strings.HasPrefix(image, DaemonPrefix) {
+	} else if strings.HasPrefix(image, DaemonPrefix) {
 
 		// remove the DaemonPrefix
 		image := strings.Replace(image, DaemonPrefix, "", -1)
@@ -154,12 +143,20 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 		}
 
 		return pkgutil.DaemonPrepper{
-			Source:      image,
-			Client:      cli,
-			ImageSource: src,
+			Source: image,
+			Client: cli,
 		}, nil
 	}
 	// either has remote prefix or has no prefix, in which case we force remote
+
+	ref, err := docker.ParseReference("//" + image)
+	if err != nil {
+		return nil, err
+	}
+	src, err := ref.NewImageSource(nil)
+	if err != nil {
+		return nil, err
+	}
 
 	if !noCache {
 		cacheDir, err := cacheDir()
