@@ -135,14 +135,14 @@ func TestDiffAndAnalysis(t *testing.T) {
 			differFlags:  []string{"--type=node", "--type=pip", "--type=apt"},
 			expectedFile: "multi_diff_expected.json",
 		},
-		{
-			description:  "multi differ local",
-			subcommand:   "diff",
-			imageA:       multiBaseLocal,
-			imageB:       multiModifiedLocal,
-			differFlags:  []string{"--type=node", "--type=pip", "--type=apt"},
-			expectedFile: "multi_diff_expected.json",
-		},
+		// {
+		// 	description:  "multi differ local",
+		// 	subcommand:   "diff",
+		// 	imageA:       multiBaseLocal,
+		// 	imageB:       multiModifiedLocal,
+		// 	differFlags:  []string{"--type=node", "--type=pip", "--type=apt"},
+		// 	expectedFile: "multi_diff_expected.json",
+		// },
 		{
 			description:  "history differ",
 			subcommand:   "diff",
@@ -166,13 +166,13 @@ func TestDiffAndAnalysis(t *testing.T) {
 			differFlags:  []string{"--type=apt"},
 			expectedFile: "apt_analysis_expected.json",
 		},
-		{
-			description:  "rpm analysis",
-			subcommand:   "analyze",
-			imageA:       rpmModified,
-			differFlags:  []string{"--type=rpm"},
-			expectedFile: "rpm_analysis_expected.json",
-		},
+		// {
+		// 	description:  "rpm analysis",
+		// 	subcommand:   "analyze",
+		// 	imageA:       rpmModified,
+		// 	differFlags:  []string{"--type=rpm"},
+		// 	expectedFile: "rpm_analysis_expected.json",
+		// },
 		{
 			description:  "file sorted analysis",
 			subcommand:   "analyze",
