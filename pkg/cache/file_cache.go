@@ -19,6 +19,7 @@ package cache
 import (
 	"context"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -54,11 +55,15 @@ func (c *FileCache) HasLayer(layer types.BlobInfo) bool {
 func (c *FileCache) SetLayer(layer types.BlobInfo, r io.Reader) (io.ReadCloser, error) {
 	layerId := layer.Digest.String()
 	fullpath := filepath.Join(c.RootDir, layerId)
-	entry, err := os.Create(fullpath)
+	// Write the entry atomically. First write it to a .tmp name, then rename to the correct one.
+	f, err := ioutil.TempFile("", "")
 	if err != nil {
 		return nil, err
 	}
-	if _, err := io.Copy(entry, r); err != nil {
+	if _, err := io.Copy(f, r); err != nil {
+		return nil, err
+	}
+	if err := os.Rename(f.Name(), fullpath); err != nil {
 		return nil, err
 	}
 	return c.GetLayer(layer)

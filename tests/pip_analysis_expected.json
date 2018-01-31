@@ -4,6 +4,18 @@
     "AnalyzeType": "Pip",
     "Analysis": [
       {
+        "Name": "configobj",
+        "Path": "/usr/lib/python2.7/dist-packages",
+        "Version": "5.0.6",
+        "Size": 89613
+      },
+      {
+        "Name": "mercurial",
+        "Path": "/usr/lib/python2.7/dist-packages",
+        "Version": "3.1.2",
+        "Size": 4073713
+      },
+      {
         "Name": "mock",
         "Path": "/usr/local/lib/python3.6/site-packages",
         "Version": "2.0.0",
@@ -32,6 +44,12 @@
         "Path": "/usr/local/lib/python3.6/site-packages",
         "Version": "1.10.0",
         "Size": 30098
+      },
+      {
+        "Name": "six",
+        "Path": "/usr/lib/python2.7/dist-packages",
+        "Version": "1.8.0",
+        "Size": 27344
       },
       {
         "Name": "wheel",
