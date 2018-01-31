@@ -62,7 +62,7 @@ type ContainerDiffRunner struct {
 	binaryPath string
 }
 
-func (c *ContainerDiffRunner) Run(command ...string) (string, error) {
+func (c *ContainerDiffRunner) Run(command ...string) (string, string, error) {
 	path, err := filepath.Abs(c.binaryPath)
 	if err != nil {
 		c.t.Fatalf("Error finding container-diff binary: %s", err)
@@ -74,9 +74,9 @@ func (c *ContainerDiffRunner) Run(command ...string) (string, error) {
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("Error running command %s: %s Stderr: %s", command, err, stderr.String())
+		return "", "", fmt.Errorf("Error running command %s: %s Stderr: %s", command, err, stderr.String())
 	}
-	return stdout.String(), nil
+	return stdout.String(), stderr.String(), nil
 }
 
 func TestDiffAndAnalysis(t *testing.T) {
@@ -196,6 +196,8 @@ func TestDiffAndAnalysis(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		// Capture the range variable for parallel testing.
+		test := test
 		t.Run(test.description, func(t *testing.T) {
 			t.Parallel()
 			args := []string{test.subcommand, test.imageA}
@@ -204,9 +206,9 @@ func TestDiffAndAnalysis(t *testing.T) {
 			}
 			args = append(args, test.differFlags...)
 			args = append(args, "-j")
-			actual, err := runner.Run(args...)
+			actual, stderr, err := runner.Run(args...)
 			if err != nil {
-				t.Fatalf("Error running command: %s", err)
+				t.Fatalf("Error running command: %s. Stderr: ", err, stderr)
 			}
 			e, err := ioutil.ReadFile(test.expectedFile)
 			if err != nil {
@@ -215,7 +217,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			actual = strings.TrimSpace(actual)
 			expected := strings.TrimSpace(string(e))
 			if actual != expected {
-				t.Errorf("Error actual output does not match expected.  \n\nExpected: %s\n\n Actual: %s", expected, actual)
+				t.Errorf("Error actual output does not match expected.  \n\nExpected: %s\n\n Actual: %s\n\n, Stderr: %s", expected, actual, stderr)
 			}
 		})
 	}
