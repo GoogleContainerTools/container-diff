@@ -1,6 +1,6 @@
 [
   {
-    "Image": "gcr.io/gcp-runtimes/pip-modified",
+    "Image": "gcr.io/gcp-runtimes/pip-modified:latest",
     "AnalyzeType": "Pip",
     "Analysis": [
       {

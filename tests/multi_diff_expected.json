@@ -1,7 +1,7 @@
 [
   {
-    "Image1": "gcr.io/gcp-runtimes/multi-base",
-    "Image2": "gcr.io/gcp-runtimes/multi-modified",
+    "Image1": "gcr.io/gcp-runtimes/multi-base:latest",
+    "Image2": "gcr.io/gcp-runtimes/multi-modified:latest",
     "DiffType": "Apt",
     "Diff": {
       "Packages1": [],
@@ -56,8 +56,8 @@
     }
   },
   {
-    "Image1": "gcr.io/gcp-runtimes/multi-base",
-    "Image2": "gcr.io/gcp-runtimes/multi-modified",
+    "Image1": "gcr.io/gcp-runtimes/multi-base:latest",
+    "Image2": "gcr.io/gcp-runtimes/multi-modified:latest",
     "DiffType": "Node",
     "Diff": {
       "Packages1": [],
@@ -89,8 +89,8 @@
     }
   },
   {
-    "Image1": "gcr.io/gcp-runtimes/multi-base",
-    "Image2": "gcr.io/gcp-runtimes/multi-modified",
+    "Image1": "gcr.io/gcp-runtimes/multi-base:latest",
+    "Image2": "gcr.io/gcp-runtimes/multi-modified:latest",
     "DiffType": "Pip",
     "Diff": {
       "Packages1": [

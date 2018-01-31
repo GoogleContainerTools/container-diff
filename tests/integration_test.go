@@ -135,14 +135,14 @@ func TestDiffAndAnalysis(t *testing.T) {
 			differFlags:  []string{"--type=node", "--type=pip", "--type=apt"},
 			expectedFile: "multi_diff_expected.json",
 		},
-		// {
-		// 	description:  "multi differ local",
-		// 	subcommand:   "diff",
-		// 	imageA:       multiBaseLocal,
-		// 	imageB:       multiModifiedLocal,
-		// 	differFlags:  []string{"--type=node", "--type=pip", "--type=apt"},
-		// 	expectedFile: "multi_diff_expected.json",
-		// },
+		{
+			description:  "multi differ local",
+			subcommand:   "diff",
+			imageA:       multiBaseLocal,
+			imageB:       multiModifiedLocal,
+			differFlags:  []string{"--type=node", "--type=pip", "--type=apt"},
+			expectedFile: "multi_diff_expected.json",
+		},
 		{
 			description:  "history differ",
 			subcommand:   "diff",
