@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -232,12 +233,15 @@ func TestMain(m *testing.M) {
 		fmt.Printf("Error retrieving docker client: %s", err)
 		os.Exit(1)
 	}
-	closer.Close()
+	io.Copy(os.Stdout, closer)
+
 	closer, err = cli.ImagePull(ctx, multiModified, types.ImagePullOptions{})
 	if err != nil {
 		fmt.Printf("Error retrieving docker client: %s", err)
 		os.Exit(1)
 	}
+	io.Copy(os.Stdout, closer)
+
 	closer.Close()
 	os.Exit(m.Run())
 }
