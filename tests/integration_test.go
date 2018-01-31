@@ -116,7 +116,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       rpmBase,
 			imageB:       rpmModified,
-			differFlags:  []string{"--type=apt"},
+			differFlags:  []string{"--type=rpm"},
 			expectedFile: "rpm_diff_expected.json",
 		},
 		{
@@ -169,7 +169,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 		{
 			description:  "rpm analysis",
 			subcommand:   "analyze",
-			imageA:       aptModified,
+			imageA:       rpmModified,
 			differFlags:  []string{"--type=rpm"},
 			expectedFile: "rpm_analysis_expected.json",
 		},
