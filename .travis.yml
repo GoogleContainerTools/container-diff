@@ -19,4 +19,4 @@ addons:
 
 
 script:
- - make test integration
+ - travis_wait make test integration
