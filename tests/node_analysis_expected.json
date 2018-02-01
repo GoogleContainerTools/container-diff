@@ -1,6 +1,6 @@
 [
   {
-    "Image": "gcr.io/gcp-runtimes/node-modified",
+    "Image": "gcr.io/gcp-runtimes/node-modified:latest",
     "AnalyzeType": "Node",
     "Analysis": [
       {

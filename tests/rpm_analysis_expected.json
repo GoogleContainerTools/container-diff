@@ -1,6 +1,6 @@
 [
   {
-    "Image": "valentinrothberg/containerdiff:diff-modified",
+    "Image": "valentinrothberg/containerdiff:diff-modified:latest",
     "AnalyzeType": "RPM",
     "Analysis": [
       {

@@ -22,16 +22,14 @@ import (
 	"strings"
 
 	"github.com/containers/image/docker/daemon"
-	"github.com/containers/image/types"
 
 	"github.com/docker/docker/client"
 	"github.com/sirupsen/logrus"
 )
 
 type DaemonPrepper struct {
-	Source      string
-	Client      *client.Client
-	ImageSource types.ImageSource
+	Source string
+	Client *client.Client
 }
 
 func (p DaemonPrepper) Name() string {
@@ -54,6 +52,11 @@ func (p DaemonPrepper) GetFileSystem() (string, error) {
 		return "", err
 	}
 
+	src, err := ref.NewImageSource(nil)
+	if err != nil {
+		return "", err
+	}
+
 	sanitizedName := strings.Replace(p.Source, ":", "", -1)
 	sanitizedName = strings.Replace(sanitizedName, "/", "", -1)
 
@@ -61,7 +64,7 @@ func (p DaemonPrepper) GetFileSystem() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return path, getFileSystemFromReference(ref, p.ImageSource, path)
+	return path, getFileSystemFromReference(ref, src, path)
 }
 
 func (p DaemonPrepper) GetConfig() (ConfigSchema, error) {

@@ -132,9 +132,31 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 			Source: image,
 			Client: cli,
 		}, nil
-
 	}
 
+	// see if the image name has tag provided, if not add latest as tag
+	if !strings.Contains(image, ":") {
+		image = image + ":latest"
+	}
+
+	if strings.HasPrefix(image, DaemonPrefix) {
+		// remove the DaemonPrefix
+		image := strings.Replace(image, DaemonPrefix, "", -1)
+		if !strings.Contains(image, ":") {
+			image = image + ":latest"
+		}
+
+		return pkgutil.DaemonPrepper{
+			Source: image,
+			Client: cli,
+		}, nil
+	}
+	// either has remote prefix or has no prefix, in which case we force remote
+
+	// see if the image name has tag provided, if not add latest as tag
+	if !strings.Contains(image, ":") {
+		image = image + ":latest"
+	}
 	ref, err := docker.ParseReference("//" + image)
 	if err != nil {
 		return nil, err
@@ -143,23 +165,6 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	if strings.HasPrefix(image, DaemonPrefix) {
-
-		// remove the DaemonPrefix
-		image := strings.Replace(image, DaemonPrefix, "", -1)
-		// see if the image name has tag provided, if not add latest as tag
-		if !strings.Contains(image, ":") {
-			image = image + ":latest"
-		}
-
-		return pkgutil.DaemonPrepper{
-			Source:      image,
-			Client:      cli,
-			ImageSource: src,
-		}, nil
-	}
-	// either has remote prefix or has no prefix, in which case we force remote
 
 	if !noCache {
 		cacheDir, err := cacheDir()

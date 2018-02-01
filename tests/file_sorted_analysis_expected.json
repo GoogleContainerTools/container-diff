@@ -1,6 +1,6 @@
 [
   {
-    "Image": "gcr.io/gcp-runtimes/diff-modified",
+    "Image": "gcr.io/gcp-runtimes/diff-modified:latest",
     "AnalyzeType": "File",
     "Analysis": [
       {
