@@ -209,7 +209,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			args = append(args, "-j")
 			actual, stderr, err := runner.Run(args...)
 			if err != nil {
-				t.Fatalf("Error running command: %s. Stderr: ", err, stderr)
+				t.Fatalf("Error running command: %s. Stderr: %s", err, stderr)
 			}
 			e, err := ioutil.ReadFile(test.expectedFile)
 			if err != nil {

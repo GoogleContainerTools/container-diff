@@ -66,7 +66,7 @@ func (req DiffRequest) GetDiff() (map[string]util.Result, error) {
 
 	var err error
 	if len(results) == 0 {
-		err = fmt.Errorf("Could not perform diff on %s and %s", img1, img2)
+		err = fmt.Errorf("Could not perform diff on %v and %v", img1, img2)
 	} else {
 		err = nil
 	}
@@ -90,7 +90,7 @@ func (req SingleRequest) GetAnalysis() (map[string]util.Result, error) {
 
 	var err error
 	if len(results) == 0 {
-		err = fmt.Errorf("Could not perform analysis on %s", img)
+		err = fmt.Errorf("Could not perform analysis on %v", img)
 	} else {
 		err = nil
 	}
