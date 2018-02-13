@@ -6,8 +6,8 @@ go_library(
     importpath = "github.com/GoogleCloudPlatform/container-diff/pkg/cache",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/image:go_default_library",
         "//vendor/github.com/containers/image/types:go_default_library",
-        "//vendor/github.com/opencontainers/go-digest:go_default_library",
         "//vendor/github.com/sirupsen/logrus:go_default_library",
     ],
 )

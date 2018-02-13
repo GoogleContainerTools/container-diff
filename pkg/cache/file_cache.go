@@ -17,32 +17,34 @@ limitations under the License.
 package cache
 
 import (
-	"context"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	"github.com/GoogleCloudPlatform/container-diff/pkg/image"
 	"github.com/containers/image/types"
-	digest "github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
 )
 
 type FileCache struct {
 	RootDir string
-	Ref     types.ImageReference
-	src     types.ImageSource
+	*image.ProxySource
 }
 
-func NewFileCache(dir string, ref types.ImageReference, src types.ImageSource) (*FileCache, error) {
+func NewFileCache(dir string, ref types.ImageReference) (*FileCache, error) {
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return nil, err
 	}
 
+	ps, err := image.NewProxySource(ref)
+	if err != nil {
+		return nil, err
+	}
+
 	return &FileCache{
-		RootDir: dir,
-		Ref:     ref,
-		src:     src,
+		RootDir:     dir,
+		ProxySource: ps,
 	}, nil
 }
 
@@ -80,24 +82,6 @@ func (c *FileCache) Invalidate(layer types.BlobInfo) error {
 	return os.RemoveAll(filepath.Join(c.RootDir, layerId))
 }
 
-// Implement types.ImageSource
-
-func (c *FileCache) Reference() types.ImageReference {
-	return c.Ref
-}
-
-func (c *FileCache) Close() error {
-	return nil
-}
-
-func (c *FileCache) GetManifest(d *digest.Digest) ([]byte, string, error) {
-	return c.src.GetManifest(d)
-}
-
-func (c *FileCache) GetTargetManifest(digest digest.Digest) ([]byte, string, error) {
-	return c.GetTargetManifest(digest)
-}
-
 // GetBlob returns a stream for the specified blob, and the blob’s size (or -1 if unknown).
 // The Digest field in BlobInfo is guaranteed to be provided; Size may be -1.
 func (c *FileCache) GetBlob(bi types.BlobInfo) (io.ReadCloser, int64, error) {
@@ -106,7 +90,7 @@ func (c *FileCache) GetBlob(bi types.BlobInfo) (io.ReadCloser, int64, error) {
 		return r, bi.Size, err
 	}
 	// Add to the cache then return
-	r, size, err := c.src.GetBlob(bi)
+	r, size, err := c.ProxySource.GetBlob(bi)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -115,13 +99,4 @@ func (c *FileCache) GetBlob(bi types.BlobInfo) (io.ReadCloser, int64, error) {
 		return nil, 0, c.Invalidate(bi)
 	}
 	return r, size, err
-}
-
-// GetSignatures returns the image's signatures.  It may use a remote (= slow) service.
-func (c *FileCache) GetSignatures(ctx context.Context, d *digest.Digest) ([][]byte, error) {
-	return c.src.GetSignatures(ctx, d)
-}
-
-func (c *FileCache) LayerInfosForCopy() []types.BlobInfo {
-	return nil
 }
