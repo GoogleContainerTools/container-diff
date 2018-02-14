@@ -61,10 +61,13 @@ func NewMutableSource(r types.ImageReference) (*MutableSource, error) {
 	return ms, nil
 }
 
-// GetManifest marshals the stored manifest to the byte format.
+// Manifest marshals the stored manifest to the byte format.
 func (m *MutableSource) GetManifest(_ *digest.Digest) ([]byte, string, error) {
-	s, err := json.Marshal(m.mfst)
 	if err := m.saveConfig(); err != nil {
+		return nil, "", err
+	}
+	s, err := json.Marshal(m.mfst)
+	if err != nil {
 		return nil, "", err
 	}
 	return s, manifest.DockerV2Schema2MediaType, err
@@ -72,7 +75,7 @@ func (m *MutableSource) GetManifest(_ *digest.Digest) ([]byte, string, error) {
 
 // populateManifestAndConfig parses the raw manifest and configs, storing them on the struct.
 func (m *MutableSource) populateManifestAndConfig() error {
-	mfstBytes, _, err := m.GetManifest(nil)
+	mfstBytes, _, err := m.ProxySource.GetManifest(nil)
 	if err != nil {
 		return err
 	}
@@ -116,7 +119,7 @@ func gzipBytes(b []byte) ([]byte, error) {
 }
 
 // appendLayer appends an uncompressed blob to the image, preserving the invariants required across the config and manifest.
-func (m *MutableSource) appendLayer(content []byte) error {
+func (m *MutableSource) AppendLayer(content []byte) error {
 	compressedBlob, err := gzipBytes(content)
 	if err != nil {
 		return err
