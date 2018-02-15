@@ -47,7 +47,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 
 			// Remove the whited-out path.
 			newName := strings.Replace(rmPath, ".wh.", "", 1)
-			if err = walkAndRemove(newName); err != nil {
+			if err = os.RemoveAll(newName); err != nil {
 				logrus.Error(err)
 			}
 			continue
@@ -111,7 +111,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			// Explicitly delete an existing file before continuing.
 			if _, err := os.Stat(target); !os.IsNotExist(err) {
 				logrus.Debugf("Removing %s to create symlink.", target)
-				if err := walkAndRemove(target); err != nil {
+				if err := os.RemoveAll(target); err != nil {
 					logrus.Debugf("Unable to remove %s: %s", target, err)
 				}
 			}
@@ -124,19 +124,10 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 	return nil
 }
 
-func walkAndRemove(p string) error {
-	return filepath.Walk(p, func(path string, info os.FileInfo, err error) error {
-		if e := os.Chmod(path, 0777); e != nil {
-			logrus.Errorf("Error updating file permissions on %s before removing for symlink creation", path)
-			return e
-		}
-		return os.RemoveAll(path)
-	})
-}
-
 func checkWhitelist(target string, whitelist []string) bool {
 	for _, w := range whitelist {
 		if HasFilepathPrefix(target, w) {
+			logrus.Debugf("Not extracting %s, as it has prefix %s which is whitelisted", target, w)
 			return true
 		}
 	}
