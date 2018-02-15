@@ -26,7 +26,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func unpackTar(tr *tar.Reader, path string) error {
+func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 	for {
 		header, err := tr.Next()
 		if err == io.EOF {
@@ -37,7 +37,6 @@ func unpackTar(tr *tar.Reader, path string) error {
 			logrus.Error("Error getting next tar header")
 			return err
 		}
-
 		if strings.Contains(header.Name, ".wh.") {
 			rmPath := filepath.Join(path, header.Name)
 			// Remove the .wh file if it was extracted.
@@ -49,13 +48,16 @@ func unpackTar(tr *tar.Reader, path string) error {
 
 			// Remove the whited-out path.
 			newName := strings.Replace(rmPath, ".wh.", "", 1)
-			if err = os.RemoveAll(newName); err != nil {
+			if err = walkAndRemove(newName); err != nil {
 				logrus.Error(err)
 			}
 			continue
 		}
-
 		target := filepath.Join(path, header.Name)
+		// Make sure the target isn't part of the whitelist
+		if checkWhitelist(target, whitelist) {
+			continue
+		}
 		mode := header.FileInfo().Mode()
 		switch header.Typeflag {
 
@@ -65,7 +67,7 @@ func unpackTar(tr *tar.Reader, path string) error {
 				if err := os.MkdirAll(target, mode); err != nil {
 					return err
 				}
-			} else {
+				// In some cases, MkdirAll doesn't change the permissions, so run Chmod
 				if err := os.Chmod(target, mode); err != nil {
 					return err
 				}
@@ -81,7 +83,6 @@ func unpackTar(tr *tar.Reader, path string) error {
 					return err
 				}
 			}
-
 			// It's possible we end up creating files that can't be overwritten based on their permissions.
 			// Explicitly delete an existing file before continuing.
 			if _, err := os.Stat(target); !os.IsNotExist(err) {
@@ -106,21 +107,52 @@ func unpackTar(tr *tar.Reader, path string) error {
 				return err
 			}
 			currFile.Close()
-		}
+		case tar.TypeSymlink:
+			// It's possible we end up creating files that can't be overwritten based on their permissions.
+			// Explicitly delete an existing file before continuing.
+			if _, err := os.Stat(target); !os.IsNotExist(err) {
+				logrus.Debugf("Removing %s to create symlink.", target)
+				if err := walkAndRemove(target); err != nil {
+					logrus.Debugf("Unable to remove %s: %s", target, err)
+				}
+			}
 
+			if err = os.Symlink(header.Linkname, target); err != nil {
+				logrus.Errorf("Failed to create symlink between %s and %s: %s", header.Linkname, target, err)
+			}
+		}
 	}
 	return nil
 }
 
+func walkAndRemove(p string) error {
+	return filepath.Walk(p, func(path string, info os.FileInfo, err error) error {
+		if e := os.Chmod(path, 0777); e != nil {
+			logrus.Errorf("Error updating file permissions on %s before removing for symlink creation", path)
+			return e
+		}
+		return os.RemoveAll(path)
+	})
+}
+
+func checkWhitelist(target string, whitelist []string) bool {
+	for _, w := range whitelist {
+		if strings.HasPrefix(target, w) {
+			return true
+		}
+	}
+	return false
+}
+
 // UnTar takes in a path to a tar file and writes the untarred version to the provided target.
 // Only untars one level, does not untar nested tars.
-func UnTar(r io.Reader, target string) error {
+func UnTar(r io.Reader, target string, whitelist []string) error {
 	if _, ok := os.Stat(target); ok != nil {
 		os.MkdirAll(target, 0775)
 	}
 
 	tr := tar.NewReader(r)
-	if err := unpackTar(tr, target); err != nil {
+	if err := unpackTar(tr, target, whitelist); err != nil {
 		return err
 	}
 	return nil

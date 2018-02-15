@@ -59,7 +59,7 @@ func (p CloudPrepper) GetFileSystem() (string, error) {
 		return "", err
 	}
 
-	return path, getFileSystemFromReference(ref, p.ImageSource, path)
+	return path, GetFileSystemFromReference(ref, p.ImageSource, path, []string{})
 }
 
 func (p CloudPrepper) GetConfig() (ConfigSchema, error) {

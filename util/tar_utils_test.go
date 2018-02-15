@@ -30,12 +30,13 @@ import (
 
 func TestUnTar(t *testing.T) {
 	testCases := []struct {
-		descrip  string
-		tarPath  string
-		target   string
-		expected string
-		starter  string
-		err      bool
+		descrip   string
+		tarPath   string
+		target    string
+		expected  string
+		starter   string
+		whitelist []string
+		err       bool
 	}{
 		{
 			descrip:  "Tar with files",
@@ -76,6 +77,13 @@ func TestUnTar(t *testing.T) {
 			expected: "testTars/la-croix-dir-update-actual",
 			starter:  "testTars/la-croix-starter",
 		},
+		{
+			descrip:   "Tar with whitelist",
+			tarPath:   "testTars/la-croix2.tar",
+			target:    "testTars/la-croix-whitelist",
+			expected:  "testTars/la-croix1-actual",
+			whitelist: []string{"testTars/la-croix-whitelist/nest"},
+		},
 	}
 	for _, test := range testCases {
 		remove := true
@@ -86,7 +94,7 @@ func TestUnTar(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error opening tar: %s", err)
 		}
-		if err := pkgutil.UnTar(r, test.target); err != nil && !test.err {
+		if err := pkgutil.UnTar(r, test.target, test.whitelist); err != nil && !test.err {
 			t.Errorf(test.descrip, "Got unexpected error: %s", err)
 			remove = false
 		}
