@@ -18,12 +18,11 @@ package util
 
 import (
 	"archive/tar"
+	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/sirupsen/logrus"
 )
 
 func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
@@ -137,7 +136,7 @@ func walkAndRemove(p string) error {
 
 func checkWhitelist(target string, whitelist []string) bool {
 	for _, w := range whitelist {
-		if strings.HasPrefix(target, w) {
+		if HasFilepathPrefix(target, w) {
 			return true
 		}
 	}

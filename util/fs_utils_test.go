@@ -156,3 +156,26 @@ func TestCheckSameFile(t *testing.T) {
 		}
 	}
 }
+
+func TestHasFilepathPrefix(t *testing.T) {
+	type test struct {
+		prefix       string
+		path         string
+		expectedBool bool
+	}
+
+	var tests = []test{
+		{"/foo", "/foo/bar", true},
+		{"/foo/", "/foo/bar", true},
+		{"/foo/bar", "/foo", false},
+		{"/foo/bar", "/foo/", false},
+		{"/foo", "/foobar", false},
+	}
+
+	for _, test := range tests {
+		hasPrefix := pkgutil.HasFilepathPrefix(test.path, test.prefix)
+		if hasPrefix != test.expectedBool {
+			t.Errorf("Got unexpected response: %v for prefix: %s and path: %s", hasPrefix, test.prefix, test.path)
+		}
+	}
+}
