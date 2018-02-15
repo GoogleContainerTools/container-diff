@@ -55,13 +55,9 @@ func (p *ProxySource) LayerInfosForCopy() []types.BlobInfo {
 // ProxyReference implements types.Reference by proxying calls to an underlying implementation.
 type ProxyReference struct {
 	types.ImageReference
-	src types.ImageSource
+	Src types.ImageSource
 }
 
 func (p *ProxyReference) NewImageSource(ctx *types.SystemContext) (types.ImageSource, error) {
-	return p.src, nil
-}
-
-func (p *ProxyReference) NewImageDestination(ctx *types.SystemContext) (types.ImageDestination, error) {
-	return p.ImageReference.NewImageDestination(ctx)
+	return p.Src, nil
 }

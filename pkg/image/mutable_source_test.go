@@ -68,7 +68,7 @@ var testCases = []struct {
 	},
 }
 
-func TestMutableSource_appendLayer(t *testing.T) {
+func TestMutableSource_AppendLayer(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &MutableSource{
@@ -77,8 +77,8 @@ func TestMutableSource_appendLayer(t *testing.T) {
 				extraBlobs: make(map[string][]byte),
 			}
 
-			if err := m.appendLayer([]byte(tt.args.content)); (err != nil) != tt.wantErr {
-				t.Fatalf("MutableSource.appendLayer() error = %v, wantErr %v", err, tt.wantErr)
+			if err := m.AppendLayer([]byte(tt.args.content)); (err != nil) != tt.wantErr {
+				t.Fatalf("MutableSource.AppendLayer() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if err := m.saveConfig(); err != nil {
 				t.Fatalf("Error saving config: %v", err)
