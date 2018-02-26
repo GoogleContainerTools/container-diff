@@ -57,8 +57,8 @@ func (c *FileCache) HasLayer(layer types.BlobInfo) bool {
 func (c *FileCache) SetLayer(layer types.BlobInfo, r io.Reader) (io.ReadCloser, error) {
 	layerId := layer.Digest.String()
 	fullpath := filepath.Join(c.RootDir, layerId)
-	// Write the entry atomically. First write it to a .tmp name, then rename to the correct one.
-	f, err := ioutil.TempFile("", "")
+	// Write the entry atomically. First write it to a temporary name, then rename to the correct one.
+	f, err := ioutil.TempFile(c.RootDir, "")
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +96,7 @@ func (c *FileCache) GetBlob(bi types.BlobInfo) (io.ReadCloser, int64, error) {
 	}
 	r, err = c.SetLayer(bi, r)
 	if err != nil {
+		logrus.Errorf("Error setting layer %s in cache: %v", bi.Digest, err)
 		return nil, 0, c.Invalidate(bi)
 	}
 	return r, size, err
