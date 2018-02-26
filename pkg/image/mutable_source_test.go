@@ -19,6 +19,7 @@ package image
 import (
 	"encoding/json"
 	"io/ioutil"
+	"reflect"
 	"testing"
 
 	"github.com/containers/image/manifest"
@@ -113,5 +114,44 @@ func TestMutableSource_AppendLayer(t *testing.T) {
 				t.Fatalf("Incorrect diffid for content. Expected %s, got %s", digest.FromString(tt.args.content), cfg.RootFS.DiffIDs[1])
 			}
 		})
+	}
+}
+
+func TestMutableSource_Env(t *testing.T) {
+
+	cfg := &manifest.Schema2Image{
+		Schema2V1Image: manifest.Schema2V1Image{
+			Config: &manifest.Schema2Config{
+				Env: []string{
+					"PATH=/path/to/dir",
+				},
+			},
+		},
+	}
+
+	m := &MutableSource{
+		mfst:       &manifest.Schema2{},
+		cfg:        cfg,
+		extraBlobs: make(map[string][]byte),
+	}
+	initialEnvMap := m.Env()
+	expectedInitialEnvMap := map[string]string{
+		"PATH": "/path/to/dir",
+	}
+	if !reflect.DeepEqual(initialEnvMap, expectedInitialEnvMap) {
+		t.Fatalf("Got incorrect environment map, got: %s, expected: %s", initialEnvMap, expectedInitialEnvMap)
+	}
+
+	initialEnvMap["NEW"] = "new"
+
+	m.SetEnv(initialEnvMap)
+
+	newEnvMap := m.Env()
+	expectedNewEnvMap := map[string]string{
+		"PATH": "/path/to/dir",
+		"NEW":  "new",
+	}
+	if !reflect.DeepEqual(newEnvMap, expectedNewEnvMap) {
+		t.Fatalf("Got incorrect environment map, got: %s, expected: %s", newEnvMap, expectedNewEnvMap)
 	}
 }
