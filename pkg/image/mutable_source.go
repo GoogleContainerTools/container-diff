@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	"github.com/containers/image/manifest"
@@ -165,4 +166,27 @@ func (m *MutableSource) saveConfig() error {
 		Digest:    cfgDigest,
 	}
 	return nil
+}
+
+// Env returns a map of environment variables stored in the image config
+// Converts each variable from a string of the form KEY=VALUE to a map of KEY:VALUE
+func (m *MutableSource) Env() map[string]string {
+	envArray := m.cfg.Schema2V1Image.Config.Env
+	envMap := make(map[string]string)
+	for _, env := range envArray {
+		entry := strings.Split(env, "=")
+		envMap[entry[0]] = entry[1]
+	}
+	return envMap
+}
+
+// SetEnv takes a map of environment variables, and converts them to an array of strings
+// in the form KEY=VALUE, and then sets the image config
+func (m *MutableSource) SetEnv(envMap map[string]string) {
+	envArray := []string{}
+	for key, value := range envMap {
+		entry := key + "=" + value
+		envArray = append(envArray, entry)
+	}
+	m.cfg.Schema2V1Image.Config.Env = envArray
 }
