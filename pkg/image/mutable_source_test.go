@@ -78,7 +78,7 @@ func TestMutableSource_AppendLayer(t *testing.T) {
 				extraBlobs: make(map[string][]byte),
 			}
 
-			if err := m.AppendLayer([]byte(tt.args.content)); (err != nil) != tt.wantErr {
+			if err := m.AppendLayer([]byte(tt.args.content), "container-diff"); (err != nil) != tt.wantErr {
 				t.Fatalf("MutableSource.AppendLayer() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if err := m.saveConfig(); err != nil {
@@ -144,7 +144,7 @@ func TestMutableSource_Env(t *testing.T) {
 
 	initialEnvMap["NEW"] = "new"
 
-	m.SetEnv(initialEnvMap)
+	m.SetEnv(initialEnvMap, "container-diff")
 
 	newEnvMap := m.Env()
 	expectedNewEnvMap := map[string]string{
@@ -154,4 +154,36 @@ func TestMutableSource_Env(t *testing.T) {
 	if !reflect.DeepEqual(newEnvMap, expectedNewEnvMap) {
 		t.Fatalf("Got incorrect environment map, got: %s, expected: %s", newEnvMap, expectedNewEnvMap)
 	}
+
+	// Ensure length of history is 1
+	if len(cfg.History) != 1 {
+		t.Fatalf("No layer added to image history: %v", cfg.History)
+	}
+}
+
+func TestMutableSource_Config(t *testing.T) {
+	cfg := &manifest.Schema2Image{
+		Schema2V1Image: manifest.Schema2V1Image{
+			Config: &manifest.Schema2Config{},
+		},
+	}
+
+	m := &MutableSource{
+		mfst:       &manifest.Schema2{},
+		cfg:        cfg,
+		extraBlobs: make(map[string][]byte),
+	}
+	config := m.Config()
+	user := "new-user"
+	config.User = user
+	m.SetConfig(config, "container-diff", true)
+	// Ensure length of history is 1
+	if len(cfg.History) != 1 {
+		t.Fatalf("No layer added to image history: %v", cfg.History)
+	}
+	// Ensure command was set
+	if !reflect.DeepEqual(m.Config().User, user) {
+		t.Fatalf("Config command incorrectly set, was: %s, expected: %s", m.Config().User, user)
+	}
+
 }
