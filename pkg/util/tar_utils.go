@@ -25,6 +25,9 @@ import (
 	"strings"
 )
 
+// Map of target:linkname
+var hardlinks = make(map[string]string)
+
 func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 	for {
 		header, err := tr.Next()
@@ -119,6 +122,31 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			if err = os.Symlink(header.Linkname, target); err != nil {
 				logrus.Errorf("Failed to create symlink between %s and %s: %s", header.Linkname, target, err)
 			}
+		case tar.TypeLink:
+			linkname := filepath.Join(path, header.Linkname)
+			// Check if the linkname already exists
+			if _, err := os.Stat(linkname); !os.IsNotExist(err) {
+				// If it exists, create the hard link
+				if err := os.Link(linkname, target); err != nil {
+					logrus.Warnf("Failed to create hard link between %s and %s: %v", linkname, target, err)
+				}
+				logrus.Debugf("Created hard link from %s to %s", linkname, target)
+			} else {
+				hardlinks[target] = linkname
+			}
+		}
+	}
+
+	for target, linkname := range hardlinks {
+		logrus.Info("Resolving hard links.")
+		if _, err := os.Stat(linkname); !os.IsNotExist(err) {
+			// If it exists, create the hard link
+			if err := os.Link(linkname, target); err != nil {
+				logrus.Warnf("Unable to create hard link from %s to %s: %v", linkname, target, err)
+			}
+			logrus.Debugf("Created hard link from %s to %s", linkname, target)
+		} else {
+			logrus.Warnf("Unable to create hard link from %s to %s", linkname, target)
 		}
 	}
 	return nil
