@@ -127,10 +127,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			// Check if the linkname already exists
 			if _, err := os.Stat(linkname); !os.IsNotExist(err) {
 				// If it exists, create the hard link
-				if err := os.Link(linkname, target); err != nil {
-					logrus.Warnf("Failed to create hard link between %s and %s: %v", linkname, target, err)
-				}
-				logrus.Debugf("Created hard link from %s to %s", linkname, target)
+				resolveHardlink(linkname, target)
 			} else {
 				hardlinks[target] = linkname
 			}
@@ -141,15 +138,20 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 		logrus.Info("Resolving hard links.")
 		if _, err := os.Stat(linkname); !os.IsNotExist(err) {
 			// If it exists, create the hard link
-			if err := os.Link(linkname, target); err != nil {
-				logrus.Warnf("Unable to create hard link from %s to %s: %v", linkname, target, err)
-			}
-			logrus.Debugf("Created hard link from %s to %s", linkname, target)
+			resolveHardlink(linkname, target)
 		} else {
-			logrus.Warnf("Unable to create hard link from %s to %s", linkname, target)
+			logrus.Errorf("Unable to create hard link from %s to %s", linkname, target)
 		}
 	}
 	return nil
+}
+
+func resolveHardlink(linkname, target string) {
+	if err := os.Link(linkname, target); err != nil {
+		logrus.Warnf("Unable to create hard link from %s to %s: %v", linkname, target, err)
+	} else {
+		logrus.Debugf("Created hard link from %s to %s", linkname, target)
+	}
 }
 
 func checkWhitelist(target string, whitelist []string) bool {
