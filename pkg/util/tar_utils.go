@@ -18,6 +18,8 @@ package util
 
 import (
 	"archive/tar"
+	"fmt"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -138,20 +140,20 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 		logrus.Info("Resolving hard links.")
 		if _, err := os.Stat(linkname); !os.IsNotExist(err) {
 			// If it exists, create the hard link
-			resolveHardlink(linkname, target)
-		} else {
-			logrus.Errorf("Unable to create hard link from %s to %s", linkname, target)
+			if err := resolveHardlink(linkname, target); err != nil {
+				return errors.Wrap(err, fmt.Sprintf("Unable to create hard link from %s to %s", linkname, target))
+			}
 		}
 	}
 	return nil
 }
 
-func resolveHardlink(linkname, target string) {
+func resolveHardlink(linkname, target string) error {
 	if err := os.Link(linkname, target); err != nil {
-		logrus.Warnf("Unable to create hard link from %s to %s: %v", linkname, target, err)
-	} else {
-		logrus.Debugf("Created hard link from %s to %s", linkname, target)
+		return err
 	}
+	logrus.Debugf("Created hard link from %s to %s", linkname, target)
+	return nil
 }
 
 func checkWhitelist(target string, whitelist []string) bool {
