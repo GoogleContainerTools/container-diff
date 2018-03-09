@@ -78,7 +78,7 @@ func TestMutableSource_AppendLayer(t *testing.T) {
 				extraBlobs: make(map[string][]byte),
 			}
 
-			if err := m.AppendLayer([]byte(tt.args.content), "container-diff"); (err != nil) != tt.wantErr {
+			if err := m.AppendLayer([]byte(tt.args.content), "container-diff", "container-diff"); (err != nil) != tt.wantErr {
 				t.Fatalf("MutableSource.AppendLayer() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if err := m.saveConfig(); err != nil {
@@ -144,7 +144,7 @@ func TestMutableSource_Env(t *testing.T) {
 
 	initialEnvMap["NEW"] = "new"
 
-	m.SetEnv(initialEnvMap, "container-diff")
+	m.SetEnv(initialEnvMap, "container-diff", "container-diff")
 
 	newEnvMap := m.Env()
 	expectedNewEnvMap := map[string]string{
@@ -176,7 +176,7 @@ func TestMutableSource_Config(t *testing.T) {
 	config := m.Config()
 	user := "new-user"
 	config.User = user
-	m.SetConfig(config, "container-diff", true)
+	m.SetConfig(config, "container-diff", "container-diff", true)
 	// Ensure length of history is 1
 	if len(cfg.History) != 1 {
 		t.Fatalf("No layer added to image history: %v", cfg.History)
