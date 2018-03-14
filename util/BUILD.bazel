@@ -27,6 +27,7 @@ go_test(
     srcs = [
         "file_cache_test.go",
         "fs_utils_test.go",
+        "image_utils_test.go",
         "output_sort_utils_test.go",
         "package_diff_utils_test.go",
         "tar_utils_test.go",
