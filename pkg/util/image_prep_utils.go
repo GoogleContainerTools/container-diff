@@ -38,6 +38,7 @@ type Prepper interface {
 	GetFileSystem() (string, error)
 	GetImage() (Image, error)
 	GetSource() string
+	SetSource(string)
 }
 
 type ImageType int
@@ -99,14 +100,11 @@ type ConfigSchema struct {
 }
 
 func getImage(p Prepper) (Image, error) {
-	var source string
 	// see if the image name has tag provided, if not add latest as tag
 	if !HasTag(p.GetSource()) {
-		source = p.GetSource() + LatestTag
-	} else {
-		source = p.GetSource()
+		p.SetSource(p.GetSource() + LatestTag)
 	}
-	output.PrintToStdErr("Retrieving image %s from source %s\n", source, p.Name())
+	output.PrintToStdErr("Retrieving image %s from source %s\n", p.GetSource(), p.Name())
 	imgPath, err := p.GetFileSystem()
 	if err != nil {
 		return Image{}, err
@@ -117,9 +115,9 @@ func getImage(p Prepper) (Image, error) {
 		logrus.Error("Error retrieving History: ", err)
 	}
 
-	logrus.Infof("Finished prepping image %s", source)
+	logrus.Infof("Finished prepping image %s", p.GetSource())
 	return Image{
-		Source: source,
+		Source: p.GetSource(),
 		FSPath: imgPath,
 		Config: config,
 	}, nil
