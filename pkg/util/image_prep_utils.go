@@ -99,7 +99,14 @@ type ConfigSchema struct {
 }
 
 func getImage(p Prepper) (Image, error) {
-	output.PrintToStdErr("Retrieving image %s from source %s\n", p.GetSource(), p.Name())
+	var source string
+	// see if the image name has tag provided, if not add latest as tag
+	if !HasTag(p.GetSource()) {
+		source = p.GetSource() + ":latest"
+	} else {
+		source = p.GetSource()
+	}
+	output.PrintToStdErr("Retrieving image %s from source %s\n", source, p.Name())
 	imgPath, err := p.GetFileSystem()
 	if err != nil {
 		return Image{}, err
@@ -110,9 +117,9 @@ func getImage(p Prepper) (Image, error) {
 		logrus.Error("Error retrieving History: ", err)
 	}
 
-	logrus.Infof("Finished prepping image %s", p.GetSource())
+	logrus.Infof("Finished prepping image %s", source)
 	return Image{
-		Source: p.GetSource(),
+		Source: source,
 		FSPath: imgPath,
 		Config: config,
 	}, nil

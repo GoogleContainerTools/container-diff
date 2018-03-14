@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/docker/docker/pkg/system"
 	"github.com/sirupsen/logrus"
@@ -66,4 +67,10 @@ func copyToFile(outfile string, r io.Reader) error {
 	}
 
 	return nil
+}
+
+// checks to see if an image string contains a tag.
+func HasTag(image string) bool {
+	tagRegex := regexp.MustCompile(".*:[^/]*$")
+	return tagRegex.MatchString(image)
 }
