@@ -27,6 +27,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const LatestTag string = ":latest"
+
 func GetImageLayers(pathToImage string) []string {
 	layers := []string{}
 	contents, err := ioutil.ReadDir(pathToImage)
@@ -71,6 +73,6 @@ func copyToFile(outfile string, r io.Reader) error {
 
 // checks to see if an image string contains a tag.
 func HasTag(image string) bool {
-	tagRegex := regexp.MustCompile(".*:[^/]*$")
+	tagRegex := regexp.MustCompile(".*:[^/]+$")
 	return tagRegex.MatchString(image)
 }

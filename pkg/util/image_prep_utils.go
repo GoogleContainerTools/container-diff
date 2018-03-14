@@ -102,7 +102,7 @@ func getImage(p Prepper) (Image, error) {
 	var source string
 	// see if the image name has tag provided, if not add latest as tag
 	if !HasTag(p.GetSource()) {
-		source = p.GetSource() + ":latest"
+		source = p.GetSource() + LatestTag
 	} else {
 		source = p.GetSource()
 	}

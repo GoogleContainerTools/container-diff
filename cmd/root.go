@@ -136,7 +136,7 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 
 	// see if the image name has tag provided, if not add latest as tag
 	if !pkgutil.HasTag(image) {
-		image = image + ":latest"
+		image = image + pkgutil.LatestTag
 	}
 
 	if strings.HasPrefix(image, DaemonPrefix) {
