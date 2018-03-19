@@ -133,6 +133,13 @@ func getImageFromTar(tarPath string) (string, error) {
 }
 
 func GetFileSystemFromReference(ref types.ImageReference, imgSrc types.ImageSource, path string, whitelist []string) error {
+	var err error
+	if imgSrc == nil {
+		imgSrc, err = ref.NewImageSource(nil)
+	}
+	if err != nil {
+		return err
+	}
 	img, err := ref.NewImage(nil)
 	if err != nil {
 		return err
