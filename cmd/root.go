@@ -145,6 +145,7 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 	}
 
 	// either has remote prefix or has no prefix, in which case we force remote
+	image = strings.Replace(image, RemotePrefix, "", -1)
 	ref, err := docker.ParseReference("//" + image)
 	if err != nil {
 		return nil, err
@@ -167,7 +168,7 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 	}
 
 	return &pkgutil.CloudPrepper{
-		Source:      strings.Replace(image, RemotePrefix, "", -1),
+		Source:      image,
 		Client:      cli,
 		ImageSource: src,
 	}, nil
