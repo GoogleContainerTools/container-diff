@@ -57,6 +57,7 @@ func (p *DaemonPrepper) GetFileSystem() (string, error) {
 	}
 
 	src, err := ref.NewImageSource(nil)
+	defer src.Close()
 	if err != nil {
 		return "", err
 	}
