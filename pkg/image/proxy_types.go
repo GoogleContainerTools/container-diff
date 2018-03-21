@@ -29,6 +29,7 @@ type ProxySource struct {
 
 func NewProxySource(ref types.ImageReference) (*ProxySource, error) {
 	src, err := ref.NewImageSource(nil)
+	defer src.Close()
 	if err != nil {
 		return nil, err
 	}

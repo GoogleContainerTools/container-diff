@@ -107,7 +107,10 @@ func getImage(p Prepper) (Image, error) {
 	output.PrintToStdErr("Retrieving image %s from source %s\n", p.GetSource(), p.Name())
 	imgPath, err := p.GetFileSystem()
 	if err != nil {
-		return Image{}, err
+		// return image with FSPath so it can be cleaned up
+		return Image{
+			FSPath: imgPath,
+		}, err
 	}
 
 	config, err := p.GetConfig()
@@ -136,6 +139,7 @@ func GetFileSystemFromReference(ref types.ImageReference, imgSrc types.ImageSour
 	var err error
 	if imgSrc == nil {
 		imgSrc, err = ref.NewImageSource(nil)
+		defer imgSrc.Close()
 	}
 	if err != nil {
 		return err

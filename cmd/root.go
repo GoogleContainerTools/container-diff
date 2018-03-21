@@ -151,6 +151,7 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 		return nil, err
 	}
 	src, err := ref.NewImageSource(nil)
+	defer src.Close()
 	if err != nil {
 		return nil, err
 	}
