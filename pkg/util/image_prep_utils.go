@@ -20,6 +20,7 @@ import (
 	"archive/tar"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -92,6 +93,18 @@ type ConfigObject struct {
 	Volumes      map[string]struct{} `json:"Volumes"`
 	Workdir      string              `json:"WorkingDir"`
 	Labels       map[string]string   `json:"Labels"`
+}
+
+func (c ConfigObject) AsList() []string {
+	return []string{
+		fmt.Sprintf("Env: %s", strings.Join(c.Env, ",")),
+		fmt.Sprintf("Entrypoint: %s", strings.Join(c.Entrypoint, ",")),
+		fmt.Sprintf("ExposedPorts: %v", c.ExposedPorts),
+		fmt.Sprintf("Cmd: %s", strings.Join(c.Cmd, ",")),
+		fmt.Sprintf("Volumes: %v", c.Volumes),
+		fmt.Sprintf("Workdir: %s", c.Workdir),
+		fmt.Sprintf("Labels: %v", c.Labels),
+	}
 }
 
 type ConfigSchema struct {

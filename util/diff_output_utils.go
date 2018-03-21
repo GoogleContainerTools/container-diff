@@ -172,6 +172,16 @@ func (r HistDiffResult) OutputText(diffType string, format string) error {
 	return TemplateOutputFromFormat(r, "HistDiff", format)
 }
 
+type MetadataDiffResult DiffResult
+
+func (r MetadataDiffResult) OutputStruct() interface{} {
+	return r
+}
+
+func (r MetadataDiffResult) OutputText(diffType string, format string) error {
+	return TemplateOutputFromFormat(r, "MetadataDiff", format)
+}
+
 type DirDiffResult DiffResult
 
 func (r DirDiffResult) OutputStruct() interface{} {
