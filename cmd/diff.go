@@ -113,7 +113,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
 	}
 
-	output.PrintToStdErr("Computing diffs")
+	output.PrintToStdErr("Computing diffs\n")
 	req := differs.DiffRequest{
 		Image1:    *imageMap[image1Arg],
 		Image2:    *imageMap[image2Arg],
@@ -125,7 +125,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	outputResults(diffs)
 
 	if filename != "" {
-		output.PrintToStdErr("Computing filename diffs")
+		output.PrintToStdErr("Computing filename diffs\n")
 		err := diffFile(imageMap[image1Arg], imageMap[image2Arg])
 		if err != nil {
 			return err
