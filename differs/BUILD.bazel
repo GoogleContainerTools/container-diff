@@ -7,6 +7,7 @@ go_library(
         "differs.go",
         "file_diff.go",
         "history_diff.go",
+        "metadata_diff.go",
         "node_diff.go",
         "package_differs.go",
         "pip_diff.go",

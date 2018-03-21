@@ -237,7 +237,7 @@ func CleanupImage(image Image) {
 	if image.FSPath != "" {
 		logrus.Infof("Removing image filesystem directory %s from system", image.FSPath)
 		if err := os.RemoveAll(image.FSPath); err != nil {
-			logrus.Error(err.Error())
+			logrus.Warn(err.Error())
 		}
 	}
 }

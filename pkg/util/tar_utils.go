@@ -30,7 +30,13 @@ import (
 // Map of target:linkname
 var hardlinks = make(map[string]string)
 
+type OriginalPerm struct {
+	path string
+	perm os.FileMode
+}
+
 func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
+	originalPerms := make([]OriginalPerm, 0)
 	for {
 		header, err := tr.Next()
 		if err == io.EOF {
@@ -68,6 +74,17 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 		// if its a dir and it doesn't exist create it
 		case tar.TypeDir:
 			if _, err := os.Stat(target); os.IsNotExist(err) {
+				if mode.Perm()&(1<<(uint(7))) == 0 {
+					logrus.Debugf("Write permission bit not set on %s by default; setting manually", target)
+					originalMode := mode
+					mode = mode | (1 << uint(7))
+					// keep track of original file permission to reset later
+					originalPerms = append(originalPerms, OriginalPerm{
+						path: target,
+						perm: originalMode,
+					})
+				}
+				logrus.Debugf("Creating directory %s with permissions %v", target, mode)
 				if err := os.MkdirAll(target, mode); err != nil {
 					return err
 				}
@@ -96,6 +113,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 				}
 			}
 
+			logrus.Debugf("Creating file %s with permissions %v", target, mode)
 			currFile, err := os.Create(target)
 			if err != nil {
 				logrus.Errorf("Error creating file %s %s", target, err)
@@ -143,6 +161,13 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			if err := resolveHardlink(linkname, target); err != nil {
 				return errors.Wrap(err, fmt.Sprintf("Unable to create hard link from %s to %s", linkname, target))
 			}
+		}
+	}
+
+	// reset all original file
+	for _, perm := range originalPerms {
+		if err := os.Chmod(perm.path, perm.perm); err != nil {
+			return err
 		}
 	}
 	return nil
