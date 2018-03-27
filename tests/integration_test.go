@@ -39,6 +39,9 @@ const (
 	diffBase     = "gcr.io/gcp-runtimes/diff-base"
 	diffModified = "gcr.io/gcp-runtimes/diff-modified"
 
+	metadataBase     = "gcr.io/gcp-runtimes/metadata-base"
+	metadataModified = "gcr.io/gcp-runtimes/metadata-modified"
+
 	aptBase     = "gcr.io/gcp-runtimes/apt-base"
 	aptModified = "gcr.io/gcp-runtimes/apt-modified"
 
@@ -151,6 +154,14 @@ func TestDiffAndAnalysis(t *testing.T) {
 			imageB:       diffModified,
 			differFlags:  []string{"--type=history"},
 			expectedFile: "hist_diff_expected.json",
+		},
+		{
+			description:  "metadata differ",
+			subcommand:   "diff",
+			imageA:       metadataBase,
+			imageB:       metadataModified,
+			differFlags:  []string{"--type=metadata"},
+			expectedFile: "metadata_diff_expected.json",
 		},
 		{
 			description:  "apt sorted differ",

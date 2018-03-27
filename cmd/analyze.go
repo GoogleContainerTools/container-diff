@@ -87,7 +87,7 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		return fmt.Errorf("Error performing image analysis: %s", err)
 	}
 
-	output.PrintToStdErr("Retrieving analyses")
+	output.PrintToStdErr("Retrieving analyses\n")
 	outputResults(analyses)
 
 	if save {

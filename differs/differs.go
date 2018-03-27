@@ -42,12 +42,13 @@ type Analyzer interface {
 }
 
 var Analyzers = map[string]Analyzer{
-	"history": HistoryAnalyzer{},
-	"file":    FileAnalyzer{},
-	"apt":     AptAnalyzer{},
-	"rpm":     RPMAnalyzer{},
-	"pip":     PipAnalyzer{},
-	"node":    NodeAnalyzer{},
+	"history":  HistoryAnalyzer{},
+	"metadata": MetadataAnalyzer{},
+	"file":     FileAnalyzer{},
+	"apt":      AptAnalyzer{},
+	"rpm":      RPMAnalyzer{},
+	"pip":      PipAnalyzer{},
+	"node":     NodeAnalyzer{},
 }
 
 func (req DiffRequest) GetDiff() (map[string]util.Result, error) {
