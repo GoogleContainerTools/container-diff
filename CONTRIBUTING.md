@@ -27,8 +27,7 @@ your fork, so you can keep your fork in sync with `MASTER`:
 
 ## Building
 
-From the project root, run `make clean && make`. Under the hood, this essentially
-just runs a `go build` on the project root to create an executable in `/out`.
+From the project root, run `make clean && make`.
 
 ## Code reviews
 
