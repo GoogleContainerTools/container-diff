@@ -152,11 +152,11 @@ func GetFileSystemFromReference(ref types.ImageReference, imgSrc types.ImageSour
 	var err error
 	if imgSrc == nil {
 		imgSrc, err = ref.NewImageSource(nil)
-		defer imgSrc.Close()
 	}
 	if err != nil {
 		return err
 	}
+	defer imgSrc.Close()
 	img, err := ref.NewImage(nil)
 	if err != nil {
 		return err

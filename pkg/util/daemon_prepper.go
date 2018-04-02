@@ -57,10 +57,10 @@ func (p *DaemonPrepper) GetFileSystem() (string, error) {
 	}
 
 	src, err := ref.NewImageSource(nil)
-	defer src.Close()
 	if err != nil {
 		return "", err
 	}
+	defer src.Close()
 
 	sanitizedName := strings.Replace(p.Source, ":", "", -1)
 	sanitizedName = strings.Replace(sanitizedName, "/", "", -1)
