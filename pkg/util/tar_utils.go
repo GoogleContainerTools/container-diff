@@ -19,12 +19,13 @@ package util
 import (
 	"archive/tar"
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // Map of target:linkname
@@ -48,7 +49,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			return err
 		}
 		if strings.Contains(header.Name, ".wh.") {
-			rmPath := filepath.Join(path, header.Name)
+			rmPath := filepath.Clean(filepath.Join(path, header.Name))
 			// Remove the .wh file if it was extracted.
 			if _, err := os.Stat(rmPath); !os.IsNotExist(err) {
 				if err := os.Remove(rmPath); err != nil {
@@ -63,7 +64,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			}
 			continue
 		}
-		target := filepath.Join(path, header.Name)
+		target := filepath.Clean(filepath.Join(path, header.Name))
 		// Make sure the target isn't part of the whitelist
 		if checkWhitelist(target, whitelist) {
 			continue
@@ -143,7 +144,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 				logrus.Errorf("Failed to create symlink between %s and %s: %s", header.Linkname, target, err)
 			}
 		case tar.TypeLink:
-			linkname := filepath.Join(path, header.Linkname)
+			linkname := filepath.Clean(filepath.Join(path, header.Linkname))
 			// Check if the linkname already exists
 			if _, err := os.Stat(linkname); !os.IsNotExist(err) {
 				// If it exists, create the hard link
