@@ -6,11 +6,11 @@
     "Diff": {
       "Adds": [
         "Entrypoint: /entrypoint",
-        "ExposedPorts: map[1234/tcp:{}]"
+        "ExposedPorts: 1234/tcp:{}"
       ],
       "Dels": [
         "Entrypoint: ",
-        "ExposedPorts: map[1234/tcp:{} 4321/tcp:{}]"
+        "ExposedPorts: 1234/tcp:{} 4321/tcp:{}"
       ]
     }
   }
