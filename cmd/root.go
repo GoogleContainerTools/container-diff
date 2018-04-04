@@ -129,7 +129,7 @@ func getPrepperForImage(image string) (pkgutil.Prepper, error) {
 
 	if pkgutil.IsTar(image) {
 		return &pkgutil.TarPrepper{
-			Source: image,
+			Source: filepath.Clean(image),
 			Client: cli,
 		}, nil
 	}
