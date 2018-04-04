@@ -87,24 +87,59 @@ type ImageHistoryItem struct {
 }
 
 type ConfigObject struct {
-	Env          []string            `json:"Env"`
-	Entrypoint   []string            `json:"Entrypoint"`
+	Hostname     string
+	Domainname   string
+	User         string
+	AttachStdin  bool
+	AttachStdout bool
+	AttachStderr bool
 	ExposedPorts map[string]struct{} `json:"ExposedPorts"`
-	Cmd          []string            `json:"Cmd"`
-	Volumes      map[string]struct{} `json:"Volumes"`
-	Workdir      string              `json:"WorkingDir"`
-	Labels       map[string]string   `json:"Labels"`
+	Tty          bool
+	OpenStdin    bool
+	StdinOnce    bool
+	Env          []string `json:"Env"`
+	Cmd          []string `json:"Cmd"`
+	// Healthcheck *HealthConfig
+	ArgsEscaped     bool `json:",omitempty"`
+	Image           string
+	Volumes         map[string]struct{} `json:"Volumes"`
+	Workdir         string              `json:"WorkingDir"`
+	Entrypoint      []string            `json:"Entrypoint"`
+	NetworkDisabled bool                `json:",omitempty"`
+	MacAddress      string              `json:",omitempty"`
+	OnBuild         []string
+	Labels          map[string]string `json:"Labels"`
+	StopSignal      string            `json:",omitempty"`
+	StopTimeout     *int              `json:",omitempty"`
+	Shell           []string          `json:",omitempty"`
 }
 
 func (c ConfigObject) AsList() []string {
 	return []string{
-		fmt.Sprintf("Env: %s", strings.Join(c.Env, ",")),
-		fmt.Sprintf("Entrypoint: %s", strings.Join(c.Entrypoint, ",")),
+		fmt.Sprintf("Hostname: %s", c.Hostname),
+		fmt.Sprintf("Domainname: %s", c.Domainname),
+		fmt.Sprintf("User: %s", c.User),
+		fmt.Sprintf("AttachStdin: %t", c.AttachStdin),
+		fmt.Sprintf("AttachStdout: %t", c.AttachStdout),
+		fmt.Sprintf("AttachStderr: %t", c.AttachStderr),
 		fmt.Sprintf("ExposedPorts: %v", sortMap(c.ExposedPorts)),
+		fmt.Sprintf("Tty: %t", c.Tty),
+		fmt.Sprintf("OpenStdin: %t", c.OpenStdin),
+		fmt.Sprintf("StdinOnce: %t", c.StdinOnce),
+		fmt.Sprintf("Env: %s", strings.Join(c.Env, ",")),
 		fmt.Sprintf("Cmd: %s", strings.Join(c.Cmd, ",")),
+		fmt.Sprintf("ArgsEscaped: %t", c.ArgsEscaped),
+		fmt.Sprintf("Image: %s", c.Image),
 		fmt.Sprintf("Volumes: %v", sortMap(c.Volumes)),
 		fmt.Sprintf("Workdir: %s", c.Workdir),
+		fmt.Sprintf("Entrypoint: %s", strings.Join(c.Entrypoint, ",")),
+		fmt.Sprintf("NetworkDisabled: %t", c.NetworkDisabled),
+		fmt.Sprintf("MacAddress: %s", c.MacAddress),
+		fmt.Sprintf("OnBuild: %s", strings.Join(c.OnBuild, ",")),
 		fmt.Sprintf("Labels: %v", c.Labels),
+		fmt.Sprintf("StopSignal: %s", c.StopSignal),
+		fmt.Sprintf("StopTimeout: %d", c.StopTimeout),
+		fmt.Sprintf("Shell: %s", strings.Join(c.Shell, ",")),
 	}
 }
 
