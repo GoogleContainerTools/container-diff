@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/container-diff/cmd/util/output"
@@ -99,9 +100,9 @@ func (c ConfigObject) AsList() []string {
 	return []string{
 		fmt.Sprintf("Env: %s", strings.Join(c.Env, ",")),
 		fmt.Sprintf("Entrypoint: %s", strings.Join(c.Entrypoint, ",")),
-		fmt.Sprintf("ExposedPorts: %v", c.ExposedPorts),
+		fmt.Sprintf("ExposedPorts: %v", sortMap(c.ExposedPorts)),
 		fmt.Sprintf("Cmd: %s", strings.Join(c.Cmd, ",")),
-		fmt.Sprintf("Volumes: %v", c.Volumes),
+		fmt.Sprintf("Volumes: %v", sortMap(c.Volumes)),
 		fmt.Sprintf("Workdir: %s", c.Workdir),
 		fmt.Sprintf("Labels: %v", c.Labels),
 	}
@@ -240,4 +241,13 @@ func CleanupImage(image Image) {
 			logrus.Warn(err.Error())
 		}
 	}
+}
+
+func sortMap(m map[string]struct{}) string {
+	pairs := make([]string, 0)
+	for key := range m {
+		pairs = append(pairs, fmt.Sprintf("%s:%s", key, m[key]))
+	}
+	sort.Strings(pairs)
+	return strings.Join(pairs, " ")
 }
