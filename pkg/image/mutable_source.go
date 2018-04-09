@@ -76,6 +76,7 @@ func (m *MutableSource) GetManifest(_ *digest.Digest) ([]byte, string, error) {
 
 // populateManifestAndConfig parses the raw manifest and configs, storing them on the struct.
 func (m *MutableSource) populateManifestAndConfig() error {
+	// First get manifest
 	mfstBytes, _, err := m.ProxySource.GetManifest(nil)
 	if err != nil {
 		return err
@@ -86,18 +87,17 @@ func (m *MutableSource) populateManifestAndConfig() error {
 		return err
 	}
 
-	bi := types.BlobInfo{Digest: m.mfst.ConfigDescriptor.Digest}
-	r, _, err := m.GetBlob(bi)
+	// Now, get config
+	img, err := m.ProxySource.Ref.NewImage(nil)
 	if err != nil {
 		return err
 	}
-
-	cfgBytes, err := ioutil.ReadAll(r)
+	defer img.Close()
+	configBlob, err := img.ConfigBlob()
 	if err != nil {
 		return err
 	}
-
-	return json.Unmarshal(cfgBytes, &m.cfg)
+	return json.Unmarshal(configBlob, &m.cfg)
 }
 
 // GetBlob first checks the stored "extra" blobs, then proxies the call to the original source.
