@@ -20,13 +20,14 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	img "github.com/containers/image/image"
+	"github.com/containers/image/types"
 	"io"
 	"io/ioutil"
 	"strings"
 	"time"
 
 	"github.com/containers/image/manifest"
-	"github.com/containers/image/types"
 	digest "github.com/opencontainers/go-digest"
 )
 
@@ -76,10 +77,33 @@ func (m *MutableSource) GetManifest(_ *digest.Digest) ([]byte, string, error) {
 
 // populateManifestAndConfig parses the raw manifest and configs, storing them on the struct.
 func (m *MutableSource) populateManifestAndConfig() error {
-	// First get manifest
-	mfstBytes, _, err := m.ProxySource.GetManifest(nil)
+	context := &types.SystemContext{
+		OSChoice:           "linux",
+		ArchitectureChoice: "amd64",
+	}
+	image, err := m.ProxySource.Ref.NewImage(context)
 	if err != nil {
 		return err
+	}
+	defer image.Close()
+	// First get manifest
+	mfstBytes, mfstType, err := image.Manifest()
+	if err != nil {
+		return err
+	}
+
+	if mfstType == manifest.DockerV2ListMediaType {
+		// We need to select a manifest digest from the manifest list
+		unparsedImage := img.UnparsedInstance(m.ImageSource, nil)
+
+		mfstDigest, err := img.ChooseManifestInstanceFromManifestList(context, unparsedImage)
+		if err != nil {
+			return err
+		}
+		mfstBytes, _, err = m.ProxySource.GetManifest(&mfstDigest)
+		if err != nil {
+			return err
+		}
 	}
 
 	m.mfst, err = manifest.Schema2FromManifest(mfstBytes)
@@ -88,12 +112,7 @@ func (m *MutableSource) populateManifestAndConfig() error {
 	}
 
 	// Now, get config
-	img, err := m.ProxySource.Ref.NewImage(nil)
-	if err != nil {
-		return err
-	}
-	defer img.Close()
-	configBlob, err := img.ConfigBlob()
+	configBlob, err := image.ConfigBlob()
 	if err != nil {
 		return err
 	}
