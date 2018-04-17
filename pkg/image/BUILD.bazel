@@ -9,6 +9,8 @@ go_library(
     importpath = "github.com/GoogleCloudPlatform/container-diff/pkg/image",
     visibility = ["//visibility:public"],
     deps = [
+        "//vendor/github.com/containers/image/image:go_default_library",
+        "//vendor/github.com/containers/image/docker:go_default_library",        
         "//vendor/github.com/containers/image/manifest:go_default_library",
         "//vendor/github.com/containers/image/types:go_default_library",
         "//vendor/github.com/opencontainers/go-digest:go_default_library",
