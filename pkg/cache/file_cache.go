@@ -22,7 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/GoogleCloudPlatform/container-diff/pkg/image"
+	"github.com/GoogleContainerTools/container-diff/pkg/image"
 	"github.com/containers/image/types"
 	"github.com/sirupsen/logrus"
 )

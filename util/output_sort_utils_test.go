@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"testing"
 
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 )
 
 var packageTests = [][]PackageOutput{

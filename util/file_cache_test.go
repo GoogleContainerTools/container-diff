@@ -24,7 +24,7 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/GoogleCloudPlatform/container-diff/pkg/cache"
+	"github.com/GoogleContainerTools/container-diff/pkg/cache"
 	"github.com/containers/image/types"
 )
 

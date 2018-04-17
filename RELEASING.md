@@ -1,6 +1,6 @@
 # Releasing container-diff
 
-The github.com/GoogleCloudPlatform/container-diff uses Container Builder triggers to build and release binaries.
+The github.com/GoogleContainerTools/container-diff uses Container Builder triggers to build and release binaries.
 These triggers are setup via the Cloud Console, but the builds they execute live in this repo.
 
 ## Continuous Builds

@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"sort"
 
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/sirupsen/logrus"
 
 	"github.com/pmezard/go-difflib/difflib"

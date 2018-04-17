@@ -13,9 +13,9 @@ with your personal GitHub account. Then, clone the fork into your `$GOPATH`:
 
 ```bash
 git clone git@github.com:<your_account>/container-diff.git 
-$GOPATH/src/github.com/GoogleCloudPlatform &&
-cd $GOPATH/src/github.com/GoogleCloudPlatform/container-diff &&
-git remote add upstream git@github.com:GoogleCloudPlatform/container-diff.git
+$GOPATH/src/github.com/GoogleContainerTools &&
+cd $GOPATH/src/github.com/GoogleContainerTools/container-diff &&
+git remote add upstream git@github.com:GoogleContainerTools/container-diff.git
 ```
 
 The last command here sets the official repository as an upstream repository for

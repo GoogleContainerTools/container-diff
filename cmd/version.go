@@ -19,7 +19,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/container-diff/version"
+	"github.com/GoogleContainerTools/container-diff/version"
 	"github.com/spf13/cobra"
 )
 

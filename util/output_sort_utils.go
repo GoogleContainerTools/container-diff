@@ -19,7 +19,7 @@ package util
 import (
 	"sort"
 
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 )
 
 var SortSize bool

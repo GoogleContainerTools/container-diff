@@ -18,7 +18,7 @@ package util
 
 import (
 	"code.cloudfoundry.org/bytefmt"
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 )
 
 type StrPackageOutput struct {
