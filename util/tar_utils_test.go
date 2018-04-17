@@ -25,7 +25,7 @@ import (
 	"os"
 	"testing"
 
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 )
 
 func TestUnTar(t *testing.T) {

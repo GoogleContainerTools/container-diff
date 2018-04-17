@@ -7,7 +7,7 @@ sudo: required
 services:
   - docker
 
-go_import_path: github.com/GoogleCloudPlatform/container-diff
+go_import_path: github.com/GoogleContainerTools/container-diff
 
 addons:
   apt:

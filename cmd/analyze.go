@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/GoogleCloudPlatform/container-diff/cmd/util/output"
-	"github.com/GoogleCloudPlatform/container-diff/differs"
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
+	"github.com/GoogleContainerTools/container-diff/cmd/util/output"
+	"github.com/GoogleContainerTools/container-diff/differs"
+	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

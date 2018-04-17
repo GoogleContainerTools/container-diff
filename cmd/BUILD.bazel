@@ -8,7 +8,7 @@ go_library(
         "root.go",
         "version.go",
     ],
-    importpath = "github.com/GoogleCloudPlatform/container-diff/cmd",
+    importpath = "github.com/GoogleContainerTools/container-diff/cmd",
     visibility = ["//visibility:public"],
     deps = [
         "//cmd/util/output:go_default_library",
@@ -34,5 +34,5 @@ go_test(
         "root_test.go",
     ],
     embed = [":go_default_library"],
-    importpath = "github.com/GoogleCloudPlatform/container-diff/cmd",
+    importpath = "github.com/GoogleContainerTools/container-diff/cmd",
 )

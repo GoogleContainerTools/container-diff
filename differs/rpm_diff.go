@@ -32,8 +32,8 @@ import (
 	"sync"
 	"time"
 
-	pkgutil "github.com/GoogleCloudPlatform/container-diff/pkg/util"
-	"github.com/GoogleCloudPlatform/container-diff/util"
+	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
+	"github.com/GoogleContainerTools/container-diff/util"
 	dockertar "github.com/containers/image/docker/tarfile"
 	godocker "github.com/fsouza/go-dockerclient"
 	"github.com/nightlyone/lockfile"

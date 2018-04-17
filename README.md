@@ -1,7 +1,7 @@
 # container-diff
 
 [![Build
-Status](https://travis-ci.org/GoogleCloudPlatform/container-diff.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/container-diff)
+Status](https://travis-ci.org/GoogleContainerTools/container-diff.svg?branch=master)](https://travis-ci.org/GoogleContainerTools/container-diff)
 
 ## What is container-diff?
 
@@ -245,7 +245,7 @@ type MultiVersionInfo struct {
 ```
 
 ## User Customized Output
-Users can customize the format of the output of diffs with the`--format` flag. The flag takes a Go template string, which specifies the format the diff should be output in. This template string uses the structs described above, depending on the differ used, to format output.  The default template strings container-diff uses can be found [here](https://github.com/GoogleCloudPlatform/container-diff/blob/master/util/template_utils.go).
+Users can customize the format of the output of diffs with the`--format` flag. The flag takes a Go template string, which specifies the format the diff should be output in. This template string uses the structs described above, depending on the differ used, to format output.  The default template strings container-diff uses can be found [here](https://github.com/GoogleContainerTools/container-diff/blob/master/util/template_utils.go).
 
 An example using the pip package analyzer is shown below, in which only package names are printed (some are repeated because of version differences).
 
@@ -442,9 +442,9 @@ In order to quickly make your own analyzer, follow these steps:
 1. Determine if you can use existing analyzing or diffing tools.  If you can make use of existing tools, you then need to construct the structs to feed into the tools by getting all of the packages for each image or the analogous quality to be analyzed.  To determine if you can leverage existing tools, think through these questions:
 - Are you trying to analyze packages?
     - Yes: Does the relevant package manager support different versions of the same package on one image?
-        - Yes: Implement `getPackages` to collect all versions of all packages within an image in a `map[string]map[string]util.PackageInfo`. Use [`GetMultiVersionMapDiff`](https://github.com/GoogleCloudPlatform/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/util/package_diff_utils.go#L119-L126) to diff map objects.  See [`differs/node_diff.go`](https://github.com/GoogleCloudPlatform/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/node_diff.go#L49-L93) or [`differs/pip_diff.go`](https://github.com/GoogleCloudPlatform/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/pip_diff.go#L48-L111) for examples.
-        -  No: Implement `getPackages` to collect all versions of all packages within an image in a `map[string]util.PackageInfo`. Use [`GetMapDiff`](https://github.com/GoogleCloudPlatform/container-diff/blob/31cec2304b54ae6ae444ccde4382b113d8e06097/util/package_diff_utils.go#L110-L117) to diff map objects.  See [`differs/apt_diff.go`](https://github.com/GoogleCloudPlatform/container-diff/blob/master/differs/apt_diff.go#L29).
-    - No: Look to [History](https://github.com/GoogleCloudPlatform/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/history_diff.go) and [File System](https://github.com/GoogleCloudPlatform/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/file_diff.go) differs as models for diffing.
+        - Yes: Implement `getPackages` to collect all versions of all packages within an image in a `map[string]map[string]util.PackageInfo`. Use [`GetMultiVersionMapDiff`](https://github.com/GoogleContainerTools/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/util/package_diff_utils.go#L119-L126) to diff map objects.  See [`differs/node_diff.go`](https://github.com/GoogleContainerTools/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/node_diff.go#L49-L93) or [`differs/pip_diff.go`](https://github.com/GoogleContainerTools/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/pip_diff.go#L48-L111) for examples.
+        -  No: Implement `getPackages` to collect all versions of all packages within an image in a `map[string]util.PackageInfo`. Use [`GetMapDiff`](https://github.com/GoogleContainerTools/container-diff/blob/31cec2304b54ae6ae444ccde4382b113d8e06097/util/package_diff_utils.go#L110-L117) to diff map objects.  See [`differs/apt_diff.go`](https://github.com/GoogleContainerTools/container-diff/blob/master/differs/apt_diff.go#L29).
+    - No: Look to [History](https://github.com/GoogleContainerTools/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/history_diff.go) and [File System](https://github.com/GoogleContainerTools/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/file_diff.go) differs as models for diffing.
 
 2. Write your analyzer driver in the `differs` directory, such that you have a struct for your analyzer type and two methods for that analyzer: `Analyze` for single image analysis and `Diff` for comparison between two images:
 
@@ -458,7 +458,7 @@ The image arguments passed to your analyzer contain the path to the unpacked tar
 
 If using existing package tools, you should create the appropriate structs (e.g. `SingleVersionPackageAnalyzeResult` or `SingleVersionPackageDiffResult`) to analyze or diff.  Otherwise, create your own structs which should yield information to fill an AnalyzeResult or DiffResult as the return type for Analyze() and Diff(), respectively, and should implement the `Result` interface, as in the next step.
 
-3. Create a struct following the [`Result`](https://github.com/GoogleCloudPlatform/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/util/analyze_output_utils.go#L27-L30) interface by implementing the following two methods.
+3. Create a struct following the [`Result`](https://github.com/GoogleContainerTools/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/util/analyze_output_utils.go#L27-L30) interface by implementing the following two methods.
 
 ```go
 type Result interface {
@@ -467,6 +467,6 @@ type Result interface {
 }
 ```
 
-This is where you define how your analyzer should output for a human readable format (`OutputText`) and as a struct which can then be written to a `.json` file.  See [`util/diff_output_utils.go`](https://github.com/GoogleCloudPlatform/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/util/diff_output_utils.go) and [`util/analyze_output_utils.go`](https://github.com/GoogleCloudPlatform/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/util/analyze_output_utils.go).
+This is where you define how your analyzer should output for a human readable format (`OutputText`) and as a struct which can then be written to a `.json` file.  See [`util/diff_output_utils.go`](https://github.com/GoogleContainerTools/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/util/diff_output_utils.go) and [`util/analyze_output_utils.go`](https://github.com/GoogleContainerTools/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/util/analyze_output_utils.go).
 
-4. Add your analyzer to the `Analyzers` map in [`differs/differs.go`](https://github.com/GoogleCloudPlatform/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/differs.go#L44-L50) with the corresponding Analyzer struct as the value.
+4. Add your analyzer to the `Analyzers` map in [`differs/differs.go`](https://github.com/GoogleContainerTools/container-diff/blob/0031c88993c9ac019e2d404815ef50c652d8d010/differs/differs.go#L44-L50) with the corresponding Analyzer struct as the value.

@@ -12,7 +12,7 @@ go_library(
         "tar_prepper.go",
         "tar_utils.go",
     ],
-    importpath = "github.com/GoogleCloudPlatform/container-diff/pkg/util",
+    importpath = "github.com/GoogleContainerTools/container-diff/pkg/util",
     visibility = ["//visibility:public"],
     deps = [
         "//cmd/util/output:go_default_library",

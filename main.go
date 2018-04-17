@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/GoogleCloudPlatform/container-diff/cmd"
+	"github.com/GoogleContainerTools/container-diff/cmd"
 	"github.com/pkg/profile"
 )
 
