@@ -17,17 +17,57 @@ limitations under the License.
 package util
 
 import (
+	"archive/tar"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/docker/docker/pkg/system"
+	"github.com/google/go-containerregistry/v1"
+	"github.com/google/go-containerregistry/v1/mutate"
 	"github.com/sirupsen/logrus"
 )
 
-const LatestTag string = ":latest"
+type Image struct {
+	Image  v1.Image
+	Source string
+	FSPath string
+}
+
+type ImageHistoryItem struct {
+	CreatedBy string `json:"created_by"`
+}
+
+func CleanupImage(image Image) {
+	if image.FSPath != "" {
+		logrus.Infof("Removing image filesystem directory %s from system", image.FSPath)
+		if err := os.RemoveAll(image.FSPath); err != nil {
+			logrus.Warn(err.Error())
+		}
+	}
+}
+
+func SortMap(m map[string]struct{}) string {
+	pairs := make([]string, 0)
+	for key := range m {
+		pairs = append(pairs, fmt.Sprintf("%s:%s", key, m[key]))
+	}
+	sort.Strings(pairs)
+	return strings.Join(pairs, " ")
+}
+
+// unpack image filesystem to local disk
+func GetFileSystemForImage(image v1.Image, root string, whitelist []string) error {
+	if err := unpackTar(tar.NewReader(mutate.Extract(image)), root, whitelist); err != nil {
+		return err
+	}
+	return nil
+}
 
 func GetImageLayers(pathToImage string) []string {
 	layers := []string{}

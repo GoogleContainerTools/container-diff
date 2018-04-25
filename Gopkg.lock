@@ -35,39 +35,11 @@
   revision = "b2b946a77f5973f420514090d6f6dd58b08303f0"
 
 [[projects]]
-  name = "github.com/containers/image"
-  packages = [
-    "docker",
-    "docker/daemon",
-    "docker/policyconfiguration",
-    "docker/reference",
-    "docker/tarfile",
-    "image",
-    "internal/tmpdir",
-    "manifest",
-    "pkg/compression",
-    "pkg/docker/config",
-    "pkg/strslice",
-    "pkg/tlsclientconfig",
-    "transports",
-    "types"
-  ]
-  revision = "495da41bd26c50be62fa07ae903ea2ee54c00283"
-
-[[projects]]
   branch = "master"
   name = "github.com/docker/distribution"
   packages = [
-    ".",
     "digestset",
-    "reference",
-    "registry/api/errcode",
-    "registry/api/v2",
-    "registry/client",
-    "registry/client/auth/challenge",
-    "registry/client/transport",
-    "registry/storage/cache",
-    "registry/storage/cache/memory"
+    "reference"
   ]
   revision = "f4118485915abb8b163442717326597908eee6aa"
 
@@ -110,15 +82,6 @@
   revision = "3e1df952b7d693ac3961f492310852bdf3106240"
 
 [[projects]]
-  name = "github.com/docker/docker-credential-helpers"
-  packages = [
-    "client",
-    "credentials"
-  ]
-  revision = "d68f9aeca33f5fd3f08eeae5e9d175edf4e731d1"
-  version = "v0.6.0"
-
-[[projects]]
   name = "github.com/docker/go-connections"
   packages = [
     "nat",
@@ -136,21 +99,9 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/docker/libtrust"
-  packages = ["."]
-  revision = "aabc10ec26b754e797f9028f4589c5b7bd90dc20"
-
-[[projects]]
-  branch = "master"
   name = "github.com/fsouza/go-dockerclient"
   packages = ["."]
   revision = "413e380d74dfeddac90c0b89c598a1c7b19f5c54"
-
-[[projects]]
-  name = "github.com/ghodss/yaml"
-  packages = ["."]
-  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
-  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -159,28 +110,29 @@
   version = "v0.5"
 
 [[projects]]
-  name = "github.com/gorilla/context"
-  packages = ["."]
-  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
-  version = "v1.1"
-
-[[projects]]
-  name = "github.com/gorilla/mux"
-  packages = ["."]
-  revision = "7f08801859139f86dfafd1c296e2cba9a80d292e"
-  version = "v1.6.0"
+  name = "github.com/google/go-containerregistry"
+  packages = [
+    "authn",
+    "name",
+    "v1",
+    "v1/daemon",
+    "v1/empty",
+    "v1/mutate",
+    "v1/partial",
+    "v1/random",
+    "v1/remote",
+    "v1/remote/transport",
+    "v1/tarball",
+    "v1/types",
+    "v1/v1util"
+  ]
+  revision = "9a6a2b004c1a6d2c946acc52af194d85b882f8c6"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/mitchellh/go-homedir"
-  packages = ["."]
-  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
 
 [[projects]]
   branch = "master"
@@ -273,15 +225,9 @@
   ]
   revision = "83801418e1b59fb1880e363299581ee543af32ca"
 
-[[projects]]
-  branch = "v2"
-  name = "gopkg.in/yaml.v2"
-  packages = ["."]
-  revision = "287cf08546ab5e7e37d55a84f7ed3fd1db036de5"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "011f13273effca41fb1b82358a8c8848c419b09bc3f37e07dd7213d3f8836c31"
+  inputs-digest = "637da5becda61a1429f1e7b7f525caf0d1e36c0306e8510f3dbaadea104f2d61"
   solver-name = "gps-cdcl"
   solver-version = 1

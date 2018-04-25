@@ -1,6 +1,6 @@
 [
   {
-    "Image": "gcr.io/gcp-runtimes/apt-modified:latest",
+    "Image": "gcr.io/gcp-runtimes/apt-modified",
     "AnalyzeType": "Apt",
     "Analysis": [
       {

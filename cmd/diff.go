@@ -75,11 +75,6 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		return err
 	}
 
-	cli, err := pkgutil.NewClient()
-	if err != nil {
-		return err
-	}
-	defer cli.Close()
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -93,13 +88,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	for imageArg := range imageMap {
 		go func(imageName string, imageMap map[string]*pkgutil.Image) {
 			defer wg.Done()
-
-			prepper, err := getPrepperForImage(imageName)
-			if err != nil {
-				logrus.Error(err)
-				return
-			}
-			image, err := prepper.GetImage()
+			image, err := getImageForName(imageName)
 			imageMap[imageName] = &image
 			if err != nil {
 				logrus.Warningf("Diff may be inaccurate: %s", err)

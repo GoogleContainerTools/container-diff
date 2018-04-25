@@ -19,18 +19,22 @@ package cmd
 import (
 	goflag "flag"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 
+	"github.com/google/go-containerregistry/authn"
+	"github.com/google/go-containerregistry/name"
+	"github.com/google/go-containerregistry/v1/daemon"
+	"github.com/google/go-containerregistry/v1/remote"
+	"github.com/google/go-containerregistry/v1/tarball"
+
 	"github.com/GoogleContainerTools/container-diff/differs"
-	"github.com/GoogleContainerTools/container-diff/pkg/cache"
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
-	"github.com/containers/image/docker"
-	"github.com/docker/docker/client"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/google/go-containerregistry/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -39,7 +43,6 @@ import (
 var json bool
 var save bool
 var types diffTypes
-var noCache bool
 
 var LogLevel string
 var format string
@@ -121,67 +124,63 @@ func checkIfValidAnalyzer(_ []string) error {
 	return nil
 }
 
-func getPrepperForImage(image string) (pkgutil.Prepper, error) {
-	cli, err := client.NewEnvClient()
-	if err != nil {
-		return nil, err
-	}
-
-	if pkgutil.IsTar(image) {
-		return &pkgutil.TarPrepper{
-			Source: filepath.Clean(image),
-			Client: cli,
-		}, nil
-	}
-
-	if strings.HasPrefix(image, DaemonPrefix) {
-		// remove the DaemonPrefix
-		image = strings.Replace(image, DaemonPrefix, "", -1)
-
-		return &pkgutil.DaemonPrepper{
-			Source: image,
-			Client: cli,
-		}, nil
-	}
-
-	// either has remote prefix or has no prefix, in which case we force remote
-	image = strings.Replace(image, RemotePrefix, "", -1)
-	ref, err := docker.ParseReference("//" + image)
-	if err != nil {
-		return nil, err
-	}
-	src, err := ref.NewImageSource(nil)
-	if err != nil {
-		return nil, err
-	}
-	defer src.Close()
-
-	if !noCache {
-		cacheDir, err := cacheDir()
+func getImageForName(imageName string) (pkgutil.Image, error) {
+	logrus.Infof("getting image for name %s", imageName)
+	var img v1.Image
+	var err error
+	if pkgutil.IsTar(imageName) {
+		img, err = tarball.ImageFromPath(imageName, nil)
 		if err != nil {
-			return nil, err
-		}
-
-		src, err = cache.NewFileCache(cacheDir, ref)
-		if err != nil {
-			return nil, err
+			return pkgutil.Image{}, err
 		}
 	}
 
-	return &pkgutil.CloudPrepper{
-		Source:      image,
-		Client:      cli,
-		ImageSource: src,
+	if strings.HasPrefix(imageName, DaemonPrefix) {
+		// remove the daemon prefix
+		imageName = strings.Replace(imageName, DaemonPrefix, "", -1)
+
+		ref, err := name.ParseReference(imageName, name.WeakValidation)
+		if err != nil {
+			return pkgutil.Image{}, err
+		}
+
+		img, err = daemon.Image(ref, &daemon.ReadOptions{})
+		if err != nil {
+			return pkgutil.Image{}, err
+		}
+	} else {
+		// either has remote prefix or has no prefix, in which case we force remote
+		imageName = strings.Replace(imageName, RemotePrefix, "", -1)
+		ref, err := name.ParseReference(imageName, name.WeakValidation)
+		if err != nil {
+			return pkgutil.Image{}, err
+		}
+		auth, err := authn.DefaultKeychain.Resolve(ref.Context().Registry)
+		if err != nil {
+			return pkgutil.Image{}, err
+		}
+		img, err = remote.Image(ref, auth, http.DefaultTransport)
+		if err != nil {
+			return pkgutil.Image{}, err
+		}
+	}
+	// TODO(nkubala): implement caching
+
+	// create tempdir and extract fs into it
+	path, err := ioutil.TempDir("", strings.Replace(imageName, "/", "", -1))
+	if err != nil {
+		return pkgutil.Image{}, err
+	}
+	if err := pkgutil.GetFileSystemForImage(img, path, nil); err != nil {
+		return pkgutil.Image{
+			FSPath: path,
+		}, err
+	}
+	return pkgutil.Image{
+		Image:  img,
+		Source: imageName,
+		FSPath: path,
 	}, nil
-}
-
-func cacheDir() (string, error) {
-	dir, err := homedir.Dir()
-	if err != nil {
-		return "", err
-	}
-	rootDir := filepath.Join(dir, ".container-diff")
-	return filepath.Join(rootDir, "cache"), nil
 }
 
 func init() {
@@ -221,5 +220,4 @@ func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(&types, "type", "t", "This flag sets the list of analyzer types to use. Set it repeatedly to use multiple analyzers.")
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
-	cmd.Flags().BoolVarP(&noCache, "no-cache", "n", false, "Set this to force retrieval of layers on each run.")
 }

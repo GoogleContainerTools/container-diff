@@ -45,24 +45,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			break
 		}
 		if err != nil {
-			logrus.Error("Error getting next tar header")
-			return err
-		}
-		if strings.Contains(header.Name, ".wh.") {
-			rmPath := filepath.Clean(filepath.Join(path, header.Name))
-			// Remove the .wh file if it was extracted.
-			if _, err := os.Stat(rmPath); !os.IsNotExist(err) {
-				if err := os.Remove(rmPath); err != nil {
-					logrus.Error(err)
-				}
-			}
-
-			// Remove the whited-out path.
-			newName := strings.Replace(rmPath, ".wh.", "", 1)
-			if err = os.RemoveAll(newName); err != nil {
-				logrus.Error(err)
-			}
-			continue
+			return errors.Wrap(err, "Error getting next tar header")
 		}
 		target := filepath.Clean(filepath.Join(path, header.Name))
 		// Make sure the target isn't part of the whitelist
@@ -190,20 +173,6 @@ func checkWhitelist(target string, whitelist []string) bool {
 		}
 	}
 	return false
-}
-
-// UnTar takes in a path to a tar file and writes the untarred version to the provided target.
-// Only untars one level, does not untar nested tars.
-func UnTar(r io.Reader, target string, whitelist []string) error {
-	if _, ok := os.Stat(target); ok != nil {
-		os.MkdirAll(target, 0775)
-	}
-
-	tr := tar.NewReader(r)
-	if err := unpackTar(tr, target, whitelist); err != nil {
-		return err
-	}
-	return nil
 }
 
 func IsTar(path string) bool {

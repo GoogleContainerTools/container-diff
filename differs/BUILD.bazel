@@ -18,8 +18,10 @@ go_library(
     deps = [
         "//pkg/util:go_default_library",
         "//util:go_default_library",
-        "//vendor/github.com/containers/image/docker/tarfile:go_default_library",
         "//vendor/github.com/fsouza/go-dockerclient:go_default_library",
+        "//vendor/github.com/google/go-containerregistry/name:go_default_library",
+        "//vendor/github.com/google/go-containerregistry/v1:go_default_library",
+        "//vendor/github.com/google/go-containerregistry/v1/daemon:go_default_library",
         "//vendor/github.com/nightlyone/lockfile:go_default_library",
         "//vendor/github.com/sirupsen/logrus:go_default_library",
     ],
@@ -39,5 +41,6 @@ go_test(
     deps = [
         "//pkg/util:go_default_library",
         "//util:go_default_library",
+        "//vendor/github.com/google/go-containerregistry/v1:go_default_library",
     ],
 )

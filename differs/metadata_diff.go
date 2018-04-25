@@ -17,6 +17,9 @@ limitations under the License.
 package differs
 
 import (
+	"fmt"
+	"strings"
+
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
 )
@@ -44,7 +47,10 @@ func (a MetadataAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error
 }
 
 func (a MetadataAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
-	analysis := getMetadataList(image)
+	analysis, err := getMetadataList(image)
+	if err != nil {
+		return &util.ListAnalyzeResult{}, err
+	}
 	return &util.ListAnalyzeResult{
 		Image:       image.Source,
 		AnalyzeType: "Metadata",
@@ -53,14 +59,49 @@ func (a MetadataAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 }
 
 func getMetadataDiff(image1, image2 pkgutil.Image) (MetadataDiff, error) {
-	m1 := getMetadataList(image1)
-	m2 := getMetadataList(image2)
+	m1, err := getMetadataList(image1)
+	if err != nil {
+		return MetadataDiff{}, err
+	}
+	m2, err := getMetadataList(image2)
+	if err != nil {
+		return MetadataDiff{}, err
+	}
 
 	adds := util.GetAdditions(m1, m2)
 	dels := util.GetDeletions(m1, m2)
 	return MetadataDiff{adds, dels}, nil
 }
 
-func getMetadataList(image pkgutil.Image) []string {
-	return image.Config.Config.AsList()
+func getMetadataList(image pkgutil.Image) ([]string, error) {
+	configFile, err := image.Image.ConfigFile()
+	if err != nil {
+		return nil, err
+	}
+	c := configFile.Config
+	return []string{
+		fmt.Sprintf("Hostname: %s", c.Hostname),
+		fmt.Sprintf("Domainname: %s", c.Domainname),
+		fmt.Sprintf("User: %s", c.User),
+		fmt.Sprintf("AttachStdin: %t", c.AttachStdin),
+		fmt.Sprintf("AttachStdout: %t", c.AttachStdout),
+		fmt.Sprintf("AttachStderr: %t", c.AttachStderr),
+		fmt.Sprintf("ExposedPorts: %v", pkgutil.SortMap(c.ExposedPorts)),
+		fmt.Sprintf("Tty: %t", c.Tty),
+		fmt.Sprintf("OpenStdin: %t", c.OpenStdin),
+		fmt.Sprintf("StdinOnce: %t", c.StdinOnce),
+		fmt.Sprintf("Env: %s", strings.Join(c.Env, ",")),
+		fmt.Sprintf("Cmd: %s", strings.Join(c.Cmd, ",")),
+		fmt.Sprintf("ArgsEscaped: %t", c.ArgsEscaped),
+		fmt.Sprintf("Image: %s", c.Image),
+		fmt.Sprintf("Volumes: %v", pkgutil.SortMap(c.Volumes)),
+		fmt.Sprintf("Workdir: %s", c.WorkingDir),
+		fmt.Sprintf("Entrypoint: %s", strings.Join(c.Entrypoint, ",")),
+		fmt.Sprintf("NetworkDisabled: %t", c.NetworkDisabled),
+		fmt.Sprintf("MacAddress: %s", c.MacAddress),
+		fmt.Sprintf("OnBuild: %s", strings.Join(c.OnBuild, ",")),
+		fmt.Sprintf("Labels: %v", c.Labels),
+		fmt.Sprintf("StopSignal: %s", c.StopSignal),
+		fmt.Sprintf("Shell: %s", strings.Join(c.Shell, ",")),
+	}, nil
 }
