@@ -194,14 +194,27 @@ func GetModifiedEntries(d1, d2 pkgutil.Directory) []string {
 		f1path := fmt.Sprintf("%s%s", d1.Root, f)
 		f2path := fmt.Sprintf("%s%s", d2.Root, f)
 
-		f1stat, err := os.Stat(f1path)
+		f1stat, err := os.Lstat(f1path)
 		if err != nil {
 			logrus.Errorf("Error checking directory entry %s: %s\n", f, err)
 			continue
 		}
-		f2stat, err := os.Stat(f2path)
+		f2stat, err := os.Lstat(f2path)
 		if err != nil {
 			logrus.Errorf("Error checking directory entry %s: %s\n", f, err)
+			continue
+		}
+
+		// If the directory entry is a symlink, make sure the symlinks point to the same place
+		if f1stat.Mode()&os.ModeSymlink != 0 && f2stat.Mode()&os.ModeSymlink != 0 {
+			same, err := pkgutil.CheckSameSymlink(f1path, f2path)
+			if err != nil {
+				logrus.Errorf("Error determining if symlink %s and %s are equivalent: %s\n", f1path, f2path, err)
+				continue
+			}
+			if !same {
+				modified = append(modified, f)
+			}
 			continue
 		}
 
