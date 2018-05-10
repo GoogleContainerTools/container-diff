@@ -130,6 +130,18 @@ func CreateDirectoryEntries(root string, entryNames []string) (entries []Directo
 	return entries
 }
 
+func CheckSameSymlink(f1name, f2name string) (bool, error) {
+	link1, err := os.Readlink(f1name)
+	if err != nil {
+		return false, err
+	}
+	link2, err := os.Readlink(f2name)
+	if err != nil {
+		return false, err
+	}
+	return (link1 == link2), nil
+}
+
 func CheckSameFile(f1name, f2name string) (bool, error) {
 	// Check first if files differ in size and immediately return
 	f1stat, err := os.Stat(f1name)
