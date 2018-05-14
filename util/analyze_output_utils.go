@@ -216,3 +216,55 @@ func (r FileAnalyzeResult) OutputText(analyzeType string, format string) error {
 	}
 	return TemplateOutputFromFormat(strResult, "FileAnalyze", format)
 }
+
+type FileLayerAnalyzeResult AnalyzeResult
+
+func (r FileLayerAnalyzeResult) OutputStruct() interface{} {
+	analysis, valid := r.Analysis.([][]util.DirectoryEntry)
+	if !valid {
+		logrus.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
+		return errors.New("Could not output FileAnalyzer analysis result")
+	}
+
+	for _, a := range analysis {
+		if SortSize {
+			directoryBy(directorySizeSort).Sort(a)
+		} else {
+			directoryBy(directoryNameSort).Sort(a)
+		}
+	}
+
+	r.Analysis = analysis
+	return r
+}
+
+func (r FileLayerAnalyzeResult) OutputText(analyzeType string, format string) error {
+	analysis, valid := r.Analysis.([][]util.DirectoryEntry)
+	if !valid {
+		logrus.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
+		return errors.New("Could not output FileAnalyzer analysis result")
+	}
+
+	var strDirectoryEntries [][]StrDirectoryEntry
+
+	for _, a := range analysis {
+		if SortSize {
+			directoryBy(directorySizeSort).Sort(a)
+		} else {
+			directoryBy(directoryNameSort).Sort(a)
+		}
+		strAnalysis := stringifyDirectoryEntries(a)
+		strDirectoryEntries = append(strDirectoryEntries, strAnalysis)
+	}
+
+	strResult := struct {
+		Image       string
+		AnalyzeType string
+		Analysis    [][]StrDirectoryEntry
+	}{
+		Image:       r.Image,
+		AnalyzeType: r.AnalyzeType,
+		Analysis:    strDirectoryEntries,
+	}
+	return TemplateOutputFromFormat(strResult, "FileLayerAnalyze", format)
+}

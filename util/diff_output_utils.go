@@ -230,3 +230,65 @@ func (r DirDiffResult) OutputText(diffType string, format string) error {
 	}
 	return TemplateOutputFromFormat(strResult, "DirDiff", format)
 }
+
+type MultipleDirDiffResult DiffResult
+
+func (r MultipleDirDiffResult) OutputStruct() interface{} {
+	diff, valid := r.Diff.(MultipleDirDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should follow the MultipleDirDiff struct")
+		return errors.New("Could not output FileLayerAnalyzer diff result")
+	}
+	for i, d := range diff.DirDiffs {
+		diff.DirDiffs[i] = sortDirDiff(d)
+	}
+	r.Diff = diff
+	return r
+}
+
+func (r MultipleDirDiffResult) OutputText(diffType string, format string) error {
+	diff, valid := r.Diff.(MultipleDirDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should follow the MultipleDirDiff struct")
+		return errors.New("Could not output FileLayerAnalyzer diff result")
+	}
+	for i, d := range diff.DirDiffs {
+		diff.DirDiffs[i] = sortDirDiff(d)
+	}
+
+	type StrDiff struct {
+		Adds []StrDirectoryEntry
+		Dels []StrDirectoryEntry
+		Mods []StrEntryDiff
+	}
+
+	var strDiffs []StrDiff
+	for _, d := range diff.DirDiffs {
+		strAdds := stringifyDirectoryEntries(d.Adds)
+		strDels := stringifyDirectoryEntries(d.Dels)
+		strMods := stringifyEntryDiffs(d.Mods)
+
+		strDiffs = append(strDiffs, StrDiff{
+			Adds: strAdds,
+			Dels: strDels,
+			Mods: strMods,
+		})
+
+	}
+
+	type ImageDiff struct {
+		StrDiffs []StrDiff
+	}
+	strResult := struct {
+		Image1   string
+		Image2   string
+		DiffType string
+		Diff     []StrDiff
+	}{
+		Image1:   r.Image1,
+		Image2:   r.Image2,
+		DiffType: r.DiffType,
+		Diff:     strDiffs,
+	}
+	return TemplateOutputFromFormat(strResult, "MultipleDirDiff", format)
+}

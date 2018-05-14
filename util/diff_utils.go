@@ -34,6 +34,10 @@ type DirDiff struct {
 	Mods []EntryDiff
 }
 
+type MultipleDirDiff struct {
+	DirDiffs []DirDiff
+}
+
 type FileNameDiff struct {
 	Filename    string
 	Description string

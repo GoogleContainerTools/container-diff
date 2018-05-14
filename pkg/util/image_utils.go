@@ -33,10 +33,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type Layer struct {
+	FSPath string
+}
+
 type Image struct {
 	Image  v1.Image
 	Source string
 	FSPath string
+	Layers []Layer
 }
 
 type ImageHistoryItem struct {
@@ -50,6 +55,13 @@ func CleanupImage(image Image) {
 			logrus.Warn(err.Error())
 		}
 	}
+	if image.Layers != nil {
+		for _, layer := range image.Layers {
+			if err := os.RemoveAll(layer.FSPath); err != nil {
+				logrus.Warn(err.Error())
+			}
+		}
+	}
 }
 
 func SortMap(m map[string]struct{}) string {
@@ -59,6 +71,15 @@ func SortMap(m map[string]struct{}) string {
 	}
 	sort.Strings(pairs)
 	return strings.Join(pairs, " ")
+}
+
+// GetFileSystemForLayer unpacks a layer to local disk
+func GetFileSystemForLayer(layer v1.Layer, root string, whitelist []string) error {
+	contents, err := layer.Uncompressed()
+	if err != nil {
+		return err
+	}
+	return unpackTar(tar.NewReader(contents), root, whitelist)
 }
 
 // unpack image filesystem to local disk
