@@ -24,16 +24,6 @@
             }
           ],
           "Mods": null
-        },
-        {
-          "Adds": null,
-          "Dels": [
-            {
-              "Name": "/third",
-              "Size": 6
-            }
-          ],
-          "Mods": null
         }
       ]
     }

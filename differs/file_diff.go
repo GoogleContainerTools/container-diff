@@ -19,8 +19,7 @@ package differs
 import (
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
-	"io/ioutil"
-	"os"
+	"github.com/sirupsen/logrus"
 )
 
 type FileAnalyzer struct {
@@ -81,23 +80,10 @@ func (a FileLayerAnalyzer) Name() string {
 // FileDiff diffs two packages and compares their contents
 func (a FileLayerAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
 	var dirDiffs []util.DirDiff
-	// This path to an empty dir will be used for diffing in cases
-	// where one image has more layers than the other
-	emptyPath, err := ioutil.TempDir("", "")
-	if err != nil {
-		return &util.MultipleDirDiffResult{}, err
-	}
-	defer os.RemoveAll(emptyPath)
 
 	// Go through each layer of the first image...
 	for index, layer := range image1.Layers {
-		// ...if there is no corresponding layer in the second image, diff with the empty dir
 		if index >= len(image2.Layers) {
-			diff, err := diffImageFiles(layer.FSPath, emptyPath)
-			if err != nil {
-				return &util.MultipleDirDiffResult{}, err
-			}
-			dirDiffs = append(dirDiffs, diff)
 			continue
 		}
 		// ...else, diff as usual
@@ -109,16 +95,12 @@ func (a FileLayerAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, erro
 		dirDiffs = append(dirDiffs, diff)
 	}
 
-	// check if there are any additional layers in image2...
-	if len(image2.Layers) > len(image1.Layers) {
-		// ... and diff any additional layers with the empty dir
-		for index := len(image1.Layers); index < len(image2.Layers); index++ {
-			layer2 := image2.Layers[index]
-			diff, err := diffImageFiles(emptyPath, layer2.FSPath)
-			if err != nil {
-				return &util.MultipleDirDiffResult{}, err
-			}
-			dirDiffs = append(dirDiffs, diff)
+	// check if there are any additional layers in either image
+	if len(image1.Layers) != len(image2.Layers) {
+		if len(image1.Layers) > len(image2.Layers) {
+			logrus.Infof("%s has additional layers, please use container-diff analyze to view the files in these layers", image1.Source)
+		} else {
+			logrus.Infof("%s has additional layers, please use container-diff analyze to view the files in these layers", image2.Source)
 		}
 	}
 	return &util.MultipleDirDiffResult{
@@ -138,8 +120,7 @@ func (a FileLayerAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 		if err != nil {
 			return util.FileLayerAnalyzeResult{}, err
 		}
-		directoryEntry := pkgutil.GetDirectoryEntries(layerDir)
-		directoryEntries = append(directoryEntries, directoryEntry)
+		directoryEntries = append(directoryEntries, pkgutil.GetDirectoryEntries(layerDir))
 	}
 
 	return &util.FileLayerAnalyzeResult{

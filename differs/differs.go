@@ -42,14 +42,14 @@ type Analyzer interface {
 }
 
 var Analyzers = map[string]Analyzer{
-	"history":    HistoryAnalyzer{},
-	"metadata":   MetadataAnalyzer{},
-	"file":       FileAnalyzer{},
-	"file-layer": FileLayerAnalyzer{},
-	"apt":        AptAnalyzer{},
-	"rpm":        RPMAnalyzer{},
-	"pip":        PipAnalyzer{},
-	"node":       NodeAnalyzer{},
+	"history":  HistoryAnalyzer{},
+	"metadata": MetadataAnalyzer{},
+	"file":     FileAnalyzer{},
+	"layer":    FileLayerAnalyzer{},
+	"apt":      AptAnalyzer{},
+	"rpm":      RPMAnalyzer{},
+	"pip":      PipAnalyzer{},
+	"node":     NodeAnalyzer{},
 }
 
 func (req DiffRequest) GetDiff() (map[string]util.Result, error) {

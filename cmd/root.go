@@ -210,7 +210,7 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 
 func includeLayers() bool {
 	for _, t := range types {
-		if t == "file-layer" {
+		if t == "layer" {
 			return true
 		}
 	}

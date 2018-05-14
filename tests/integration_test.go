@@ -114,7 +114,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       diffLayerBase,
 			imageB:       diffLayerModifed,
-			differFlags:  []string{"--type=file-layer"},
+			differFlags:  []string{"--type=layer"},
 			expectedFile: "file_layer_diff_expected.json",
 		},
 		{
@@ -206,7 +206,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			description:  "file layer analysis",
 			subcommand:   "analyze",
 			imageA:       diffLayerBase,
-			differFlags:  []string{"--type=file-layer"},
+			differFlags:  []string{"--type=layer"},
 			expectedFile: "file_layer_analysis_expected.json",
 		},
 		{
