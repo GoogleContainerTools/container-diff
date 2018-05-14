@@ -33,6 +33,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const tagRegexStr = ".*:([^/]+$)"
+
 type Layer struct {
 	FSPath string
 }
@@ -83,7 +85,16 @@ func GetFileSystemForLayer(layer v1.Layer, root string, whitelist []string) erro
 }
 
 // unpack image filesystem to local disk
+// if provided directory is not empty, do nothing
 func GetFileSystemForImage(image v1.Image, root string, whitelist []string) error {
+	empty, err := DirIsEmpty(root)
+	if err != nil {
+		return err
+	}
+	if !empty {
+		logrus.Infof("using cached filesystem in %s", root)
+		return nil
+	}
 	if err := unpackTar(tar.NewReader(mutate.Extract(image)), root, whitelist); err != nil {
 		return err
 	}
@@ -134,6 +145,17 @@ func copyToFile(outfile string, r io.Reader) error {
 
 // checks to see if an image string contains a tag.
 func HasTag(image string) bool {
-	tagRegex := regexp.MustCompile(".*:[^/]+$")
+	tagRegex := regexp.MustCompile(tagRegexStr)
 	return tagRegex.MatchString(image)
+}
+
+// returns a raw image name with the tag removed
+func RemoveTag(image string) string {
+	if !HasTag(image) {
+		return image
+	}
+	tagRegex := regexp.MustCompile(tagRegexStr)
+	parts := tagRegex.FindStringSubmatch(image)
+	tag := parts[len(parts)-1]
+	return image[0 : len(image)-len(tag)-1]
 }

@@ -237,6 +237,7 @@ go_library(
             "asm_linux_386.s",
             "fcntl_linux_32bit.go",
             "syscall_linux_386.go",
+            "syscall_linux_gc_386.go",
             "zerrors_linux_386.go",
             "zptrace386_linux.go",
             "zsyscall_linux_386.go",
