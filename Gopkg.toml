@@ -37,13 +37,5 @@
   version = "1.0.4"
 
 [[constraint]]
-  name = "github.com/docker/distribution"
-  branch = "master"
-
-[[constraint]]
-  name = "github.com/containers/image"
-  revision = "495da41bd26c50be62fa07ae903ea2ee54c00283"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/mitchellh/go-homedir"
+  name = "github.com/google/go-containerregistry"
+  revision = "9a6a2b004c1a6d2c946acc52af194d85b882f8c6"

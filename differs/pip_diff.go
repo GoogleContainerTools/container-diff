@@ -49,8 +49,12 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 	path := image.FSPath
 	packages := make(map[string]map[string]util.PackageInfo)
 	pythonPaths := []string{}
-	if image.Config.Config.Env != nil {
-		paths := getPythonPaths(image.Config.Config.Env)
+	config, err := image.Image.ConfigFile()
+	if err != nil {
+		return packages, err
+	}
+	if config.Config.Env != nil {
+		paths := getPythonPaths(config.Config.Env)
 		for _, p := range paths {
 			pythonPaths = append(pythonPaths, p)
 		}

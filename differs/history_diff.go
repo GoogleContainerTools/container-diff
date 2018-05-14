@@ -21,6 +21,7 @@ import (
 
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
+	"github.com/google/go-containerregistry/v1"
 )
 
 type HistoryAnalyzer struct {
@@ -46,7 +47,11 @@ func (a HistoryAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error)
 }
 
 func (a HistoryAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
-	history := getHistoryList(image.Config.History)
+	c, err := image.Image.ConfigFile()
+	if err != nil {
+		return util.ListAnalyzeResult{}, err
+	}
+	history := getHistoryList(c.History)
 	result := util.ListAnalyzeResult{
 		Image:       image.Source,
 		AnalyzeType: "History",
@@ -56,8 +61,16 @@ func (a HistoryAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 }
 
 func getHistoryDiff(image1, image2 pkgutil.Image) (HistDiff, error) {
-	history1 := getHistoryList(image1.Config.History)
-	history2 := getHistoryList(image2.Config.History)
+	c1, err := image1.Image.ConfigFile()
+	if err != nil {
+		return HistDiff{}, err
+	}
+	c2, err := image2.Image.ConfigFile()
+	if err != nil {
+		return HistDiff{}, err
+	}
+	history1 := getHistoryList(c1.History)
+	history2 := getHistoryList(c2.History)
 
 	adds := util.GetAdditions(history1, history2)
 	dels := util.GetDeletions(history1, history2)
@@ -65,7 +78,7 @@ func getHistoryDiff(image1, image2 pkgutil.Image) (HistDiff, error) {
 	return diff, nil
 }
 
-func getHistoryList(historyItems []pkgutil.ImageHistoryItem) []string {
+func getHistoryList(historyItems []v1.History) []string {
 	strhistory := make([]string, len(historyItems))
 	for i, layer := range historyItems {
 		strhistory[i] = strings.TrimSpace(layer.CreatedBy)
