@@ -31,13 +31,14 @@ import (
 )
 
 var filename string
+var layers bool
 
 var diffCmd = &cobra.Command{
 	Use:   "diff",
 	Short: "Compare two images: [image1] [image2]",
 	Long:  `Compares two images using the specifed analyzers as indicated via flags (see documentation for available ones).`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if err := validateArgs(args, checkDiffArgNum, checkIfValidAnalyzer, checkFilenameFlag); err != nil {
+		if err := validateArgs(args, checkDiffArgNum, checkIfValidAnalyzer, checkFilenameFlag, checkLayersFlag); err != nil {
 			return err
 		}
 		return nil
@@ -67,6 +68,18 @@ func checkFilenameFlag(_ []string) error {
 		}
 	}
 	return errors.New("Please include --types=file with the --filename flag")
+}
+
+func checkLayersFlag(_ []string) error {
+	if layers {
+		for _, t := range types {
+			if t == "file" {
+				return nil
+			}
+		}
+		return errors.New("Please include --types=file with the --layers flag")
+	}
+	return nil
 }
 
 func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
@@ -100,6 +113,12 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	if !save {
 		defer pkgutil.CleanupImage(*imageMap[image1Arg])
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
+	}
+
+	if layers {
+		if err := diffLayers(imageMap[image1Arg], imageMap[image2Arg]); err != nil {
+			return err
+		}
 	}
 
 	output.PrintToStdErr("Computing diffs\n")
@@ -139,6 +158,7 @@ func diffFile(image1, image2 *pkgutil.Image) error {
 
 func init() {
 	diffCmd.Flags().StringVarP(&filename, "filename", "f", "", "Set this flag to the path of a file in both containers to view the diff of the file. Must be used with --types=file flag.")
+	diffCmd.Flags().BoolVarP(&layers, "layers", "", false, "Set this flag to diff the filesystems of two images by layer. Must be used with --types=file flag.")
 	RootCmd.AddCommand(diffCmd)
 	addSharedFlags(diffCmd)
 	output.AddFlags(diffCmd)
