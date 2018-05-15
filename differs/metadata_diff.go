@@ -80,7 +80,6 @@ func getMetadataList(image pkgutil.Image) ([]string, error) {
 	}
 	c := configFile.Config
 	return []string{
-		fmt.Sprintf("Hostname: %s", c.Hostname),
 		fmt.Sprintf("Domainname: %s", c.Domainname),
 		fmt.Sprintf("User: %s", c.User),
 		fmt.Sprintf("AttachStdin: %t", c.AttachStdin),
@@ -93,7 +92,6 @@ func getMetadataList(image pkgutil.Image) ([]string, error) {
 		fmt.Sprintf("Env: %s", strings.Join(c.Env, ",")),
 		fmt.Sprintf("Cmd: %s", strings.Join(c.Cmd, ",")),
 		fmt.Sprintf("ArgsEscaped: %t", c.ArgsEscaped),
-		fmt.Sprintf("Image: %s", c.Image),
 		fmt.Sprintf("Volumes: %v", pkgutil.SortMap(c.Volumes)),
 		fmt.Sprintf("Workdir: %s", c.WorkingDir),
 		fmt.Sprintf("Entrypoint: %s", strings.Join(c.Entrypoint, ",")),
