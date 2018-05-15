@@ -34,9 +34,11 @@ var templates = map[string]string{
 	"HistDiff":                    HistoryDiffOutput,
 	"MetadataDiff":                MetadataDiffOutput,
 	"DirDiff":                     FSDiffOutput,
+	"MultipleDirDiff":             FSLayerDiffOutput,
 	"FilenameDiff":                FilenameDiffOutput,
 	"ListAnalyze":                 ListAnalysisOutput,
 	"FileAnalyze":                 FileAnalysisOutput,
+	"FileLayerAnalyze":            FileLayerAnalysisOutput,
 	"MultiVersionPackageAnalyze":  MultiVersionPackageOutput,
 	"SingleVersionPackageAnalyze": SingleVersionPackageOutput,
 }

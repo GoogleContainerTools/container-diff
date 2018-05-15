@@ -1,0 +1,26 @@
+[
+  {
+    "Image": "gcr.io/gcp-runtimes/diff-layer-base",
+    "AnalyzeType": "FileLayer",
+    "Analysis": [
+      [
+        {
+          "Name": "/first",
+          "Size": 6
+        }
+      ],
+      [
+        {
+          "Name": "/second",
+          "Size": 7
+        }
+      ],
+      [
+        {
+          "Name": "/third",
+          "Size": 6
+        }
+      ]
+    ]
+  }
+]

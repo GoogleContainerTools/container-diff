@@ -29,6 +29,23 @@ These entries have been changed between {{.Image1}} and {{.Image2}}:{{if not .Di
 FILE	SIZE1	SIZE2{{range .Diff.Mods}}{{"\n"}}{{.Name}}	{{.Size1}}	{{.Size2}}{{end}}
 {{end}}
 `
+const FSLayerDiffOutput = `
+-----{{.DiffType}}-----
+
+{{range $index, $diff := .Diff}}
+
+Diff for Layer {{$index}}:
+These entries have been added to {{$.Image1}}:{{if not $diff.Adds}} None{{else}}
+FILE	SIZE{{range $diff.Adds}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}{{end}}
+
+These entries have been deleted from {{$.Image1}}:{{if not $diff.Dels}} None{{else}}
+FILE	SIZE{{range $diff.Dels}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}{{end}}
+
+These entries have been changed between {{$.Image1}} and {{$.Image2}}:{{if not $diff.Mods}} None{{else}}
+FILE	SIZE1	SIZE2{{range $diff.Mods}}{{"\n"}}{{.Name}}	{{.Size1}}	{{.Size2}}{{end}}
+{{end}}
+{{end}}
+`
 
 const SingleVersionDiffOutput = `
 -----{{.DiffType}}-----
@@ -94,6 +111,16 @@ const FileAnalysisOutput = `
 
 Analysis for {{.Image}}:{{if not .Analysis}} None{{else}}
 FILE	SIZE{{range .Analysis}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}
+{{end}}
+`
+
+const FileLayerAnalysisOutput = `
+-----{{.AnalyzeType}}-----
+{{range $index, $analysis := .Analysis}}
+
+Analysis for {{$.Image}} Layer {{$index}}:{{if not $analysis}} None{{else}}
+FILE	SIZE{{range $analysis}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}
+{{end}}
 {{end}}
 `
 

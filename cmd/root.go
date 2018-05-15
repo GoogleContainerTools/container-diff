@@ -167,6 +167,29 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 	// TODO(nkubala): implement caching
 
 	// create tempdir and extract fs into it
+	var layers []pkgutil.Layer
+	if includeLayers() {
+		imgLayers, err := img.Layers()
+		if err != nil {
+			return pkgutil.Image{}, err
+		}
+		for _, layer := range imgLayers {
+			path, err := ioutil.TempDir("", strings.Replace(imageName, "/", "", -1))
+			if err != nil {
+				return pkgutil.Image{
+					Layers: layers,
+				}, err
+			}
+			if err := pkgutil.GetFileSystemForLayer(layer, path, nil); err != nil {
+				return pkgutil.Image{
+					Layers: layers,
+				}, err
+			}
+			layers = append(layers, pkgutil.Layer{
+				FSPath: path,
+			})
+		}
+	}
 	path, err := ioutil.TempDir("", strings.Replace(imageName, "/", "", -1))
 	if err != nil {
 		return pkgutil.Image{}, err
@@ -174,13 +197,24 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 	if err := pkgutil.GetFileSystemForImage(img, path, nil); err != nil {
 		return pkgutil.Image{
 			FSPath: path,
+			Layers: layers,
 		}, err
 	}
 	return pkgutil.Image{
 		Image:  img,
 		Source: imageName,
 		FSPath: path,
+		Layers: layers,
 	}, nil
+}
+
+func includeLayers() bool {
+	for _, t := range types {
+		if t == "layer" {
+			return true
+		}
+	}
+	return false
 }
 
 func init() {

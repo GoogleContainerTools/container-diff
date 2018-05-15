@@ -38,6 +38,9 @@ const (
 	diffBase     = "gcr.io/gcp-runtimes/diff-base"
 	diffModified = "gcr.io/gcp-runtimes/diff-modified"
 
+	diffLayerBase    = "gcr.io/gcp-runtimes/diff-layer-base"
+	diffLayerModifed = "gcr.io/gcp-runtimes/diff-layer-modified"
+
 	metadataBase     = "gcr.io/gcp-runtimes/metadata-base"
 	metadataModified = "gcr.io/gcp-runtimes/metadata-modified"
 
@@ -105,6 +108,14 @@ func TestDiffAndAnalysis(t *testing.T) {
 			imageB:       diffModified,
 			differFlags:  []string{"--type=file"},
 			expectedFile: "file_diff_expected.json",
+		},
+		{
+			description:  "file layer differ",
+			subcommand:   "diff",
+			imageA:       diffLayerBase,
+			imageB:       diffLayerModifed,
+			differFlags:  []string{"--type=layer"},
+			expectedFile: "file_layer_diff_expected.json",
 		},
 		{
 			description:  "apt differ",
@@ -190,6 +201,13 @@ func TestDiffAndAnalysis(t *testing.T) {
 			imageA:       diffModified,
 			differFlags:  []string{"--type=file", "-o"},
 			expectedFile: "file_sorted_analysis_expected.json",
+		},
+		{
+			description:  "file layer analysis",
+			subcommand:   "analyze",
+			imageA:       diffLayerBase,
+			differFlags:  []string{"--type=layer"},
+			expectedFile: "file_layer_analysis_expected.json",
 		},
 		{
 			description:  "pip analysis",
