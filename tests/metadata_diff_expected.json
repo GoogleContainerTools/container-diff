@@ -6,12 +6,10 @@
     "Diff": {
       "Adds": [
         "ExposedPorts: 1234/tcp:{}",
-        "Image: sha256:0b30c570b95ba9cc450c8252cb264a8c66f7492a7dd6fb32f356267b9e04038f",
         "Entrypoint: /entrypoint"
       ],
       "Dels": [
         "ExposedPorts: 1234/tcp:{} 4321/tcp:{}",
-        "Image: sha256:63d847f046cdda00df8ba9176753059439478784129443dd1da632504dce95bb",
         "Entrypoint: "
       ]
     }
