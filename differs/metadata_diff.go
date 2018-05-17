@@ -79,27 +79,38 @@ func getMetadataList(image pkgutil.Image) ([]string, error) {
 		return nil, err
 	}
 	c := configFile.Config
+
 	return []string{
 		fmt.Sprintf("Domainname: %s", c.Domainname),
 		fmt.Sprintf("User: %s", c.User),
 		fmt.Sprintf("AttachStdin: %t", c.AttachStdin),
 		fmt.Sprintf("AttachStdout: %t", c.AttachStdout),
 		fmt.Sprintf("AttachStderr: %t", c.AttachStderr),
-		fmt.Sprintf("ExposedPorts: %v", pkgutil.SortMap(c.ExposedPorts)),
+		fmt.Sprintf("ExposedPorts: %v", pkgutil.SortMap(StructMapToStringMap(c.ExposedPorts))),
 		fmt.Sprintf("Tty: %t", c.Tty),
 		fmt.Sprintf("OpenStdin: %t", c.OpenStdin),
 		fmt.Sprintf("StdinOnce: %t", c.StdinOnce),
 		fmt.Sprintf("Env: %s", strings.Join(c.Env, ",")),
 		fmt.Sprintf("Cmd: %s", strings.Join(c.Cmd, ",")),
 		fmt.Sprintf("ArgsEscaped: %t", c.ArgsEscaped),
-		fmt.Sprintf("Volumes: %v", pkgutil.SortMap(c.Volumes)),
+		fmt.Sprintf("Volumes: %v", pkgutil.SortMap(StructMapToStringMap(c.Volumes))),
 		fmt.Sprintf("Workdir: %s", c.WorkingDir),
 		fmt.Sprintf("Entrypoint: %s", strings.Join(c.Entrypoint, ",")),
 		fmt.Sprintf("NetworkDisabled: %t", c.NetworkDisabled),
 		fmt.Sprintf("MacAddress: %s", c.MacAddress),
 		fmt.Sprintf("OnBuild: %s", strings.Join(c.OnBuild, ",")),
-		fmt.Sprintf("Labels: %v", c.Labels),
+		fmt.Sprintf("Labels: %v", pkgutil.SortMap(c.Labels)),
 		fmt.Sprintf("StopSignal: %s", c.StopSignal),
 		fmt.Sprintf("Shell: %s", strings.Join(c.Shell, ",")),
 	}, nil
+}
+
+// StructMapToStringMap converts map[string]struct{} to map[string]string knowing that the
+// struct in the value is always empty
+func StructMapToStringMap(m map[string]struct{}) map[string]string {
+	newMap := make(map[string]string)
+	for k := range m {
+		newMap[k] = fmt.Sprintf("%s", m[k])
+	}
+	return newMap
 }

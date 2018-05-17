@@ -64,7 +64,7 @@ func CleanupImage(image Image) {
 	}
 }
 
-func SortMap(m map[string]struct{}) string {
+func SortMap(m map[string]string) string {
 	pairs := make([]string, 0)
 	for key := range m {
 		pairs = append(pairs, fmt.Sprintf("%s:%s", key, m[key]))
