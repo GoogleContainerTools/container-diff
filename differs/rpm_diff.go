@@ -17,11 +17,14 @@ limitations under the License.
 package differs
 
 import (
+	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -40,6 +43,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//RPM command to extract packages from the rpm database
+var rpmCmd = []string{
+	"rpm", "--nodigest", "--nosignature",
+	"-qa", "--qf", "%{NAME}\t%{VERSION}\t%{SIZE}\n",
+}
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 // daemonMutex is required to protect against other go-routines, as
@@ -87,7 +95,65 @@ func (a RPMAnalyzer) getPackages(image pkgutil.Image) (map[string]util.PackageIn
 		}
 	}
 
-	return rpmDataFromContainer(image)
+	packages, err := rpmDataFromImageFS(image)
+	if err != nil {
+		logrus.Warn("Trying to run the RPM binary of the image in a container")
+		return rpmDataFromContainer(image)
+	}
+	return packages, err
+}
+
+// rpmDataFromImageFS runs a local rpm binary, if any, to query the image
+// rpmdb and returns a map of installed packages.
+func rpmDataFromImageFS(image pkgutil.Image) (map[string]util.PackageInfo, error) {
+	packages := make(map[string]util.PackageInfo)
+	// Check there is an executable rpm tool in host
+	if err := exec.Command("rpm", "--version").Run(); err != nil {
+		logrus.Warn("No RPM binary in host")
+		return packages, err
+	}
+	dbPath, err := rpmDBPath(image.FSPath)
+	if err != nil {
+		logrus.Warnf("Couldn't find RPM database: %s", err.Error())
+		return packages, err
+	}
+	cmdArgs := append([]string{"--root", image.FSPath, "--dbpath", dbPath}, rpmCmd[1:]...)
+	out, err := exec.Command(rpmCmd[0], cmdArgs...).Output()
+	if err != nil {
+		logrus.Warnf("RPM call failed: %s", err.Error())
+		return packages, err
+	}
+	output := strings.Split(string(out), "\n")
+	return parsePackageData(output)
+}
+
+// rpmDBPath tries to get the RPM database path from the /usr/lib/rpm/macros
+// file in the image rootfs.
+func rpmDBPath(rootFSPath string) (string, error) {
+	rpmMacros, err := os.Open(filepath.Join(rootFSPath, "usr/lib/rpm/macros"))
+	if err != nil {
+		return "", err
+	}
+	defer rpmMacros.Close()
+
+	scanner := bufio.NewScanner(rpmMacros)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, "%_dbpath") {
+			fields := strings.Fields(line)
+			if len(fields) < 2 {
+				break
+			}
+			out, err := exec.Command("rpm", "-E", fields[1]).Output()
+			if err != nil {
+				return "", err
+			}
+			dbPath := strings.TrimRight(string(out), "\r\n")
+			_, err = os.Stat(filepath.Join(rootFSPath, dbPath))
+			return dbPath, err
+		}
+	}
+	return "", errors.New("Failed parsing macros file")
 }
 
 // rpmDataFromContainer runs image in a container, queries the data of
@@ -114,7 +180,7 @@ func rpmDataFromContainer(image pkgutil.Image) (map[string]util.PackageInfo, err
 	defer logrus.Infof("Removing image %s", imageName)
 
 	contConf := godocker.Config{
-		Entrypoint: []string{"rpm", "--nodigest", "--nosignature", "-qa", "--qf", "%{NAME}\t%{VERSION}\t%{SIZE}\n"},
+		Entrypoint: rpmCmd,
 		Image:      imageName,
 	}
 
