@@ -14,6 +14,7 @@ go_library(
         "image.go",
         "misc.go",
         "network.go",
+        "plugin.go",
         "signal.go",
         "swarm.go",
         "swarm_configs.go",
@@ -72,8 +73,6 @@ go_library(
         "//vendor/github.com/docker/docker/pkg/jsonmessage:go_default_library",
         "//vendor/github.com/docker/docker/pkg/stdcopy:go_default_library",
         "//vendor/github.com/docker/go-units:go_default_library",
-        "//vendor/golang.org/x/net/context:go_default_library",
-        "//vendor/golang.org/x/net/context/ctxhttp:go_default_library",
     ] + select({
         "@io_bazel_rules_go//go/platform:windows": [
             "//vendor/github.com/Microsoft/go-winio:go_default_library",
@@ -97,6 +96,7 @@ go_test(
         "image_test.go",
         "misc_test.go",
         "network_test.go",
+        "plugins_test.go",
         "swarm_configs_test.go",
         "swarm_node_test.go",
         "swarm_secrets_test.go",
@@ -167,7 +167,6 @@ go_test(
         "//vendor/github.com/docker/docker/api/types/swarm:go_default_library",
         "//vendor/github.com/docker/docker/pkg/archive:go_default_library",
         "//vendor/github.com/google/go-cmp/cmp:go_default_library",
-        "//vendor/golang.org/x/net/context:go_default_library",
     ] + select({
         "@io_bazel_rules_go//go/platform:windows": [
             "//vendor/github.com/Microsoft/go-winio:go_default_library",

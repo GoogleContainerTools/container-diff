@@ -28,8 +28,8 @@ import (
 	"strings"
 
 	"github.com/docker/docker/pkg/system"
-	"github.com/google/go-containerregistry/v1"
-	"github.com/google/go-containerregistry/v1/mutate"
+	"github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1/mutate"
 	"github.com/sirupsen/logrus"
 )
 

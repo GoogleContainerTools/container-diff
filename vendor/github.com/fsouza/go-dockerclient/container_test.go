@@ -7,6 +7,7 @@ package docker
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,8 +22,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 func TestStateString(t *testing.T) {
@@ -217,7 +216,10 @@ func TestInspectContainer(t *testing.T) {
                       ],
                       "Ulimits": [
                           { "Name": "nofile", "Soft": 1024, "Hard": 2048 }
-                      ]
+											],
+											"Shell": [
+                         "/bin/sh", "-c"
+											]
              },
              "State": {
                      "Running": false,
@@ -1324,6 +1326,18 @@ func TestKillContainerNotFound(t *testing.T) {
 	client := newTestClient(&FakeRoundTripper{message: "no such container", status: http.StatusNotFound})
 	err := client.KillContainer(KillContainerOptions{ID: "a2334"})
 	expected := &NoSuchContainer{ID: "a2334"}
+	if !reflect.DeepEqual(err, expected) {
+		t.Errorf("KillContainer: Wrong error returned. Want %#v. Got %#v.", expected, err)
+	}
+}
+
+func TestKillContainerNotRunning(t *testing.T) {
+	t.Parallel()
+	id := "abcd1234567890"
+	msg := fmt.Sprintf("Cannot kill container: %[1]s: Container %[1]s is not running", id)
+	client := newTestClient(&FakeRoundTripper{message: msg, status: http.StatusConflict})
+	err := client.KillContainer(KillContainerOptions{ID: id})
+	expected := &ContainerNotRunning{ID: id}
 	if !reflect.DeepEqual(err, expected) {
 		t.Errorf("KillContainer: Wrong error returned. Want %#v. Got %#v.", expected, err)
 	}
@@ -2461,7 +2475,8 @@ func TestStats(t *testing.T) {
              "total_usage" : 36488948,
              "usage_in_kernelmode" : 20000000
           },
-          "system_cpu_usage" : 20091722000000000
+          "system_cpu_usage" : 20091722000000000,
+		  "online_cpus": 4
        },
        "precpu_stats" : {
           "cpu_usage" : {
@@ -2475,7 +2490,8 @@ func TestStats(t *testing.T) {
              "total_usage" : 36488948,
              "usage_in_kernelmode" : 20000000
           },
-          "system_cpu_usage" : 20091722000000000
+          "system_cpu_usage" : 20091722000000000,
+		  "online_cpus": 4
        }
     }`
 	// 1 second later, cache is 100
@@ -2579,7 +2595,8 @@ func TestStats(t *testing.T) {
              "total_usage" : 36488948,
              "usage_in_kernelmode" : 20000000
           },
-          "system_cpu_usage" : 20091722000000000
+          "system_cpu_usage" : 20091722000000000,
+		  "online_cpus": 4
        },
        "precpu_stats" : {
           "cpu_usage" : {
@@ -2593,7 +2610,8 @@ func TestStats(t *testing.T) {
              "total_usage" : 36488948,
              "usage_in_kernelmode" : 20000000
           },
-          "system_cpu_usage" : 20091722000000000
+          "system_cpu_usage" : 20091722000000000,
+		  "online_cpus": 4
        }
     }`
 	var expected1 Stats

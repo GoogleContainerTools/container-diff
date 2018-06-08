@@ -7,7 +7,6 @@ go_library(
     ] + select({
         "@io_bazel_rules_go//go/platform:windows": [
             "dll_windows.go",
-            "env_unset.go",
             "env_windows.go",
             "eventlog.go",
             "exec_windows.go",

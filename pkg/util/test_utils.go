@@ -17,9 +17,9 @@ limitations under the License.
 package util
 
 import (
-	"github.com/google/go-containerregistry/v1"
-	"github.com/google/go-containerregistry/v1/partial"
-	"github.com/google/go-containerregistry/v1/types"
+	"github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1/partial"
+	"github.com/google/go-containerregistry/pkg/v1/types"
 )
 
 type TestImage struct {

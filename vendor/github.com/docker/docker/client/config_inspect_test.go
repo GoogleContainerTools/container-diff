@@ -1,4 +1,4 @@
-package client
+package client // import "github.com/docker/docker/client"
 
 import (
 	"bytes"
@@ -10,9 +10,34 @@ import (
 	"testing"
 
 	"github.com/docker/docker/api/types/swarm"
-	"github.com/stretchr/testify/assert"
+	"github.com/gotestyourself/gotestyourself/assert"
+	is "github.com/gotestyourself/gotestyourself/assert/cmp"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
+
+func TestConfigInspectNotFound(t *testing.T) {
+	client := &Client{
+		client: newMockClient(errorMock(http.StatusNotFound, "Server error")),
+	}
+
+	_, _, err := client.ConfigInspectWithRaw(context.Background(), "unknown")
+	if err == nil || !IsErrNotFound(err) {
+		t.Fatalf("expected a NotFoundError error, got %v", err)
+	}
+}
+
+func TestConfigInspectWithEmptyID(t *testing.T) {
+	client := &Client{
+		client: newMockClient(func(req *http.Request) (*http.Response, error) {
+			return nil, errors.New("should not make request")
+		}),
+	}
+	_, _, err := client.ConfigInspectWithRaw(context.Background(), "")
+	if !IsErrNotFound(err) {
+		t.Fatalf("Expected NotFoundError, got %v", err)
+	}
+}
 
 func TestConfigInspectUnsupported(t *testing.T) {
 	client := &Client{
@@ -20,7 +45,7 @@ func TestConfigInspectUnsupported(t *testing.T) {
 		client:  &http.Client{},
 	}
 	_, _, err := client.ConfigInspectWithRaw(context.Background(), "nothing")
-	assert.EqualError(t, err, `"config inspect" requires API version 1.30, but the Docker daemon API version is 1.29`)
+	assert.Check(t, is.Error(err, `"config inspect" requires API version 1.30, but the Docker daemon API version is 1.29`))
 }
 
 func TestConfigInspectError(t *testing.T) {

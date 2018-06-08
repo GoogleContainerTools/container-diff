@@ -4,7 +4,7 @@
 
 [[constraint]]
   name = "github.com/docker/docker"
-  branch = "master"
+  revision = "a422774e593b33bd287d9890544ad9e09b380d8c"
 
 [[constraint]]
   name = "github.com/docker/go-units"
@@ -12,15 +12,11 @@
 
 [[constraint]]
   name = "github.com/google/go-cmp"
-  branch = "master"
+  version = "v0.2.0"
 
 [[constraint]]
   name = "github.com/gorilla/mux"
   version = "v1.5.0"
-
-[[constraint]]
-  name = "golang.org/x/net"
-  branch = "master"
 
 [[override]]
   name = "github.com/Nvveen/Gotty"

@@ -1,4 +1,4 @@
-package client
+package client // import "github.com/docker/docker/client"
 
 import (
 	"bytes"
@@ -11,8 +11,9 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/internal/testutil"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/gotestyourself/gotestyourself/assert"
+	is "github.com/gotestyourself/gotestyourself/assert/cmp"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -31,24 +32,19 @@ func TestVolumeInspectNotFound(t *testing.T) {
 	}
 
 	_, err := client.VolumeInspect(context.Background(), "unknown")
-	assert.True(t, IsErrNotFound(err))
+	assert.Check(t, IsErrNotFound(err))
 }
 
 func TestVolumeInspectWithEmptyID(t *testing.T) {
-	expectedURL := "/volumes/"
-
 	client := &Client{
 		client: newMockClient(func(req *http.Request) (*http.Response, error) {
-			assert.Equal(t, req.URL.Path, expectedURL)
-			return &http.Response{
-				StatusCode: http.StatusNotFound,
-				Body:       ioutil.NopCloser(bytes.NewReader(nil)),
-			}, nil
+			return nil, errors.New("should not make request")
 		}),
 	}
-	_, err := client.VolumeInspect(context.Background(), "")
-	testutil.ErrorContains(t, err, "No such volume: ")
-
+	_, _, err := client.VolumeInspectWithRaw(context.Background(), "")
+	if !IsErrNotFound(err) {
+		t.Fatalf("Expected NotFoundError, got %v", err)
+	}
 }
 
 func TestVolumeInspect(t *testing.T) {
@@ -79,6 +75,6 @@ func TestVolumeInspect(t *testing.T) {
 	}
 
 	volume, err := client.VolumeInspect(context.Background(), "volume_id")
-	require.NoError(t, err)
-	assert.Equal(t, expected, volume)
+	assert.NilError(t, err)
+	assert.Check(t, is.DeepEqual(expected, volume))
 }

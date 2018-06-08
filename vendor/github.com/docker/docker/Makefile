@@ -66,7 +66,7 @@ DOCKER_MOUNT := $(if $(BIND_DIR),-v "$(CURDIR)/$(BIND_DIR):/go/src/github.com/do
 # This allows the test suite to be able to run without worrying about the underlying fs used by the container running the daemon (e.g. aufs-on-aufs), so long as the host running the container is running a supported fs.
 # The volume will be cleaned up when the container is removed due to `--rm`.
 # Note that `BIND_DIR` will already be set to `bundles` if `DOCKER_HOST` is not set (see above BIND_DIR line), in such case this will do nothing since `DOCKER_MOUNT` will already be set.
-DOCKER_MOUNT := $(if $(DOCKER_MOUNT),$(DOCKER_MOUNT),-v /go/src/github.com/docker/docker/bundles) -v $(CURDIR)/.git:/go/src/github.com/docker/docker/.git
+DOCKER_MOUNT := $(if $(DOCKER_MOUNT),$(DOCKER_MOUNT),-v /go/src/github.com/docker/docker/bundles) -v "$(CURDIR)/.git:/go/src/github.com/docker/docker/.git"
 
 # This allows to set the docker-dev container name
 DOCKER_CONTAINER_NAME := $(if $(CONTAINER_NAME),--name $(CONTAINER_NAME),)
@@ -197,7 +197,7 @@ swagger-docs: ## preview the API documentation
 
 build-integration-cli-on-swarm: build ## build images and binary for running integration-cli on Swarm in parallel
 	@echo "Building hack/integration-cli-on-swarm (if build fails, please refer to hack/integration-cli-on-swarm/README.md)"
-	go build -o ./hack/integration-cli-on-swarm/integration-cli-on-swarm ./hack/integration-cli-on-swarm/host
+	go build -buildmode=pie -o ./hack/integration-cli-on-swarm/integration-cli-on-swarm ./hack/integration-cli-on-swarm/host
 	@echo "Building $(INTEGRATION_CLI_MASTER_IMAGE)"
 	docker build -t $(INTEGRATION_CLI_MASTER_IMAGE) hack/integration-cli-on-swarm/agent
 # For worker, we don't use `docker build` so as to enable DOCKER_INCREMENTAL_BINARY and so on
@@ -207,6 +207,6 @@ build-integration-cli-on-swarm: build ## build images and binary for running int
 # For avoiding bakings DOCKER_GRAPHDRIVER and so on to image, we cannot use $(DOCKER_ENVS) here
 	docker run -t -d --name $(tmp) -e DOCKER_GITCOMMIT -e BUILDFLAGS -e DOCKER_INCREMENTAL_BINARY --privileged $(DOCKER_MOUNT_PKGCACHE) $(DOCKER_IMAGE) top
 	docker exec $(tmp) hack/make.sh build-integration-test-binary dynbinary
-	docker exec $(tmp) go build -o /worker github.com/docker/docker/hack/integration-cli-on-swarm/agent/worker
+	docker exec $(tmp) go build -buildmode=pie -o /worker github.com/docker/docker/hack/integration-cli-on-swarm/agent/worker
 	docker commit -c 'ENTRYPOINT ["/worker"]' $(tmp) $(INTEGRATION_CLI_WORKER_IMAGE)
 	docker rm -f $(tmp)
