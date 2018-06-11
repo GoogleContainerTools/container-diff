@@ -19,6 +19,14 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
+# Implicit dependency of github.com/fsouza/go-dockerclient, which depends on 
+# github.com/docker/docker, which depends on github.com/docker/distribution.
+# Since this is vendored through something other than dep, dep doesn't know
+# how to resolve it, so we have to do it manually.
+required = ["github.com/docker/distribution"]
+[[constraint]]
+  name = "github.com/docker/distribution"
+  revision = "f0cc927784781fa395c06317c58dea2841ece3a9"
 
 [[constraint]]
   name = "github.com/fsouza/go-dockerclient"
@@ -38,4 +46,4 @@
 
 [[constraint]]
   name = "github.com/google/go-containerregistry"
-  revision = "9a6a2b004c1a6d2c946acc52af194d85b882f8c6"
+  revision = "dc0a77702ddab8c3dc5630eca7c026d571c1c9b7"

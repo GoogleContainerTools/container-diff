@@ -80,6 +80,7 @@ go_test(
     importpath = "github.com/docker/docker/opts",
     deps = [
         "//vendor/github.com/docker/go-units:go_default_library",
-        "//vendor/github.com/stretchr/testify/assert:go_default_library",
+        "//vendor/github.com/gotestyourself/gotestyourself/assert:go_default_library",
+        "//vendor/github.com/gotestyourself/gotestyourself/assert/cmp:go_default_library",
     ],
 )

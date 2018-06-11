@@ -275,11 +275,11 @@ go_test(
     ] + select({
         "@io_bazel_rules_go//go/platform:freebsd": [
             "//vendor/github.com/docker/go-units:go_default_library",
-            "//vendor/github.com/stretchr/testify/require:go_default_library",
+            "//vendor/github.com/gotestyourself/gotestyourself/assert:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:linux": [
             "//vendor/github.com/docker/go-units:go_default_library",
-            "//vendor/github.com/stretchr/testify/require:go_default_library",
+            "//vendor/github.com/gotestyourself/gotestyourself/assert:go_default_library",
         ],
         "@io_bazel_rules_go//go/platform:windows": [
             "//vendor/github.com/containerd/continuity/pathdriver:go_default_library",

@@ -69,7 +69,8 @@ go_test(
     embed = [":go_default_library"],
     importpath = "github.com/docker/docker/pkg/ioutils",
     deps = [
-        "//vendor/github.com/stretchr/testify/assert:go_default_library",
+        "//vendor/github.com/gotestyourself/gotestyourself/assert:go_default_library",
+        "//vendor/github.com/gotestyourself/gotestyourself/assert/cmp:go_default_library",
         "//vendor/golang.org/x/net/context:go_default_library",
     ],
 )

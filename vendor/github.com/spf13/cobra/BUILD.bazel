@@ -59,6 +59,7 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
+        "args_test.go",
         "bash_completions_test.go",
         "cobra_test.go",
         "command_test.go",

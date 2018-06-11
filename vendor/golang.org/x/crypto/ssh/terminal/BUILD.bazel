@@ -73,7 +73,36 @@ go_library(
 
 go_test(
     name = "go_default_test",
-    srcs = ["terminal_test.go"],
+    srcs = select({
+        "@io_bazel_rules_go//go/platform:darwin": [
+            "terminal_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:dragonfly": [
+            "terminal_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:freebsd": [
+            "terminal_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:linux": [
+            "terminal_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:netbsd": [
+            "terminal_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:openbsd": [
+            "terminal_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:plan9": [
+            "terminal_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:solaris": [
+            "terminal_test.go",
+        ],
+        "@io_bazel_rules_go//go/platform:windows": [
+            "terminal_test.go",
+        ],
+        "//conditions:default": [],
+    }),
     embed = [":go_default_library"],
     importpath = "golang.org/x/crypto/ssh/terminal",
 )

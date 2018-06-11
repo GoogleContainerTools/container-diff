@@ -1,4 +1,4 @@
-package client
+package client // import "github.com/docker/docker/client"
 
 import (
 	"bytes"
@@ -11,7 +11,9 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
-	"github.com/stretchr/testify/assert"
+	"github.com/gotestyourself/gotestyourself/assert"
+	is "github.com/gotestyourself/gotestyourself/assert/cmp"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -21,7 +23,7 @@ func TestNetworkInspectError(t *testing.T) {
 	}
 
 	_, err := client.NetworkInspect(context.Background(), "nothing", types.NetworkInspectOptions{})
-	assert.EqualError(t, err, "Error response from daemon: Server error")
+	assert.Check(t, is.Error(err, "Error response from daemon: Server error"))
 }
 
 func TestNetworkInspectNotFoundError(t *testing.T) {
@@ -30,8 +32,20 @@ func TestNetworkInspectNotFoundError(t *testing.T) {
 	}
 
 	_, err := client.NetworkInspect(context.Background(), "unknown", types.NetworkInspectOptions{})
-	assert.EqualError(t, err, "Error: No such network: unknown")
-	assert.True(t, IsErrNotFound(err))
+	assert.Check(t, is.Error(err, "Error: No such network: unknown"))
+	assert.Check(t, IsErrNotFound(err))
+}
+
+func TestNetworkInspectWithEmptyID(t *testing.T) {
+	client := &Client{
+		client: newMockClient(func(req *http.Request) (*http.Response, error) {
+			return nil, errors.New("should not make request")
+		}),
+	}
+	_, _, err := client.NetworkInspectWithRaw(context.Background(), "", types.NetworkInspectOptions{})
+	if !IsErrNotFound(err) {
+		t.Fatalf("Expected NotFoundError, got %v", err)
+	}
 }
 
 func TestNetworkInspect(t *testing.T) {
@@ -100,5 +114,5 @@ func TestNetworkInspect(t *testing.T) {
 	}
 
 	_, err = client.NetworkInspect(context.Background(), "network_id", types.NetworkInspectOptions{Scope: "global"})
-	assert.EqualError(t, err, "Error: No such network: network_id")
+	assert.Check(t, is.Error(err, "Error: No such network: network_id"))
 }

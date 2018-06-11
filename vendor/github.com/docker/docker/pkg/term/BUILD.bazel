@@ -120,7 +120,12 @@ go_test(
     embed = [":go_default_library"],
     importpath = "github.com/docker/docker/pkg/term",
     deps = [
-        "//vendor/github.com/stretchr/testify/assert:go_default_library",
-        "//vendor/github.com/stretchr/testify/require:go_default_library",
-    ],
+        "//vendor/github.com/gotestyourself/gotestyourself/assert:go_default_library",
+        "//vendor/github.com/gotestyourself/gotestyourself/assert/cmp:go_default_library",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:linux": [
+            "//vendor/github.com/google/go-cmp/cmp:go_default_library",
+        ],
+        "//conditions:default": [],
+    }),
 )
