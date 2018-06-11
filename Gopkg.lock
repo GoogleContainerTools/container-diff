@@ -35,7 +35,6 @@
   revision = "d3c23511c1bf5851696cba83143d9cbcd666869b"
 
 [[projects]]
-  branch = "master"
   name = "github.com/docker/distribution"
   packages = [
     ".",
@@ -229,6 +228,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7937a148d13add1a1999e212b7e26b637fc298f6d0b36561277233b4bbc2710c"
+  inputs-digest = "e6952a6950654188b2f9d5e3cb17fa28195513fc09b87d1145b3a1709f9aca43"
   solver-name = "gps-cdcl"
   solver-version = 1

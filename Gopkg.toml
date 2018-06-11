@@ -26,7 +26,7 @@
 required = ["github.com/docker/distribution"]
 [[constraint]]
   name = "github.com/docker/distribution"
-  branch = "master"
+  revision = "f0cc927784781fa395c06317c58dea2841ece3a9"
 
 [[constraint]]
   name = "github.com/fsouza/go-dockerclient"
@@ -47,5 +47,3 @@ required = ["github.com/docker/distribution"]
 [[constraint]]
   name = "github.com/google/go-containerregistry"
   revision = "dc0a77702ddab8c3dc5630eca7c026d571c1c9b7"
-
-
