@@ -18,6 +18,7 @@ package util
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -190,4 +191,19 @@ func HasFilepathPrefix(path, prefix string) bool {
 		return false
 	}
 	return true
+}
+
+// given a path to a directory, check if it has any contents
+func DirIsEmpty(path string) (bool, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	_, err = f.Readdir(1)
+	if err == io.EOF {
+		return true, nil
+	}
+	return false, err
 }

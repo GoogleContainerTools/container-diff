@@ -78,7 +78,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	output.PrintToStdErr("Starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
+	logrus.Infof("starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
 
 	imageMap := map[string]*pkgutil.Image{
 		image1Arg: {},
@@ -97,12 +97,12 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	}
 	wg.Wait()
 
-	if !save {
+	if noCache && !save {
 		defer pkgutil.CleanupImage(*imageMap[image1Arg])
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
 	}
 
-	output.PrintToStdErr("Computing diffs\n")
+	logrus.Info("computing diffs")
 	req := differs.DiffRequest{
 		Image1:    *imageMap[image1Arg],
 		Image2:    *imageMap[image2Arg],
@@ -114,14 +114,14 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	outputResults(diffs)
 
 	if filename != "" {
-		output.PrintToStdErr("Computing filename diffs\n")
+		logrus.Info("computing filename diffs")
 		err := diffFile(imageMap[image1Arg], imageMap[image2Arg])
 		if err != nil {
 			return err
 		}
 	}
 
-	if save {
+	if noCache && save {
 		logrus.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
 			imageMap[image2Arg].FSPath)
 	}

@@ -106,7 +106,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       diffBase,
 			imageB:       diffModified,
-			differFlags:  []string{"--type=file"},
+			differFlags:  []string{"--type=file", "--no-cache"},
 			expectedFile: "file_diff_expected.json",
 		},
 		{
@@ -114,7 +114,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       diffLayerBase,
 			imageB:       diffLayerModifed,
-			differFlags:  []string{"--type=layer"},
+			differFlags:  []string{"--type=layer", "--no-cache"},
 			expectedFile: "file_layer_diff_expected.json",
 		},
 		{
@@ -122,7 +122,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       aptBase,
 			imageB:       aptModified,
-			differFlags:  []string{"--type=apt"},
+			differFlags:  []string{"--type=apt", "--no-cache"},
 			expectedFile: "apt_diff_expected.json",
 		},
 		// {
@@ -138,7 +138,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       nodeBase,
 			imageB:       nodeModified,
-			differFlags:  []string{"--type=node"},
+			differFlags:  []string{"--type=node", "--no-cache"},
 			expectedFile: "node_diff_order_expected.json",
 		},
 		{
@@ -146,7 +146,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       multiBase,
 			imageB:       multiModified,
-			differFlags:  []string{"--type=node", "--type=pip", "--type=apt"},
+			differFlags:  []string{"--type=node", "--type=pip", "--type=apt", "--no-cache"},
 			expectedFile: "multi_diff_expected.json",
 		},
 		{
@@ -154,7 +154,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       multiBaseLocal,
 			imageB:       multiModifiedLocal,
-			differFlags:  []string{"--type=node", "--type=pip", "--type=apt"},
+			differFlags:  []string{"--type=node", "--type=pip", "--type=apt", "--no-cache"},
 			expectedFile: "multi_diff_expected.json",
 		},
 		{
@@ -162,7 +162,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       diffBase,
 			imageB:       diffModified,
-			differFlags:  []string{"--type=history"},
+			differFlags:  []string{"--type=history", "--no-cache"},
 			expectedFile: "hist_diff_expected.json",
 		},
 		{
@@ -170,7 +170,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       metadataBase,
 			imageB:       metadataModified,
-			differFlags:  []string{"--type=metadata"},
+			differFlags:  []string{"--type=metadata", "--no-cache"},
 			expectedFile: "metadata_diff_expected.json",
 		},
 		{
@@ -178,14 +178,14 @@ func TestDiffAndAnalysis(t *testing.T) {
 			subcommand:   "diff",
 			imageA:       aptBase,
 			imageB:       aptModified,
-			differFlags:  []string{"--type=apt", "-o"},
+			differFlags:  []string{"--type=apt", "-o", "--no-cache"},
 			expectedFile: "apt_sorted_diff_expected.json",
 		},
 		{
 			description:  "apt analysis",
 			subcommand:   "analyze",
 			imageA:       aptModified,
-			differFlags:  []string{"--type=apt"},
+			differFlags:  []string{"--type=apt", "--no-cache"},
 			expectedFile: "apt_analysis_expected.json",
 		},
 		// {
@@ -199,28 +199,28 @@ func TestDiffAndAnalysis(t *testing.T) {
 			description:  "file sorted analysis",
 			subcommand:   "analyze",
 			imageA:       diffModified,
-			differFlags:  []string{"--type=file", "-o"},
+			differFlags:  []string{"--type=file", "-o", "--no-cache"},
 			expectedFile: "file_sorted_analysis_expected.json",
 		},
 		{
 			description:  "file layer analysis",
 			subcommand:   "analyze",
 			imageA:       diffLayerBase,
-			differFlags:  []string{"--type=layer"},
+			differFlags:  []string{"--type=layer", "--no-cache"},
 			expectedFile: "file_layer_analysis_expected.json",
 		},
 		{
 			description:  "pip analysis",
 			subcommand:   "analyze",
 			imageA:       pipModified,
-			differFlags:  []string{"--type=pip"},
+			differFlags:  []string{"--type=pip", "--no-cache"},
 			expectedFile: "pip_analysis_expected.json",
 		},
 		{
 			description:  "node analysis",
 			subcommand:   "analyze",
 			imageA:       nodeModified,
-			differFlags:  []string{"--type=node"},
+			differFlags:  []string{"--type=node", "--no-cache"},
 			expectedFile: "node_analysis_expected.json",
 		},
 	}

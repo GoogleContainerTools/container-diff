@@ -83,7 +83,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			// It's possible for a file to be included before the directory it's in is created.
 			baseDir := filepath.Dir(target)
 			if _, err := os.Stat(baseDir); os.IsNotExist(err) {
-				logrus.Debugf("baseDir %s for file %s does not exist. Creating.", baseDir, target)
+				logrus.Debugf("baseDir %s for file %s does not exist. Creating", baseDir, target)
 				if err := os.MkdirAll(baseDir, 0755); err != nil {
 					return err
 				}
@@ -91,8 +91,9 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			// It's possible we end up creating files that can't be overwritten based on their permissions.
 			// Explicitly delete an existing file before continuing.
 			if _, err := os.Stat(target); !os.IsNotExist(err) {
-				logrus.Debugf("Removing %s for overwrite.", target)
+				logrus.Debugf("Removing %s for overwrite", target)
 				if err := os.Remove(target); err != nil {
+					logrus.Errorf("error removing file %s", target)
 					return err
 				}
 			}
@@ -117,7 +118,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 			// It's possible we end up creating files that can't be overwritten based on their permissions.
 			// Explicitly delete an existing file before continuing.
 			if _, err := os.Stat(target); !os.IsNotExist(err) {
-				logrus.Debugf("Removing %s to create symlink.", target)
+				logrus.Debugf("Removing %s to create symlink", target)
 				if err := os.RemoveAll(target); err != nil {
 					logrus.Debugf("Unable to remove %s: %s", target, err)
 				}
@@ -139,7 +140,7 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 	}
 
 	for target, linkname := range hardlinks {
-		logrus.Info("Resolving hard links.")
+		logrus.Info("Resolving hard links")
 		if _, err := os.Stat(linkname); !os.IsNotExist(err) {
 			// If it exists, create the hard link
 			if err := resolveHardlink(linkname, target); err != nil {
