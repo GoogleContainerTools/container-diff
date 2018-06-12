@@ -9,14 +9,5 @@ services:
 
 go_import_path: github.com/GoogleContainerTools/container-diff
 
-addons:
-  apt:
-    sources:
-    - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
-      key_url: 'https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg'
-    packages:
-    - bazel
-
-
 script:
  - travis_wait make test integration
