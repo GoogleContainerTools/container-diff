@@ -141,9 +141,7 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 		}
 		elapsed := time.Now().Sub(start)
 		logrus.Infof("retrieving image from tar took %f seconds", elapsed.Seconds())
-	}
-
-	if strings.HasPrefix(imageName, DaemonPrefix) {
+	} else if strings.HasPrefix(imageName, DaemonPrefix) {
 		// remove the daemon prefix
 		imageName = strings.Replace(imageName, DaemonPrefix, "", -1)
 
