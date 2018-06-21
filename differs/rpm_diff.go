@@ -43,6 +43,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//RPM macros file location
+const rpmMacros string = "/usr/lib/rpm/macros"
+
 //RPM command to extract packages from the rpm database
 var rpmCmd = []string{
 	"rpm", "--nodigest", "--nosignature",
@@ -97,7 +100,7 @@ func (a RPMAnalyzer) getPackages(image pkgutil.Image) (map[string]util.PackageIn
 
 	packages, err := rpmDataFromImageFS(image)
 	if err != nil {
-		logrus.Warn("Trying to run the RPM binary of the image in a container")
+		logrus.Info("Running RPM binary from image in a container")
 		return rpmDataFromContainer(image)
 	}
 	return packages, err
@@ -130,15 +133,18 @@ func rpmDataFromImageFS(image pkgutil.Image) (map[string]util.PackageInfo, error
 // rpmDBPath tries to get the RPM database path from the /usr/lib/rpm/macros
 // file in the image rootfs.
 func rpmDBPath(rootFSPath string) (string, error) {
-	rpmMacros, err := os.Open(filepath.Join(rootFSPath, "usr/lib/rpm/macros"))
+	imgMacrosFile, err := os.Open(filepath.Join(rootFSPath, rpmMacros))
 	if err != nil {
 		return "", err
 	}
-	defer rpmMacros.Close()
+	defer imgMacrosFile.Close()
 
-	scanner := bufio.NewScanner(rpmMacros)
+	scanner := bufio.NewScanner(imgMacrosFile)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
+
+		// We are looking for a macro definition like (form openSUSE Leap):
+		// %_dbpath                %{_usr}/lib/sysimage/rpm
 		if strings.HasPrefix(line, "%_dbpath") {
 			fields := strings.Fields(line)
 			if len(fields) < 2 {
