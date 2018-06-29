@@ -25,57 +25,6 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1"
 )
 
-func TestGetRubyVersion(t *testing.T) {
-	testCases := []struct {
-		layerPath        string
-		expectedVersions []string
-		err              bool
-	}{
-		{
-			layerPath:        "testDirs/gemTests/rubyVersionTests/notAFolder",
-			expectedVersions: []string{},
-			err:              false,
-		},
-		{
-			layerPath:        "testDirs/gemTests/rubyVersionTests/noLibLayer",
-			expectedVersions: []string{},
-			err:              false,
-		},
-		{
-			layerPath:        "testDirs/gemTests/rubyVersionTests/noRubyLayer",
-			expectedVersions: []string{},
-			err:              false,
-		},
-		{
-			layerPath:        "testDirs/gemTests/rubyVersionTests/version2.3Layer",
-			expectedVersions: []string{"2.3.0"},
-			err:              false,
-		},
-		{
-			layerPath:        "testDirs/gemTests/rubyVersionTests/version2.5Layer",
-			expectedVersions: []string{"2.5.0"},
-			err:              false,
-		},
-		{
-			layerPath:        "testDirs/gemTests/rubyVersionTests/2VersionLayer",
-			expectedVersions: []string{"2.5.0", "2.3.0"},
-			err:              false,
-		},
-	}
-	for _, test := range testCases {
-		version, err := getRubyVersion(test.layerPath)
-		if err != nil && !test.err {
-			t.Errorf("Got unexpected error: %s", err)
-		}
-		if err == nil && test.err {
-			t.Error("Expected error but got none.")
-		}
-		if !reflect.DeepEqual(version, test.expectedVersions) {
-			t.Errorf("\nExpected: %s\nGot: %s", test.expectedVersions, version)
-		}
-	}
-}
-
 func TestGetRubyPackages(t *testing.T) {
 	testCases := []struct {
 		descrip          string
@@ -94,7 +43,7 @@ func TestGetRubyPackages(t *testing.T) {
 		},
 
 		{
-			descrip: "packagesMultiVersion, no GEM_HOME",
+			descrip: "packagesMultiVersion",
 			image: pkgutil.Image{
 				FSPath: "testDirs/gemTests/packagesMultiVersion",
 				Image: &pkgutil.TestImage{
@@ -103,15 +52,15 @@ func TestGetRubyPackages(t *testing.T) {
 			},
 			expectedPackages: map[string]map[string]util.PackageInfo{
 				"packageone": {
-					"/usr/local/lib/ruby/gems/2.3.0/specifications": {Version: "1.0.0", Size: 0},
-					"/usr/local/lib/ruby/gems/2.5.0/specifications": {Version: "2.0.0", Size: 0},
-					"/usr/lib/ruby/gems/2.3.0/specifications":       {Version: "2.3.0", Size: 0},
+					"/usr/local/lib/ruby/gems/2.3.0/specifications/": {Version: "1.0.0", Size: 0},
+					"/usr/local/lib/ruby/gems/2.5.0/specifications/": {Version: "2.0.0", Size: 0},
+					"/usr/lib/ruby/gems/2.3.0/specifications/":       {Version: "2.3.0", Size: 0},
 				},
-				"packagetwo": {"/usr/local/bundle/specifications": {Version: "4.0.1", Size: 0}},
+				"packagetwo": {"/usr/local/bundle/specifications/": {Version: "4.0.1", Size: 0}},
 			},
 		},
 		{
-			descrip: "packagesSingleVersion, no GEM_HOME",
+			descrip: "packagesSingleVersion",
 			image: pkgutil.Image{
 				FSPath: "testDirs/gemTests/packagesSingleVersion",
 				Image: &pkgutil.TestImage{
@@ -119,27 +68,8 @@ func TestGetRubyPackages(t *testing.T) {
 				},
 			},
 			expectedPackages: map[string]map[string]util.PackageInfo{
-				"packageone": {"/usr/local/lib/ruby/gems/2.5.0/specifications": {Version: "2.0.0", Size: 0}},
-				"packagetwo": {"/usr/local/lib/ruby/gems/2.5.0/specifications": {Version: "4.0.1", Size: 0}},
-			},
-		},
-		{
-			descrip: "gemPathTests, GEM_HOME",
-			image: pkgutil.Image{
-				FSPath: "testDirs/gemTests/gemPathTests",
-				Image: &pkgutil.TestImage{
-					Config: &v1.ConfigFile{
-						Config: v1.Config{
-							Env: []string{"GEM_HOME=testDirs/gemTests/gemPathTests/rbenv:/testDirs/gemTests/gemPathTests/usr/local/bundle", "ENVVAR2=something"},
-						},
-					},
-				},
-			},
-			expectedPackages: map[string]map[string]util.PackageInfo{
-				"packageone":   {"/usr/local/lib/ruby/gems/2.5.0/specifications": {Version: "2.0.0", Size: 0}},
-				"packagetwo":   {"/usr/local/lib/ruby/gems/2.5.0/specifications": {Version: "4.0.1", Size: 0}},
-				"packagethree": {"/rbenv": {Version: "5.0.0", Size: 0}},
-				"packagefour":  {"/usr/local/bundle/specifications": {Version: "10.1", Size: 0}},
+				"packageone": {"/usr/local/lib/ruby/gems/2.5.0/specifications/": {Version: "2.0.0", Size: 0}},
+				"packagetwo": {"/usr/local/lib/ruby/gems/2.5.0/specifications/": {Version: "4.0.1", Size: 0}},
 			},
 		},
 	}
