@@ -46,6 +46,12 @@ type PackageDiff struct {
 	InfoDiff  []Info
 }
 
+// PackageLayerDiff stores the difference information between two images
+// layer by layer in PackageDiff array
+type PackageLayerDiff struct {
+	PackageDiffs []PackageDiff
+}
+
 // Info stores the information for one package in two different images.
 type Info struct {
 	Package string

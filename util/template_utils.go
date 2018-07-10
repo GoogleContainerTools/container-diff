@@ -61,6 +61,22 @@ PACKAGE	IMAGE1 ({{.Image1}})	IMAGE2 ({{.Image2}}){{range .Diff.InfoDiff}}{{"\n"}
 {{end}}
 `
 
+const SingleVersionLayerDiffOutput = `
+-----{{.DiffType}}-----
+{{range $index, $diff := .Diff}}
+Diff for Layer {{$index}}: {{if not (or (or $diff.Packages1 $diff.Packages2) $diff.InfoDiff)}} No differences {{else}}
+Packages found only in {{$.Image1}}:{{if not $diff.Packages1}} None{{else}}
+NAME	VERSION	SIZE{{range $diff.Packages1}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}{{end}}
+
+Packages found only in {{$.Image2}}:{{if not $diff.Packages2}} None{{else}}
+NAME	VERSION	SIZE{{range $diff.Packages2}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}{{end}}
+
+Version differences:{{if not $diff.InfoDiff}} None{{else}}
+PACKAGE	IMAGE1 ({{$.Image1}})	IMAGE2 ({{$.Image2}}){{range $diff.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{.Info1.Version}}, {{.Info1.Size}}	{{.Info2.Version}}, {{.Info2.Size}}{{end}}
+{{end}}{{end}}
+{{end}}
+`
+
 const MultiVersionDiffOutput = `
 -----{{.DiffType}}-----
 
@@ -137,5 +153,21 @@ const SingleVersionPackageOutput = `
 
 Packages found in {{.Image}}:{{if not .Analysis}} None{{else}}
 NAME	VERSION	SIZE{{range .Analysis}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}
+{{end}}
+`
+
+const SingleVersionPackageLayerOutput = `
+-----{{.AnalyzeType}}-----
+{{range $index, $analysis := .Analysis}}
+For Layer {{$index}}:{{if not (or (or $analysis.Packages1 $analysis.Packages2) $analysis.InfoDiff)}} No package changes {{else}}
+{{if ne $index 0}}Deleted packages from previous layers:{{if not $analysis.Packages1}} None{{else}}
+NAME	VERSION	SIZE{{range $analysis.Packages1}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}{{end}}
+
+{{end}}Packages added in this layer:{{if not $analysis.Packages2}} None{{else}}
+NAME	VERSION	SIZE{{range $analysis.Packages2}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}{{end}}
+{{if ne $index 0}}
+Version differences:{{if not $analysis.InfoDiff}} None{{else}}
+PACKAGE	PREV_LAYER	CURRENT_LAYER {{range $analysis.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{.Info1.Version}}, {{.Info1.Size}}	{{.Info2.Version}}, {{.Info2.Size}}{{end}}
+{{end}}{{end}}{{end}}
 {{end}}
 `
