@@ -268,7 +268,7 @@ func getExtractPathForName(name string) (string, error) {
 
 func includeLayers() bool {
 	for _, t := range types {
-		if t == "layer" {
+		if strings.Contains(t, "layer") {
 			return true
 		}
 	}
