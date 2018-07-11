@@ -49,6 +49,7 @@ var Analyzers = map[string]Analyzer{
 	"apt":      AptAnalyzer{},
 	"aptlayer": AptLayerAnalyzer{},
 	"rpm":      RPMAnalyzer{},
+	"rpmlayer": RPMLayerAnalyzer{},
 	"pip":      PipAnalyzer{},
 	"node":     NodeAnalyzer{},
 }

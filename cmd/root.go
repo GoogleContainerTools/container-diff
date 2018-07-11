@@ -59,7 +59,7 @@ const (
 	RemotePrefix = "remote://"
 )
 
-var layerAnalyzers = [...]string{"layer", "aptlayer"}
+var layerAnalyzers = [...]string{"layer", "aptlayer", "rpmlayer"}
 
 var RootCmd = &cobra.Command{
 	Use:   "container-diff",

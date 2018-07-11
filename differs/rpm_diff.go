@@ -34,6 +34,8 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/daemon"
+	"github.com/google/go-containerregistry/pkg/v1/mutate"
+	"github.com/google/go-containerregistry/pkg/v1/random"
 
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
@@ -101,7 +103,7 @@ func (a RPMAnalyzer) getPackages(image pkgutil.Image) (map[string]util.PackageIn
 	packages, err := rpmDataFromImageFS(image)
 	if err != nil {
 		logrus.Info("Running RPM binary from image in a container")
-		return rpmDataFromContainer(image)
+		return rpmDataFromContainer(image.Image)
 	}
 	return packages, err
 }
@@ -164,7 +166,7 @@ func rpmDBPath(rootFSPath string) (string, error) {
 
 // rpmDataFromContainer runs image in a container, queries the data of
 // installed rpm packages and returns a map of packages.
-func rpmDataFromContainer(image pkgutil.Image) (map[string]util.PackageInfo, error) {
+func rpmDataFromContainer(image v1.Image) (map[string]util.PackageInfo, error) {
 	packages := make(map[string]util.PackageInfo)
 
 	client, err := godocker.NewClientFromEnv()
@@ -175,7 +177,7 @@ func rpmDataFromContainer(image pkgutil.Image) (map[string]util.PackageInfo, err
 		return packages, err
 	}
 
-	imageName, err := loadImageToDaemon(image.Image)
+	imageName, err := loadImageToDaemon(image)
 
 	if err != nil {
 		return packages, fmt.Errorf("Error loading image: %s", err)
@@ -363,4 +365,116 @@ func unlock() error {
 	logrus.Debugf("[unlock] lock released")
 	daemonMutex.Unlock()
 	return nil
+}
+
+type RPMLayerAnalyzer struct {
+}
+
+// Name returns the name of the analyzer.
+func (a RPMLayerAnalyzer) Name() string {
+	return "RPMLayerAnalyzer"
+}
+
+// Diff compares the installed rpm packages of image1 and image2 for each layer
+func (a RPMLayerAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
+	diff, err := singleVersionLayerDiff(image1, image2, a)
+	return diff, err
+}
+
+// Analyze collects information of the installed rpm packages on each layer
+func (a RPMLayerAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
+	analysis, err := singleVersionLayerAnalysis(image, a)
+	return analysis, err
+}
+
+// getPackages returns an array of maps of installed rpm packages on each layer
+func (a RPMLayerAnalyzer) getPackages(image pkgutil.Image) ([]map[string]util.PackageInfo, error) {
+	path := image.FSPath
+	var packages []map[string]util.PackageInfo
+	if _, err := os.Stat(path); err != nil {
+		// invalid image directory path
+		return packages, err
+	}
+
+	// try to find the rpm binary in bin/ or usr/bin/
+	rpmBinary := filepath.Join(path, "bin/rpm")
+	if _, err := os.Stat(rpmBinary); err != nil {
+		rpmBinary = filepath.Join(path, "usr/bin/rpm")
+		if _, err = os.Stat(rpmBinary); err != nil {
+			logrus.Errorf("Could not detect RPM binary in unpacked image %s", image.Source)
+			return packages, nil
+		}
+	}
+
+	packages, err := rpmDataFromLayerFS(image)
+	if err != nil {
+		logrus.Info("Running RPM binary from image in a container")
+		return rpmDataFromLayeredContainers(image.Image)
+	}
+	return packages, err
+}
+
+// rpmDataFromLayerFS runs a local rpm binary, if any, to query the layer
+// rpmdb and returns an array of maps of installed packages.
+func rpmDataFromLayerFS(image pkgutil.Image) ([]map[string]util.PackageInfo, error) {
+	var packages []map[string]util.PackageInfo
+	// Check there is an executable rpm tool in host
+	if err := exec.Command("rpm", "--version").Run(); err != nil {
+		logrus.Warn("No RPM binary in host")
+		return packages, err
+	}
+	dbPath, err := rpmDBPath(image.FSPath)
+	if err != nil {
+		logrus.Warnf("Couldn't find RPM database: %s", err.Error())
+		return packages, err
+	}
+	for _, layer := range image.Layers {
+		layerPackages := make(map[string]util.PackageInfo)
+		//query only layers that include the rpm database
+		if _, err := os.Stat(filepath.Join(layer.FSPath, dbPath)); err == nil {
+			cmdArgs := append([]string{"--root", layer.FSPath, "--dbpath", dbPath}, rpmCmd[1:]...)
+			out, err := exec.Command(rpmCmd[0], cmdArgs...).Output()
+			if err != nil {
+				logrus.Warnf("RPM call failed: %s", err.Error())
+				return packages, err
+			}
+			layerPackages, err = parsePackageData(strings.Split(string(out), "\n"))
+			if err != nil {
+				return packages, err
+			}
+		}
+		packages = append(packages, layerPackages)
+	}
+
+	return packages, nil
+}
+
+// rpmDataFromLayeredContainers runs a tmp image in a container for each layer,
+// queries the data of installed rpm packages and returns an array of maps of
+// packages.
+func rpmDataFromLayeredContainers(image v1.Image) ([]map[string]util.PackageInfo, error) {
+	var packages []map[string]util.PackageInfo
+	tmpImage, err := random.Image(0, 0)
+	if err != nil {
+		return packages, err
+	}
+	layers, err := image.Layers()
+	if err != nil {
+		return packages, err
+	}
+	// Append layers one by one to an empty image and query rpm
+	// database on each iteration
+	for _, layer := range layers {
+		tmpImage, err = mutate.AppendLayers(tmpImage, layer)
+		if err != nil {
+			return packages, err
+		}
+		layerPackages, err := rpmDataFromContainer(tmpImage)
+		if err != nil {
+			return packages, err
+		}
+		packages = append(packages, layerPackages)
+	}
+
+	return packages, nil
 }
