@@ -77,6 +77,14 @@ func SortMap(m map[string]string) string {
 
 // GetFileSystemForLayer unpacks a layer to local disk
 func GetFileSystemForLayer(layer v1.Layer, root string, whitelist []string) error {
+	empty, err := DirIsEmpty(root)
+	if err != nil {
+		return err
+	}
+	if !empty {
+		logrus.Infof("using cached filesystem in %s", root)
+		return nil
+	}
 	contents, err := layer.Uncompressed()
 	if err != nil {
 		return err
