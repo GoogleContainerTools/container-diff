@@ -50,13 +50,16 @@ func (a AptAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 }
 
 func (a AptAnalyzer) getPackages(image pkgutil.Image) (map[string]util.PackageInfo, error) {
-	path := image.FSPath
+	return readStatusFile(image.FSPath)
+}
+
+func readStatusFile(root string) (map[string]util.PackageInfo, error) {
 	packages := make(map[string]util.PackageInfo)
-	if _, err := os.Stat(path); err != nil {
+	if _, err := os.Stat(root); err != nil {
 		// invalid image directory path
 		return packages, err
 	}
-	statusFile := filepath.Join(path, dpkgStatusFile)
+	statusFile := filepath.Join(root, dpkgStatusFile)
 	if _, err := os.Stat(statusFile); err != nil {
 		// status file does not exist in this layer
 		return packages, nil
@@ -154,27 +157,9 @@ func (a AptLayerAnalyzer) getPackages(image pkgutil.Image) ([]map[string]util.Pa
 		return packages, nil
 	}
 	for _, layer := range image.Layers {
-		layerPackages := make(map[string]util.PackageInfo)
-		if _, err := os.Stat(layer.FSPath); err != nil {
-			// invalid layer directory path
+		layerPackages, err := readStatusFile(layer.FSPath)
+		if err != nil {
 			return packages, err
-		}
-		statusFile := filepath.Join(layer.FSPath, dpkgStatusFile)
-		if _, err := os.Stat(statusFile); err == nil {
-			// this layer has a package database
-			if file, err := os.Open(statusFile); err == nil {
-				// make sure it gets closed
-				defer file.Close()
-
-				// create a new scanner and read the file line by line
-				scanner := bufio.NewScanner(file)
-				var currPackage string
-				for scanner.Scan() {
-					currPackage = parseLine(scanner.Text(), currPackage, layerPackages)
-				}
-			} else {
-				return packages, err
-			}
 		}
 		packages = append(packages, layerPackages)
 	}
