@@ -80,7 +80,7 @@ func (a GemAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 				path = strings.TrimPrefix(searchPath, basePath)
 				// trim package file name
 				path = strings.TrimSuffix(path, f.Name())
-				addToMap(packages, gemName, path, currPackage)
+				AddToMap(packages, gemName, path, currPackage)
 			}
 
 		}

@@ -106,23 +106,12 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 				}
 				currPackage := util.PackageInfo{Version: version, Size: size}
 				mapPath := strings.Replace(pythonPath, path, "", 1)
-				addToMap(packages, packageName, mapPath, currPackage)
+				AddToMap(packages, packageName, mapPath, currPackage)
 			}
 		}
 	}
 
 	return packages, nil
-}
-
-func addToMap(packages map[string]map[string]util.PackageInfo, pack string, path string, packInfo util.PackageInfo) {
-	if _, ok := packages[pack]; !ok {
-		// package not yet seen
-		infoMap := make(map[string]util.PackageInfo)
-		infoMap[path] = packInfo
-		packages[pack] = infoMap
-		return
-	}
-	packages[pack][path] = packInfo
 }
 
 func getPythonVersion(pathToLayer string) ([]string, error) {
