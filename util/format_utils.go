@@ -30,7 +30,6 @@ import (
 
 var templates = map[string]string{
 	"SingleVersionPackageDiff":         SingleVersionDiffOutput,
-	"SingleVersionPackageLayerDiff":    SingleVersionLayerDiffOutput,
 	"MultiVersionPackageDiff":          MultiVersionDiffOutput,
 	"HistDiff":                         HistoryDiffOutput,
 	"MetadataDiff":                     MetadataDiffOutput,

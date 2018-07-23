@@ -61,22 +61,6 @@ PACKAGE	IMAGE1 ({{.Image1}})	IMAGE2 ({{.Image2}}){{range .Diff.InfoDiff}}{{"\n"}
 {{end}}
 `
 
-const SingleVersionLayerDiffOutput = `
------{{.DiffType}}-----
-{{range $index, $diff := .Diff}}
-Diff for Layer {{$index}}: {{if not (or (or $diff.Packages1 $diff.Packages2) $diff.InfoDiff)}} No differences {{else}}
-Packages found only in {{$.Image1}}:{{if not $diff.Packages1}} None{{else}}
-NAME	VERSION	SIZE{{range $diff.Packages1}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}{{end}}
-
-Packages found only in {{$.Image2}}:{{if not $diff.Packages2}} None{{else}}
-NAME	VERSION	SIZE{{range $diff.Packages2}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}{{end}}
-
-Version differences:{{if not $diff.InfoDiff}} None{{else}}
-PACKAGE	IMAGE1 ({{$.Image1}})	IMAGE2 ({{$.Image2}}){{range $diff.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{.Info1.Version}}, {{.Info1.Size}}	{{.Info2.Version}}, {{.Info2.Size}}{{end}}
-{{end}}{{end}}
-{{end}}
-`
-
 const MultiVersionDiffOutput = `
 -----{{.DiffType}}-----
 

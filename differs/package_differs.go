@@ -17,6 +17,7 @@ limitations under the License.
 package differs
 
 import (
+	"errors"
 	"strings"
 
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
@@ -77,41 +78,11 @@ func singleVersionDiff(image1, image2 pkgutil.Image, differ SingleVersionPackage
 	}, nil
 }
 
-// singleVersionLayerDiff diffs the packages of each image layer by layer
+// singleVersionLayerDiff returns an error as this diff is not supported as
+// it is far from obvious to define it in meaningful way
 func singleVersionLayerDiff(image1, image2 pkgutil.Image, differ SingleVersionPackageLayerAnalyzer) (*util.SingleVersionPackageLayerDiffResult, error) {
-	pack1, err := differ.getPackages(image1)
-	if err != nil {
-		return &util.SingleVersionPackageLayerDiffResult{}, err
-	}
-	pack2, err := differ.getPackages(image2)
-	if err != nil {
-		return &util.SingleVersionPackageLayerDiffResult{}, err
-	}
-	var pkgDiffs []util.PackageDiff
-
-	// Go through each layer for image1
-	for i := range pack1 {
-		if i >= len(pack2) {
-			// Skip diff when there is no layer to compare with in image2
-			continue
-		}
-
-		pkgDiff := util.GetMapDiff(pack1[i], pack2[i])
-		pkgDiffs = append(pkgDiffs, pkgDiff)
-	}
-
-	if len(image1.Layers) != len(image2.Layers) {
-		logrus.Infof("%s and %s have different number of layers, please consider using container-diff analyze to view the contents of each image in each layer", image1.Source, image2.Source)
-	}
-
-	return &util.SingleVersionPackageLayerDiffResult{
-		Image1:   image1.Source,
-		Image2:   image2.Source,
-		DiffType: strings.TrimSuffix(differ.Name(), "Analyzer"),
-		Diff: util.PackageLayerDiff{
-			PackageDiffs: pkgDiffs,
-		},
-	}, nil
+	logrus.Warning("'diff' command for packages on layers is not supported, consider using 'analyze' on each image instead")
+	return &util.SingleVersionPackageLayerDiffResult{}, errors.New("Diff for packages on layers is not supported, only analysis is supported")
 }
 
 func multiVersionAnalysis(image pkgutil.Image, analyzer MultiVersionPackageAnalyzer) (*util.MultiVersionPackageAnalyzeResult, error) {
@@ -153,8 +124,8 @@ func singleVersionLayerAnalysis(image pkgutil.Image, analyzer SingleVersionPacka
 
 	// Each layer with modified packages includes a complete list of packages
 	// in its package database. Thus we diff the current layer with the
-	// previous one. Not all layers may include differences in packages, those
-	// are omitted.
+	// previous one that contains a package database. Layers that do not
+	// include a package database are omitted.
 	preInd := -1
 	for i := range pack {
 		var pkgDiff util.PackageDiff
