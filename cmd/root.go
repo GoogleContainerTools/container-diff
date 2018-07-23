@@ -59,6 +59,8 @@ const (
 	RemotePrefix = "remote://"
 )
 
+var layerAnalyzers = [...]string{"layer", "aptlayer"}
+
 var RootCmd = &cobra.Command{
 	Use:   "container-diff",
 	Short: "container-diff is a tool for analyzing and comparing container images",
@@ -268,8 +270,10 @@ func getExtractPathForName(name string) (string, error) {
 
 func includeLayers() bool {
 	for _, t := range types {
-		if t == "layer" {
-			return true
+		for _, a := range layerAnalyzers {
+			if t == a {
+				return true
+			}
 		}
 	}
 	return false

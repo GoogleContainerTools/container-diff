@@ -17,10 +17,12 @@ limitations under the License.
 package differs
 
 import (
+	"errors"
 	"strings"
 
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
+	"github.com/sirupsen/logrus"
 )
 
 type MultiVersionPackageAnalyzer interface {
@@ -30,6 +32,11 @@ type MultiVersionPackageAnalyzer interface {
 
 type SingleVersionPackageAnalyzer interface {
 	getPackages(image pkgutil.Image) (map[string]util.PackageInfo, error)
+	Name() string
+}
+
+type SingleVersionPackageLayerAnalyzer interface {
+	getPackages(image pkgutil.Image) ([]map[string]util.PackageInfo, error)
 	Name() string
 }
 
@@ -71,6 +78,13 @@ func singleVersionDiff(image1, image2 pkgutil.Image, differ SingleVersionPackage
 	}, nil
 }
 
+// singleVersionLayerDiff returns an error as this diff is not supported as
+// it is far from obvious to define it in meaningful way
+func singleVersionLayerDiff(image1, image2 pkgutil.Image, differ SingleVersionPackageLayerAnalyzer) (*util.SingleVersionPackageLayerDiffResult, error) {
+	logrus.Warning("'diff' command for packages on layers is not supported, consider using 'analyze' on each image instead")
+	return &util.SingleVersionPackageLayerDiffResult{}, errors.New("Diff for packages on layers is not supported, only analysis is supported")
+}
+
 func multiVersionAnalysis(image pkgutil.Image, analyzer MultiVersionPackageAnalyzer) (*util.MultiVersionPackageAnalyzeResult, error) {
 	pack, err := analyzer.getPackages(image)
 	if err != nil {
@@ -97,4 +111,40 @@ func singleVersionAnalysis(image pkgutil.Image, analyzer SingleVersionPackageAna
 		Analysis:    pack,
 	}
 	return &analysis, nil
+}
+
+// singleVersionLayerAnalysis returns the packages included, deleted or
+// updated in each layer
+func singleVersionLayerAnalysis(image pkgutil.Image, analyzer SingleVersionPackageLayerAnalyzer) (*util.SingleVersionPackageLayerAnalyzeResult, error) {
+	pack, err := analyzer.getPackages(image)
+	if err != nil {
+		return &util.SingleVersionPackageLayerAnalyzeResult{}, err
+	}
+	var pkgDiffs []util.PackageDiff
+
+	// Each layer with modified packages includes a complete list of packages
+	// in its package database. Thus we diff the current layer with the
+	// previous one that contains a package database. Layers that do not
+	// include a package database are omitted.
+	preInd := -1
+	for i := range pack {
+		var pkgDiff util.PackageDiff
+		if preInd < 0 && len(pack[i]) > 0 {
+			pkgDiff = util.GetMapDiff(make(map[string]util.PackageInfo), pack[i])
+			preInd = i
+		} else if preInd >= 0 && len(pack[i]) > 0 {
+			pkgDiff = util.GetMapDiff(pack[preInd], pack[i])
+			preInd = i
+		}
+
+		pkgDiffs = append(pkgDiffs, pkgDiff)
+	}
+
+	return &util.SingleVersionPackageLayerAnalyzeResult{
+		Image:       image.Source,
+		AnalyzeType: strings.TrimSuffix(analyzer.Name(), "Analyzer"),
+		Analysis: util.PackageLayerDiff{
+			PackageDiffs: pkgDiffs,
+		},
+	}, nil
 }

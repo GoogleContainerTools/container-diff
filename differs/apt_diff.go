@@ -28,6 +28,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//APT package database location
+const dpkgStatusFile string = "var/lib/dpkg/status"
+
 type AptAnalyzer struct {
 }
 
@@ -47,13 +50,16 @@ func (a AptAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 }
 
 func (a AptAnalyzer) getPackages(image pkgutil.Image) (map[string]util.PackageInfo, error) {
-	path := image.FSPath
+	return readStatusFile(image.FSPath)
+}
+
+func readStatusFile(root string) (map[string]util.PackageInfo, error) {
 	packages := make(map[string]util.PackageInfo)
-	if _, err := os.Stat(path); err != nil {
+	if _, err := os.Stat(root); err != nil {
 		// invalid image directory path
 		return packages, err
 	}
-	statusFile := filepath.Join(path, "var/lib/dpkg/status")
+	statusFile := filepath.Join(root, dpkgStatusFile)
 	if _, err := os.Stat(statusFile); err != nil {
 		// status file does not exist in this layer
 		return packages, nil
@@ -119,4 +125,44 @@ func parseLine(text string, currPackage string, packages map[string]util.Package
 		}
 	}
 	return currPackage
+}
+
+type AptLayerAnalyzer struct {
+}
+
+func (a AptLayerAnalyzer) Name() string {
+	return "AptLayerAnalyzer"
+}
+
+// AptDiff compares the packages installed by apt-get.
+func (a AptLayerAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
+	diff, err := singleVersionLayerDiff(image1, image2, a)
+	return diff, err
+}
+
+func (a AptLayerAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
+	analysis, err := singleVersionLayerAnalysis(image, a)
+	return analysis, err
+}
+
+func (a AptLayerAnalyzer) getPackages(image pkgutil.Image) ([]map[string]util.PackageInfo, error) {
+	var packages []map[string]util.PackageInfo
+	if _, err := os.Stat(image.FSPath); err != nil {
+		// invalid image directory path
+		return packages, err
+	}
+	statusFile := filepath.Join(image.FSPath, dpkgStatusFile)
+	if _, err := os.Stat(statusFile); err != nil {
+		// status file does not exist in this image
+		return packages, nil
+	}
+	for _, layer := range image.Layers {
+		layerPackages, err := readStatusFile(layer.FSPath)
+		if err != nil {
+			return packages, err
+		}
+		packages = append(packages, layerPackages)
+	}
+
+	return packages, nil
 }

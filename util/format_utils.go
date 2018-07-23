@@ -29,18 +29,19 @@ import (
 )
 
 var templates = map[string]string{
-	"SingleVersionPackageDiff":    SingleVersionDiffOutput,
-	"MultiVersionPackageDiff":     MultiVersionDiffOutput,
-	"HistDiff":                    HistoryDiffOutput,
-	"MetadataDiff":                MetadataDiffOutput,
-	"DirDiff":                     FSDiffOutput,
-	"MultipleDirDiff":             FSLayerDiffOutput,
-	"FilenameDiff":                FilenameDiffOutput,
-	"ListAnalyze":                 ListAnalysisOutput,
-	"FileAnalyze":                 FileAnalysisOutput,
-	"FileLayerAnalyze":            FileLayerAnalysisOutput,
-	"MultiVersionPackageAnalyze":  MultiVersionPackageOutput,
-	"SingleVersionPackageAnalyze": SingleVersionPackageOutput,
+	"SingleVersionPackageDiff":         SingleVersionDiffOutput,
+	"MultiVersionPackageDiff":          MultiVersionDiffOutput,
+	"HistDiff":                         HistoryDiffOutput,
+	"MetadataDiff":                     MetadataDiffOutput,
+	"DirDiff":                          FSDiffOutput,
+	"MultipleDirDiff":                  FSLayerDiffOutput,
+	"FilenameDiff":                     FilenameDiffOutput,
+	"ListAnalyze":                      ListAnalysisOutput,
+	"FileAnalyze":                      FileAnalysisOutput,
+	"FileLayerAnalyze":                 FileLayerAnalysisOutput,
+	"MultiVersionPackageAnalyze":       MultiVersionPackageOutput,
+	"SingleVersionPackageAnalyze":      SingleVersionPackageOutput,
+	"SingleVersionPackageLayerAnalyze": SingleVersionPackageLayerOutput,
 }
 
 func JSONify(diff interface{}) error {

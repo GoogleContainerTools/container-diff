@@ -162,6 +162,72 @@ func getSingleVersionInfoDiffOutput(infoDiff []Info) []Info {
 	return infoDiff
 }
 
+type SingleVersionPackageLayerDiffResult DiffResult
+
+func (r SingleVersionPackageLayerDiffResult) OutputStruct() interface{} {
+	diff, valid := r.Diff.(PackageLayerDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should follow the PackageLayerDiff struct")
+		return fmt.Errorf("Could not output %s diff result", r.DiffType)
+	}
+
+	type PkgDiff struct {
+		Packages1 []PackageOutput
+		Packages2 []PackageOutput
+		InfoDiff  []Info
+	}
+
+	var diffOutputs []PkgDiff
+	for _, d := range diff.PackageDiffs {
+		diffOutput := PkgDiff{
+			Packages1: getSingleVersionPackageOutput(d.Packages1),
+			Packages2: getSingleVersionPackageOutput(d.Packages2),
+			InfoDiff:  getSingleVersionInfoDiffOutput(d.InfoDiff),
+		}
+		diffOutputs = append(diffOutputs, diffOutput)
+	}
+
+	r.Diff = diffOutputs
+	return r
+}
+
+func (r SingleVersionPackageLayerDiffResult) OutputText(diffType string, format string) error {
+	diff, valid := r.Diff.(PackageLayerDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should follow the PackageLayerDiff struct")
+		return fmt.Errorf("Could not output %s diff result", r.DiffType)
+	}
+
+	type StrDiff struct {
+		Packages1 []StrPackageOutput
+		Packages2 []StrPackageOutput
+		InfoDiff  []StrInfo
+	}
+
+	var diffOutputs []StrDiff
+	for _, d := range diff.PackageDiffs {
+		diffOutput := StrDiff{
+			Packages1: stringifyPackages(getSingleVersionPackageOutput(d.Packages1)),
+			Packages2: stringifyPackages(getSingleVersionPackageOutput(d.Packages2)),
+			InfoDiff:  stringifyPackageDiff(getSingleVersionInfoDiffOutput(d.InfoDiff)),
+		}
+		diffOutputs = append(diffOutputs, diffOutput)
+	}
+
+	strResult := struct {
+		Image1   string
+		Image2   string
+		DiffType string
+		Diff     []StrDiff
+	}{
+		Image1:   r.Image1,
+		Image2:   r.Image2,
+		DiffType: r.DiffType,
+		Diff:     diffOutputs,
+	}
+	return TemplateOutputFromFormat(strResult, "SingleVersionPackageLayerDiff", format)
+}
+
 type HistDiffResult DiffResult
 
 func (r HistDiffResult) OutputStruct() interface{} {

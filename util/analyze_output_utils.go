@@ -136,6 +136,78 @@ func (r SingleVersionPackageAnalyzeResult) OutputText(diffType string, format st
 	return TemplateOutputFromFormat(strResult, "SingleVersionPackageAnalyze", format)
 }
 
+type SingleVersionPackageLayerAnalyzeResult AnalyzeResult
+
+func (r SingleVersionPackageLayerAnalyzeResult) OutputStruct() interface{} {
+	analysis, valid := r.Analysis.(PackageLayerDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Analysis.  Should be of type PackageLayerDiff")
+		return fmt.Errorf("Could not output %s analysis result", r.AnalyzeType)
+	}
+
+	type PkgDiff struct {
+		Packages1 []PackageOutput
+		Packages2 []PackageOutput
+		InfoDiff  []Info
+	}
+
+	var analysisOutput []PkgDiff
+	for _, d := range analysis.PackageDiffs {
+		diffOutput := PkgDiff{
+			Packages1: getSingleVersionPackageOutput(d.Packages1),
+			Packages2: getSingleVersionPackageOutput(d.Packages2),
+			InfoDiff:  getSingleVersionInfoDiffOutput(d.InfoDiff),
+		}
+		analysisOutput = append(analysisOutput, diffOutput)
+	}
+
+	output := struct {
+		Image       string
+		AnalyzeType string
+		Analysis    []PkgDiff
+	}{
+		Image:       r.Image,
+		AnalyzeType: r.AnalyzeType,
+		Analysis:    analysisOutput,
+	}
+	return output
+}
+
+func (r SingleVersionPackageLayerAnalyzeResult) OutputText(diffType string, format string) error {
+	analysis, valid := r.Analysis.(PackageLayerDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Analysis.  Should be of type PackageLayerDiff")
+		return fmt.Errorf("Could not output %s analysis result", r.AnalyzeType)
+	}
+
+	type StrDiff struct {
+		Packages1 []StrPackageOutput
+		Packages2 []StrPackageOutput
+		InfoDiff  []StrInfo
+	}
+
+	var analysisOutput []StrDiff
+	for _, d := range analysis.PackageDiffs {
+		diffOutput := StrDiff{
+			Packages1: stringifyPackages(getSingleVersionPackageOutput(d.Packages1)),
+			Packages2: stringifyPackages(getSingleVersionPackageOutput(d.Packages2)),
+			InfoDiff:  stringifyPackageDiff(getSingleVersionInfoDiffOutput(d.InfoDiff)),
+		}
+		analysisOutput = append(analysisOutput, diffOutput)
+	}
+
+	strResult := struct {
+		Image       string
+		AnalyzeType string
+		Analysis    []StrDiff
+	}{
+		Image:       r.Image,
+		AnalyzeType: r.AnalyzeType,
+		Analysis:    analysisOutput,
+	}
+	return TemplateOutputFromFormat(strResult, "SingleVersionPackageLayerAnalyze", format)
+}
+
 type PackageOutput struct {
 	Name    string
 	Path    string `json:",omitempty"`

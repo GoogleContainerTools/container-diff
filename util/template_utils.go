@@ -139,3 +139,19 @@ Packages found in {{.Image}}:{{if not .Analysis}} None{{else}}
 NAME	VERSION	SIZE{{range .Analysis}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}
 {{end}}
 `
+
+const SingleVersionPackageLayerOutput = `
+-----{{.AnalyzeType}}-----
+{{range $index, $analysis := .Analysis}}
+For Layer {{$index}}:{{if not (or (or $analysis.Packages1 $analysis.Packages2) $analysis.InfoDiff)}} No package changes {{else}}
+{{if ne $index 0}}Deleted packages from previous layers:{{if not $analysis.Packages1}} None{{else}}
+NAME	VERSION	SIZE{{range $analysis.Packages1}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}{{end}}
+
+{{end}}Packages added in this layer:{{if not $analysis.Packages2}} None{{else}}
+NAME	VERSION	SIZE{{range $analysis.Packages2}}{{"\n"}}{{print "-"}}{{.Name}}	{{.Version}}	{{.Size}}{{end}}{{end}}
+{{if ne $index 0}}
+Version differences:{{if not $analysis.InfoDiff}} None{{else}}
+PACKAGE	PREV_LAYER	CURRENT_LAYER {{range $analysis.InfoDiff}}{{"\n"}}{{print "-"}}{{.Package}}	{{.Info1.Version}}, {{.Info1.Size}}	{{.Info2.Version}}, {{.Info2.Size}}{{end}}
+{{end}}{{end}}{{end}}
+{{end}}
+`
