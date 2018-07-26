@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -26,6 +25,7 @@ import (
 	"github.com/GoogleContainerTools/container-diff/differs"
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -69,10 +69,23 @@ func checkFilenameFlag(_ []string) error {
 	return errors.New("Please include --types=file with the --filename flag")
 }
 
+func processImage(imageName string, imageMap map[string]*pkgutil.Image, wg *sync.WaitGroup, errChan chan<- error) {
+	defer wg.Done()
+	image, err := getImageForName(imageName)
+	if image.Image == nil {
+		errChan <- fmt.Errorf("error retrieving image %s: %s", imageName, err.Error())
+		return
+	}
+	if err != nil {
+		logrus.Warningf("diff may be inaccurate: %s", err)
+	}
+	imageMap[imageName] = &image
+}
+
 func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	diffTypes, err := differs.GetAnalyzers(diffArgs)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "getting analyzers")
 	}
 
 	var wg sync.WaitGroup
@@ -80,22 +93,34 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 
 	logrus.Infof("starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
 
-	imageMap := map[string]*pkgutil.Image{
-		image1Arg: {},
-		image2Arg: {},
-	}
-	// TODO: fix error handling here
-	for imageArg := range imageMap {
-		go func(imageName string, imageMap map[string]*pkgutil.Image) {
-			defer wg.Done()
-			image, err := getImageForName(imageName)
-			imageMap[imageName] = &image
-			if err != nil {
-				logrus.Warningf("Diff may be inaccurate: %s", err)
-			}
-		}(imageArg, imageMap)
-	}
+	imageMap := map[string]*pkgutil.Image{}
+	errChan := make(chan error, 2)
+
+	go processImage(image1Arg, imageMap, &wg, errChan)
+	go processImage(image2Arg, imageMap, &wg, errChan)
+
 	wg.Wait()
+	err, ok := <-errChan
+	errs := []error{}
+	if ok {
+		errs = append(errs, err)
+	}
+	if len(errs) > 0 {
+		errStr := ""
+		for _, err := range errs {
+			errStr = errStr + err.Error()
+		}
+		return errors.New(errStr)
+	}
+
+	img1, ok := imageMap[image1Arg]
+	if !ok {
+		return fmt.Errorf("cannot find image %s", image1Arg)
+	}
+	img2, ok := imageMap[image2Arg]
+	if !ok {
+		return fmt.Errorf("cannot find image %s", image2Arg)
+	}
 
 	if noCache && !save {
 		defer pkgutil.CleanupImage(*imageMap[image1Arg])
@@ -104,8 +129,8 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 
 	logrus.Info("computing diffs")
 	req := differs.DiffRequest{
-		Image1:    *imageMap[image1Arg],
-		Image2:    *imageMap[image2Arg],
+		Image1:    *img1,
+		Image2:    *img2,
 		DiffTypes: diffTypes}
 	diffs, err := req.GetDiff()
 	if err != nil {

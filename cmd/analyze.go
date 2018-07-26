@@ -17,13 +17,13 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"github.com/GoogleContainerTools/container-diff/cmd/util/output"
 	"github.com/GoogleContainerTools/container-diff/differs"
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -56,19 +56,19 @@ func checkAnalyzeArgNum(args []string) error {
 func analyzeImage(imageName string, analyzerArgs []string) error {
 	analyzeTypes, err := differs.GetAnalyzers(analyzerArgs)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "getting analyzers")
 	}
 
 	image, err := getImageForName(imageName)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error retrieving image %s", imageName)
 	}
 
 	if noCache && !save {
 		defer pkgutil.CleanupImage(image)
 	}
 	if err != nil {
-		return fmt.Errorf("Error processing image: %s", err)
+		return fmt.Errorf("error processing image: %s", err)
 	}
 
 	req := differs.SingleRequest{
@@ -76,7 +76,7 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		AnalyzeTypes: analyzeTypes}
 	analyses, err := req.GetAnalysis()
 	if err != nil {
-		return fmt.Errorf("Error performing image analysis: %s", err)
+		return fmt.Errorf("error performing image analysis: %s", err)
 	}
 
 	logrus.Info("retrieving analyses")
