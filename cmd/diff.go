@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/GoogleContainerTools/container-diff/cmd/util/output"
@@ -100,17 +101,19 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	go processImage(image2Arg, imageMap, &wg, errChan)
 
 	wg.Wait()
-	err, ok := <-errChan
-	errs := []error{}
-	if ok {
-		errs = append(errs, err)
-	}
-	if len(errs) > 0 {
-		errStr := ""
-		for _, err := range errs {
-			errStr = errStr + err.Error()
+	close(errChan)
+
+	errs := []string{}
+	for {
+		err, ok := <-errChan
+		if !ok {
+			break
 		}
-		return errors.New(errStr)
+		errs = append(errs, err.Error())
+	}
+
+	if len(errs) > 0 {
+		return errors.New(strings.Join(errs, "\n"))
 	}
 
 	img1, ok := imageMap[image1Arg]
