@@ -79,6 +79,24 @@ func processImage(imageName string, imageMap map[string]*pkgutil.Image, wg *sync
 	imageMap[imageName] = &image
 }
 
+// collects errors from a channel and combines them
+// assumes channel has already been closed
+func readErrorsFromChannel(c chan error) error {
+	errs := []string{}
+	for {
+		err, ok := <-c
+		if !ok {
+			break
+		}
+		errs = append(errs, err.Error())
+	}
+
+	if len(errs) > 0 {
+		return errors.New(strings.Join(errs, "\n"))
+	}
+	return nil
+}
+
 func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	diffTypes, err := differs.GetAnalyzers(diffArgs)
 	if err != nil {
@@ -104,17 +122,8 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
 	}
 
-	errs := []string{}
-	for {
-		err, ok := <-errChan
-		if !ok {
-			break
-		}
-		errs = append(errs, err.Error())
-	}
-
-	if len(errs) > 0 {
-		return errors.New(strings.Join(errs, "\n"))
+	if err := readErrorsFromChannel(errChan); err != nil {
+		return err
 	}
 
 	logrus.Info("computing diffs")
