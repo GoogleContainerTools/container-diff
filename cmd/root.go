@@ -132,6 +132,9 @@ func checkIfValidAnalyzer(_ []string) error {
 	return nil
 }
 
+// getImageForName infers the source of an image and retrieves a v1.Image reference to it.
+// Once a reference is obtained, it attempts to unpack the v1.Image's reader's contents
+// into a temp directory on the local filesystem.
 func getImageForName(imageName string) (pkgutil.Image, error) {
 	logrus.Infof("retrieving image: %s", imageName)
 	var img v1.Image
