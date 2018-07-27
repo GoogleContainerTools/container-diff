@@ -67,18 +67,14 @@ func checkFilenameFlag(_ []string) error {
 			return nil
 		}
 	}
-	return errors.New("Please include --types=file with the --filename flag")
+	return errors.New("please include --types=file with the --filename flag")
 }
 
 func processImage(imageName string, imageMap map[string]*pkgutil.Image, wg *sync.WaitGroup, errChan chan<- error) {
 	defer wg.Done()
 	image, err := getImageForName(imageName)
-	if image.Image == nil {
-		errChan <- fmt.Errorf("error retrieving image %s: %s", imageName, err.Error())
-		return
-	}
 	if err != nil {
-		logrus.Warningf("diff may be inaccurate: %s", err)
+		errChan <- fmt.Errorf("error retrieving image %s: %s", imageName, err)
 	}
 	imageMap[imageName] = &image
 }
@@ -103,6 +99,11 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	wg.Wait()
 	close(errChan)
 
+	if noCache && !save {
+		defer pkgutil.CleanupImage(*imageMap[image1Arg])
+		defer pkgutil.CleanupImage(*imageMap[image2Arg])
+	}
+
 	errs := []string{}
 	for {
 		err, ok := <-errChan
@@ -116,28 +117,14 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		return errors.New(strings.Join(errs, "\n"))
 	}
 
-	img1, ok := imageMap[image1Arg]
-	if !ok {
-		return fmt.Errorf("cannot find image %s", image1Arg)
-	}
-	img2, ok := imageMap[image2Arg]
-	if !ok {
-		return fmt.Errorf("cannot find image %s", image2Arg)
-	}
-
-	if noCache && !save {
-		defer pkgutil.CleanupImage(*imageMap[image1Arg])
-		defer pkgutil.CleanupImage(*imageMap[image2Arg])
-	}
-
 	logrus.Info("computing diffs")
 	req := differs.DiffRequest{
-		Image1:    *img1,
-		Image2:    *img2,
+		Image1:    *imageMap[image1Arg],
+		Image2:    *imageMap[image2Arg],
 		DiffTypes: diffTypes}
 	diffs, err := req.GetDiff()
 	if err != nil {
-		return fmt.Errorf("Could not retrieve diff: %s", err)
+		return fmt.Errorf("could not retrieve diff: %s", err)
 	}
 	outputResults(diffs)
 
@@ -150,7 +137,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	}
 
 	if noCache && save {
-		logrus.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
+		logrus.Infof("images were saved at %s and %s", imageMap[image1Arg].FSPath,
 			imageMap[image2Arg].FSPath)
 	}
 	return nil
