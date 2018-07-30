@@ -17,6 +17,6 @@ limitations under the License.
 package cmd
 
 type testpair struct {
-	input           []string
-	expected_output bool
+	input       []string
+	shouldError bool
 }

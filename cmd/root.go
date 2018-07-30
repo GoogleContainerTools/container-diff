@@ -38,6 +38,7 @@ import (
 	"github.com/GoogleContainerTools/container-diff/util"
 	"github.com/google/go-containerregistry/pkg/v1"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -131,6 +132,9 @@ func checkIfValidAnalyzer(_ []string) error {
 	return nil
 }
 
+// getImageForName infers the source of an image and retrieves a v1.Image reference to it.
+// Once a reference is obtained, it attempts to unpack the v1.Image's reader's contents
+// into a temp directory on the local filesystem.
 func getImageForName(imageName string) (pkgutil.Image, error) {
 	logrus.Infof("retrieving image: %s", imageName)
 	var img v1.Image
@@ -139,17 +143,17 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 		start := time.Now()
 		img, err = tarball.ImageFromPath(imageName, nil)
 		if err != nil {
-			return pkgutil.Image{}, err
+			return pkgutil.Image{}, errors.Wrap(err, "retrieving tar from path")
 		}
 		elapsed := time.Now().Sub(start)
-		logrus.Infof("retrieving image from tar took %f seconds", elapsed.Seconds())
+		logrus.Infof("retrieving image ref from tar took %f seconds", elapsed.Seconds())
 	} else if strings.HasPrefix(imageName, DaemonPrefix) {
 		// remove the daemon prefix
 		imageName = strings.Replace(imageName, DaemonPrefix, "", -1)
 
 		ref, err := name.ParseReference(imageName, name.WeakValidation)
 		if err != nil {
-			return pkgutil.Image{}, err
+			return pkgutil.Image{}, errors.Wrap(err, "parsing image reference")
 		}
 
 		start := time.Now()
@@ -158,28 +162,28 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 			Buffer: true,
 		})
 		if err != nil {
-			return pkgutil.Image{}, err
+			return pkgutil.Image{}, errors.Wrap(err, "retrieving image from daemon")
 		}
 		elapsed := time.Now().Sub(start)
-		logrus.Infof("retrieving image from daemon took %f seconds", elapsed.Seconds())
+		logrus.Infof("retrieving local image ref took %f seconds", elapsed.Seconds())
 	} else {
 		// either has remote prefix or has no prefix, in which case we force remote
 		imageName = strings.Replace(imageName, RemotePrefix, "", -1)
 		ref, err := name.ParseReference(imageName, name.WeakValidation)
 		if err != nil {
-			return pkgutil.Image{}, err
+			return pkgutil.Image{}, errors.Wrap(err, "parsing image reference")
 		}
 		auth, err := authn.DefaultKeychain.Resolve(ref.Context().Registry)
 		if err != nil {
-			return pkgutil.Image{}, err
+			return pkgutil.Image{}, errors.Wrap(err, "resolving auth")
 		}
 		start := time.Now()
 		img, err = remote.Image(ref, auth, http.DefaultTransport)
 		if err != nil {
-			return pkgutil.Image{}, err
+			return pkgutil.Image{}, errors.Wrap(err, "retrieving remote image")
 		}
 		elapsed := time.Now().Sub(start)
-		logrus.Infof("retrieving remote image took %f seconds", elapsed.Seconds())
+		logrus.Infof("retrieving remote image ref took %f seconds", elapsed.Seconds())
 	}
 
 	// create tempdir and extract fs into it
@@ -188,7 +192,7 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 		start := time.Now()
 		imgLayers, err := img.Layers()
 		if err != nil {
-			return pkgutil.Image{}, err
+			return pkgutil.Image{}, errors.Wrap(err, "getting image layers")
 		}
 		for _, layer := range imgLayers {
 			layerStart := time.Now()
@@ -197,12 +201,12 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 			if err != nil {
 				return pkgutil.Image{
 					Layers: layers,
-				}, err
+				}, errors.Wrap(err, "getting extract path for layer")
 			}
 			if err := pkgutil.GetFileSystemForLayer(layer, path, nil); err != nil {
 				return pkgutil.Image{
 					Layers: layers,
-				}, err
+				}, errors.Wrap(err, "getting filesystem for layer")
 			}
 			layers = append(layers, pkgutil.Layer{
 				FSPath: path,
@@ -215,12 +219,15 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 	}
 
 	path, err := getExtractPathForImage(imageName, img)
+	if err != nil {
+		return pkgutil.Image{}, err
+	}
 	// extract fs into provided dir
 	if err := pkgutil.GetFileSystemForImage(img, path, nil); err != nil {
 		return pkgutil.Image{
 			FSPath: path,
 			Layers: layers,
-		}, err
+		}, errors.Wrap(err, "getting filesystem for image")
 	}
 	return pkgutil.Image{
 		Image:  img,

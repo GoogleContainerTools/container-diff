@@ -17,15 +17,16 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/GoogleContainerTools/container-diff/cmd/util/output"
 	"github.com/GoogleContainerTools/container-diff/differs"
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -66,13 +67,41 @@ func checkFilenameFlag(_ []string) error {
 			return nil
 		}
 	}
-	return errors.New("Please include --types=file with the --filename flag")
+	return errors.New("please include --types=file with the --filename flag")
+}
+
+// processImage is a concurrency-friendly wrapper around getImageForName
+func processImage(imageName string, imageMap map[string]*pkgutil.Image, wg *sync.WaitGroup, errChan chan<- error) {
+	defer wg.Done()
+	image, err := getImageForName(imageName)
+	if err != nil {
+		errChan <- fmt.Errorf("error retrieving image %s: %s", imageName, err)
+	}
+	imageMap[imageName] = &image
+}
+
+// collects errors from a channel and combines them
+// assumes channel has already been closed
+func readErrorsFromChannel(c chan error) error {
+	errs := []string{}
+	for {
+		err, ok := <-c
+		if !ok {
+			break
+		}
+		errs = append(errs, err.Error())
+	}
+
+	if len(errs) > 0 {
+		return errors.New(strings.Join(errs, "\n"))
+	}
+	return nil
 }
 
 func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	diffTypes, err := differs.GetAnalyzers(diffArgs)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "getting analyzers")
 	}
 
 	var wg sync.WaitGroup
@@ -80,26 +109,22 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 
 	logrus.Infof("starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
 
-	imageMap := map[string]*pkgutil.Image{
-		image1Arg: {},
-		image2Arg: {},
-	}
-	// TODO: fix error handling here
-	for imageArg := range imageMap {
-		go func(imageName string, imageMap map[string]*pkgutil.Image) {
-			defer wg.Done()
-			image, err := getImageForName(imageName)
-			imageMap[imageName] = &image
-			if err != nil {
-				logrus.Warningf("Diff may be inaccurate: %s", err)
-			}
-		}(imageArg, imageMap)
-	}
+	imageMap := map[string]*pkgutil.Image{}
+	errChan := make(chan error, 2)
+
+	go processImage(image1Arg, imageMap, &wg, errChan)
+	go processImage(image2Arg, imageMap, &wg, errChan)
+
 	wg.Wait()
+	close(errChan)
 
 	if noCache && !save {
 		defer pkgutil.CleanupImage(*imageMap[image1Arg])
 		defer pkgutil.CleanupImage(*imageMap[image2Arg])
+	}
+
+	if err := readErrorsFromChannel(errChan); err != nil {
+		return err
 	}
 
 	logrus.Info("computing diffs")
@@ -109,7 +134,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		DiffTypes: diffTypes}
 	diffs, err := req.GetDiff()
 	if err != nil {
-		return fmt.Errorf("Could not retrieve diff: %s", err)
+		return fmt.Errorf("could not retrieve diff: %s", err)
 	}
 	outputResults(diffs)
 
@@ -122,7 +147,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	}
 
 	if noCache && save {
-		logrus.Infof("Images were saved at %s and %s", imageMap[image1Arg].FSPath,
+		logrus.Infof("images were saved at %s and %s", imageMap[image1Arg].FSPath,
 			imageMap[image2Arg].FSPath)
 	}
 	return nil
