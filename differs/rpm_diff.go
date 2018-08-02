@@ -102,7 +102,7 @@ func (a RPMAnalyzer) getPackages(image pkgutil.Image) (map[string]util.PackageIn
 
 	packages, err := rpmDataFromImageFS(image)
 	if err != nil {
-		logrus.Info("Running RPM binary from image in a container")
+		logrus.Info("Couldn't retrieve RPM data from extracted filesystem; running query in container")
 		return rpmDataFromContainer(image.Image)
 	}
 	return packages, err
@@ -111,30 +111,22 @@ func (a RPMAnalyzer) getPackages(image pkgutil.Image) (map[string]util.PackageIn
 // rpmDataFromImageFS runs a local rpm binary, if any, to query the image
 // rpmdb and returns a map of installed packages.
 func rpmDataFromImageFS(image pkgutil.Image) (map[string]util.PackageInfo, error) {
-	packages := make(map[string]util.PackageInfo)
-	// Check there is an executable rpm tool in host
-	if err := exec.Command("rpm", "--version").Run(); err != nil {
-		logrus.Warn("No RPM binary in host")
-		return packages, err
-	}
-	dbPath, err := rpmDBPath(image.FSPath)
+	dbPath, err := rpmEnvCheck(image.FSPath)
 	if err != nil {
 		logrus.Warnf("Couldn't find RPM database: %s", err.Error())
-		return packages, err
+		return nil, err
 	}
-	cmdArgs := append([]string{"--root", image.FSPath, "--dbpath", dbPath}, rpmCmd[1:]...)
-	out, err := exec.Command(rpmCmd[0], cmdArgs...).Output()
-	if err != nil {
-		logrus.Warnf("RPM call failed: %s", err.Error())
-		return packages, err
-	}
-	output := strings.Split(string(out), "\n")
-	return parsePackageData(output)
+	return rpmDataFromFS(image.FSPath, dbPath)
 }
 
-// rpmDBPath tries to get the RPM database path from the /usr/lib/rpm/macros
-// file in the image rootfs.
-func rpmDBPath(rootFSPath string) (string, error) {
+// rpmEnvCheck checks there is an rpm binary in the host and tries to
+// get the RPM database path from the /usr/lib/rpm/macros file in the
+// image rootfs
+func rpmEnvCheck(rootFSPath string) (string, error) {
+	if err := exec.Command("rpm", "--version").Run(); err != nil {
+		logrus.Warn("No RPM binary in host")
+		return "", err
+	}
 	imgMacrosFile, err := os.Open(filepath.Join(rootFSPath, rpmMacros))
 	if err != nil {
 		return "", err
@@ -408,7 +400,7 @@ func (a RPMLayerAnalyzer) getPackages(image pkgutil.Image) ([]map[string]util.Pa
 
 	packages, err := rpmDataFromLayerFS(image)
 	if err != nil {
-		logrus.Info("Running RPM binary from image in a container")
+		logrus.Info("Couldn't retrieve RPM data from extracted filesystem; running query in container")
 		return rpmDataFromLayeredContainers(image.Image)
 	}
 	return packages, err
@@ -418,34 +410,39 @@ func (a RPMLayerAnalyzer) getPackages(image pkgutil.Image) ([]map[string]util.Pa
 // rpmdb and returns an array of maps of installed packages.
 func rpmDataFromLayerFS(image pkgutil.Image) ([]map[string]util.PackageInfo, error) {
 	var packages []map[string]util.PackageInfo
-	// Check there is an executable rpm tool in host
-	if err := exec.Command("rpm", "--version").Run(); err != nil {
-		logrus.Warn("No RPM binary in host")
-		return packages, err
-	}
-	dbPath, err := rpmDBPath(image.FSPath)
+	dbPath, err := rpmEnvCheck(image.FSPath)
 	if err != nil {
 		logrus.Warnf("Couldn't find RPM database: %s", err.Error())
 		return packages, err
 	}
 	for _, layer := range image.Layers {
-		layerPackages := make(map[string]util.PackageInfo)
-		//query only layers that include the rpm database
-		if _, err := os.Stat(filepath.Join(layer.FSPath, dbPath)); err == nil {
-			cmdArgs := append([]string{"--root", layer.FSPath, "--dbpath", dbPath}, rpmCmd[1:]...)
-			out, err := exec.Command(rpmCmd[0], cmdArgs...).Output()
-			if err != nil {
-				logrus.Warnf("RPM call failed: %s", err.Error())
-				return packages, err
-			}
-			layerPackages, err = parsePackageData(strings.Split(string(out), "\n"))
-			if err != nil {
-				return packages, err
-			}
+		layerPackages, err := rpmDataFromFS(layer.FSPath, dbPath)
+		if err != nil {
+			return packages, err
 		}
 		packages = append(packages, layerPackages)
 	}
 
+	return packages, nil
+}
+
+// rpmDataFromFS runs a local rpm binary to query the image
+// rpmdb and returns a map of installed packages.
+func rpmDataFromFS(fsPath string, dbPath string) (map[string]util.PackageInfo, error) {
+	packages := make(map[string]util.PackageInfo)
+	if _, err := os.Stat(filepath.Join(fsPath, dbPath)); err == nil {
+		cmdArgs := append([]string{"--root", fsPath, "--dbpath", dbPath}, rpmCmd[1:]...)
+		out, err := exec.Command(rpmCmd[0], cmdArgs...).Output()
+		if err != nil {
+			logrus.Warnf("RPM call failed: %s", err.Error())
+			return packages, err
+		}
+		output := strings.Split(string(out), "\n")
+		packages, err := parsePackageData(output)
+		if err != nil {
+			return packages, err
+		}
+	}
 	return packages, nil
 }
 
