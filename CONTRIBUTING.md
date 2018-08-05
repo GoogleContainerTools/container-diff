@@ -20,7 +20,7 @@ git remote add fork git@github.com:<your_account>/container-diff
 
 You can now push changes to your fork:
 ```bash
-(container-diff) git push fork
+(container-diff) git pull origin master && git push fork
 ```
 
 ## Building
