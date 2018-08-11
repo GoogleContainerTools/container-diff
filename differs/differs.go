@@ -24,6 +24,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const historyAnalyzer = "history"
+const metadataAnalyzer = "metadata"
+const fileAnalyzer = "file"
+const layerAnalyzer = "layer"
+const aptAnalyzer = "apt"
+const aptLayerAnalyzer = "aptlayer"
+const rpmAnalyzer = "rpm"
+const rpmLayerAnalyzer = "rpmlayer"
+const pipAnalyzer = "pip"
+const nodeAnalyzer = "node"
+
 type DiffRequest struct {
 	Image1    pkgutil.Image
 	Image2    pkgutil.Image
@@ -42,16 +53,19 @@ type Analyzer interface {
 }
 
 var Analyzers = map[string]Analyzer{
-	"history":  HistoryAnalyzer{},
-	"metadata": MetadataAnalyzer{},
-	"file":     FileAnalyzer{},
-	"layer":    FileLayerAnalyzer{},
-	"apt":      AptAnalyzer{},
-	"aptlayer": AptLayerAnalyzer{},
-	"rpm":      RPMAnalyzer{},
-	"pip":      PipAnalyzer{},
-	"node":     NodeAnalyzer{},
+	historyAnalyzer:  HistoryAnalyzer{},
+	metadataAnalyzer: MetadataAnalyzer{},
+	fileAnalyzer:     FileAnalyzer{},
+	layerAnalyzer:    FileLayerAnalyzer{},
+	aptAnalyzer:      AptAnalyzer{},
+	aptLayerAnalyzer: AptLayerAnalyzer{},
+	rpmAnalyzer:      RPMAnalyzer{},
+	rpmLayerAnalyzer: RPMLayerAnalyzer{},
+	pipAnalyzer:      PipAnalyzer{},
+	nodeAnalyzer:     NodeAnalyzer{},
 }
+
+var LayerAnalyzers = [...]string{layerAnalyzer, aptLayerAnalyzer, rpmLayerAnalyzer}
 
 func (req DiffRequest) GetDiff() (map[string]util.Result, error) {
 	img1 := req.Image1
