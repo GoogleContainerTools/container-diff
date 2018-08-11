@@ -9,20 +9,18 @@ If you haven't written Go code on your machine before, first follow the official
 Golang instructions for setting up your environment: https://golang.org/doc/code.html
 
 Once you have your environment set up, create a fork of the container-diff repository
-with your personal GitHub account. Then, clone the fork into your `$GOPATH`:
+with your personal GitHub account. Then, set your fork as a remote for the project in
+your `$GOPATH`:
 
 ```bash
-git clone git@github.com:<your_account>/container-diff.git 
-$GOPATH/src/github.com/GoogleContainerTools &&
+go get -u github.com/GoogleContainerTools/container-diff &&
 cd $GOPATH/src/github.com/GoogleContainerTools/container-diff &&
-git remote add upstream git@github.com:GoogleContainerTools/container-diff.git
+git remote add fork git@github.com:<your_account>/container-diff
 ```
 
-The last command here sets the official repository as an upstream repository for
-your fork, so you can keep your fork in sync with `MASTER`:
-
+You can now push changes to your fork:
 ```bash
-(container-diff) git pull upstream master && git push origin master
+(container-diff) git pull origin master && git push fork
 ```
 
 ## Building
