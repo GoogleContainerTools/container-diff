@@ -13,7 +13,7 @@ with your personal GitHub account. Then, clone the fork into your `$GOPATH`:
 
 ```bash
 git clone git@github.com:<your_account>/container-diff.git 
-$GOPATH/src/github.com/GoogleContainerTools &&
+$GOPATH/src/github.com/GoogleContainerTools/container-diff &&
 cd $GOPATH/src/github.com/GoogleContainerTools/container-diff &&
 git remote add upstream git@github.com:GoogleContainerTools/container-diff.git
 ```
