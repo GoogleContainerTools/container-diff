@@ -340,3 +340,36 @@ func (r FileLayerAnalyzeResult) OutputText(analyzeType string, format string) er
 	}
 	return TemplateOutputFromFormat(strResult, "FileLayerAnalyze", format)
 }
+
+type SizeAnalyzeResult AnalyzeResult
+
+func (r SizeAnalyzeResult) OutputStruct() interface{} {
+	analysis, valid := r.Analysis.([]util.DirectoryEntry)
+	if !valid {
+		logrus.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
+		return errors.New("Could not output SizeAnalyzer analysis result")
+	}
+	r.Analysis = analysis
+	return r
+}
+
+func (r SizeAnalyzeResult) OutputText(analyzeType string, format string) error {
+	analysis, valid := r.Analysis.([]util.DirectoryEntry)
+	if !valid {
+		logrus.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
+		return errors.New("Could not output SizeAnalyzer analysis result")
+	}
+
+	strAnalysis := stringifyDirectoryEntries(analysis)
+
+	strResult := struct {
+		Image       string
+		AnalyzeType string
+		Analysis    []StrDirectoryEntry
+	}{
+		Image:       r.Image,
+		AnalyzeType: r.AnalyzeType,
+		Analysis:    strAnalysis,
+	}
+	return TemplateOutputFromFormat(strResult, "SizeAnalyze", format)
+}

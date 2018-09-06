@@ -297,6 +297,42 @@ func (r DirDiffResult) OutputText(diffType string, format string) error {
 	return TemplateOutputFromFormat(strResult, "DirDiff", format)
 }
 
+type SizeDiffResult DiffResult
+
+func (r SizeDiffResult) OutputStruct() interface{} {
+	diff, valid := r.Diff.([]EntryDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should be of type []EntryDiff")
+		return errors.New("Could not output SizeAnalyzer diff result")
+	}
+
+	r.Diff = diff
+	return r
+}
+
+func (r SizeDiffResult) OutputText(diffType string, format string) error {
+	diff, valid := r.Diff.([]EntryDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should be of type []EntryDiff")
+		return errors.New("Could not output SizeAnalyzer diff result")
+	}
+
+	strDiff := stringifyEntryDiffs(diff)
+
+	strResult := struct {
+		Image1   string
+		Image2   string
+		DiffType string
+		Diff     []StrEntryDiff
+	}{
+		Image1:   r.Image1,
+		Image2:   r.Image2,
+		DiffType: r.DiffType,
+		Diff:     strDiff,
+	}
+	return TemplateOutputFromFormat(strResult, "SizeDiff", format)
+}
+
 type MultipleDirDiffResult DiffResult
 
 func (r MultipleDirDiffResult) OutputStruct() interface{} {

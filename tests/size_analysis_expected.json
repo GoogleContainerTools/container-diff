@@ -1,0 +1,12 @@
+[
+  {
+    "Image": "gcr.io/gcp-runtimes/diff-base",
+    "AnalyzeType": "Size",
+    "Analysis": [
+      {
+        "Name": "*",
+        "Size": 383043168
+      }
+    ]
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "Image": "gcr.io/gcp-runtimes/diff-layer-base",
+    "AnalyzeType": "SizeLayer",
+    "Analysis": [
+      {
+        "Name": "0",
+        "Size": 6
+      },
+      {
+        "Name": "1",
+        "Size": 7
+      },
+      {
+        "Name": "2",
+        "Size": 6
+      }
+    ]
+  }
+]

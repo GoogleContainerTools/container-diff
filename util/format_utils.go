@@ -39,6 +39,8 @@ var templates = map[string]string{
 	"ListAnalyze":                      ListAnalysisOutput,
 	"FileAnalyze":                      FileAnalysisOutput,
 	"FileLayerAnalyze":                 FileLayerAnalysisOutput,
+	"SizeAnalyze":                      SizeAnalysisOutput,
+	"SizeDiff":                         SizeDiffOutput,
 	"MultiVersionPackageAnalyze":       MultiVersionPackageOutput,
 	"SingleVersionPackageAnalyze":      SingleVersionPackageOutput,
 	"SingleVersionPackageLayerAnalyze": SingleVersionPackageLayerOutput,
