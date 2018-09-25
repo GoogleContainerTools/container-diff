@@ -37,12 +37,14 @@ const tagRegexStr = ".*:([^/]+$)"
 
 type Layer struct {
 	FSPath string
+	Digest v1.Hash
 }
 
 type Image struct {
 	Image  v1.Image
 	Source string
 	FSPath string
+	Digest v1.Hash
 	Layers []Layer
 }
 

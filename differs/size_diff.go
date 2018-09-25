@@ -32,12 +32,15 @@ func (a SizeAnalyzer) Name() string {
 
 // SizeDiff diffs two images and compares their size
 func (a SizeAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
-	diff := []util.EntryDiff{
-		{
-			Name:  "*",
-			Size1: pkgutil.GetSize(image1.FSPath),
-			Size2: pkgutil.GetSize(image2.FSPath),
-		},
+	diff := []util.SizeDiff{}
+	size1 := pkgutil.GetSize(image1.FSPath)
+	size2 := pkgutil.GetSize(image2.FSPath)
+
+	if size1 != size2 {
+		diff = append(diff, util.SizeDiff{
+			Size1: size1,
+			Size2: size2,
+		})
 	}
 
 	return &util.SizeDiffResult{
@@ -49,10 +52,11 @@ func (a SizeAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
 }
 
 func (a SizeAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
-	entries := []pkgutil.DirectoryEntry{
+	entries := []util.SizeEntry{
 		{
-			Name: "*",
-			Size: pkgutil.GetSize(image.FSPath),
+			Name:   image.Source,
+			Digest: image.Digest,
+			Size:   pkgutil.GetSize(image.FSPath),
 		},
 	}
 
@@ -72,7 +76,7 @@ func (a SizeLayerAnalyzer) Name() string {
 
 // SizeLayerDiff diffs the layers of two images and compares their size
 func (a SizeLayerAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, error) {
-	var layerDiffs []util.EntryDiff
+	var layerDiffs []util.SizeDiff
 
 	maxLayer := len(image1.Layers)
 	if len(image2.Layers) > maxLayer {
@@ -88,15 +92,17 @@ func (a SizeLayerAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, erro
 			size2 = pkgutil.GetSize(image2.Layers[index].FSPath)
 		}
 
-		diff := util.EntryDiff{
-			Name:  strconv.Itoa(index),
-			Size1: size1,
-			Size2: size2,
+		if size1 != size2 {
+			diff := util.SizeDiff{
+				Name:  strconv.Itoa(index),
+				Size1: size1,
+				Size2: size2,
+			}
+			layerDiffs = append(layerDiffs, diff)
 		}
-		layerDiffs = append(layerDiffs, diff)
 	}
 
-	return &util.SizeDiffResult{
+	return &util.SizeLayerDiffResult{
 		Image1:   image1.Source,
 		Image2:   image2.Source,
 		DiffType: "SizeLayer",
@@ -105,16 +111,17 @@ func (a SizeLayerAnalyzer) Diff(image1, image2 pkgutil.Image) (util.Result, erro
 }
 
 func (a SizeLayerAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
-	var entries []pkgutil.DirectoryEntry
+	var entries []util.SizeEntry
 	for index, layer := range image.Layers {
-		entry := pkgutil.DirectoryEntry{
-			Name: strconv.Itoa(index),
-			Size: pkgutil.GetSize(layer.FSPath),
+		entry := util.SizeEntry{
+			Name:   strconv.Itoa(index),
+			Digest: layer.Digest,
+			Size:   pkgutil.GetSize(layer.FSPath),
 		}
 		entries = append(entries, entry)
 	}
 
-	return &util.SizeAnalyzeResult{
+	return &util.SizeLayerAnalyzeResult{
 		Image:       image.Source,
 		AnalyzeType: "SizeLayer",
 		Analysis:    entries,

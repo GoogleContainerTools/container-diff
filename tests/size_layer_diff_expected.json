@@ -5,11 +5,6 @@
     "DiffType": "SizeLayer",
     "Diff": [
       {
-        "Name": "0",
-        "Size1": 6,
-        "Size2": 6
-      },
-      {
         "Name": "1",
         "Size1": 7,
         "Size2": 9

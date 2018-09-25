@@ -121,3 +121,31 @@ func stringifyEntryDiffs(entries []EntryDiff) (strEntries []StrEntryDiff) {
 	}
 	return
 }
+
+type StrSizeEntry struct {
+	Name   string
+	Digest string
+	Size   string
+}
+
+func stringifySizeEntries(entries []SizeEntry) (strEntries []StrSizeEntry) {
+	for _, entry := range entries {
+		strEntry := StrSizeEntry{Name: entry.Name, Digest: entry.Digest.String(), Size: stringifySize(entry.Size)}
+		strEntries = append(strEntries, strEntry)
+	}
+	return
+}
+
+type StrSizeDiff struct {
+	Name  string
+	Size1 string
+	Size2 string
+}
+
+func stringifySizeDiffs(entries []SizeDiff) (strEntries []StrSizeDiff) {
+	for _, entry := range entries {
+		strEntry := StrSizeDiff{Name: entry.Name, Size1: stringifySize(entry.Size1), Size2: stringifySize(entry.Size2)}
+		strEntries = append(strEntries, strEntry)
+	}
+	return
+}

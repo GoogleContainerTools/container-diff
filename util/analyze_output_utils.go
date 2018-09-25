@@ -344,9 +344,9 @@ func (r FileLayerAnalyzeResult) OutputText(analyzeType string, format string) er
 type SizeAnalyzeResult AnalyzeResult
 
 func (r SizeAnalyzeResult) OutputStruct() interface{} {
-	analysis, valid := r.Analysis.([]util.DirectoryEntry)
+	analysis, valid := r.Analysis.([]SizeEntry)
 	if !valid {
-		logrus.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
+		logrus.Error("Unexpected structure of Analysis.  Should be of type []SizeEntry")
 		return errors.New("Could not output SizeAnalyzer analysis result")
 	}
 	r.Analysis = analysis
@@ -354,22 +354,55 @@ func (r SizeAnalyzeResult) OutputStruct() interface{} {
 }
 
 func (r SizeAnalyzeResult) OutputText(analyzeType string, format string) error {
-	analysis, valid := r.Analysis.([]util.DirectoryEntry)
+	analysis, valid := r.Analysis.([]SizeEntry)
 	if !valid {
-		logrus.Error("Unexpected structure of Analysis.  Should be of type []DirectoryEntry")
+		logrus.Error("Unexpected structure of Analysis.  Should be of type []SizeEntry")
 		return errors.New("Could not output SizeAnalyzer analysis result")
 	}
 
-	strAnalysis := stringifyDirectoryEntries(analysis)
+	strAnalysis := stringifySizeEntries(analysis)
 
 	strResult := struct {
 		Image       string
 		AnalyzeType string
-		Analysis    []StrDirectoryEntry
+		Analysis    []StrSizeEntry
 	}{
 		Image:       r.Image,
 		AnalyzeType: r.AnalyzeType,
 		Analysis:    strAnalysis,
 	}
 	return TemplateOutputFromFormat(strResult, "SizeAnalyze", format)
+}
+
+type SizeLayerAnalyzeResult AnalyzeResult
+
+func (r SizeLayerAnalyzeResult) OutputStruct() interface{} {
+	analysis, valid := r.Analysis.([]SizeEntry)
+	if !valid {
+		logrus.Error("Unexpected structure of Analysis.  Should be of type []SizeEntry")
+		return errors.New("Could not output SizeLayerAnalyzer analysis result")
+	}
+	r.Analysis = analysis
+	return r
+}
+
+func (r SizeLayerAnalyzeResult) OutputText(analyzeType string, format string) error {
+	analysis, valid := r.Analysis.([]SizeEntry)
+	if !valid {
+		logrus.Error("Unexpected structure of Analysis.  Should be of type []SizeEntry")
+		return errors.New("Could not output SizeLayerAnalyzer analysis result")
+	}
+
+	strAnalysis := stringifySizeEntries(analysis)
+
+	strResult := struct {
+		Image       string
+		AnalyzeType string
+		Analysis    []StrSizeEntry
+	}{
+		Image:       r.Image,
+		AnalyzeType: r.AnalyzeType,
+		Analysis:    strAnalysis,
+	}
+	return TemplateOutputFromFormat(strResult, "SizeLayerAnalyze", format)
 }

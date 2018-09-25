@@ -208,6 +208,7 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 			}
 			layers = append(layers, pkgutil.Layer{
 				FSPath: path,
+				Digest: digest,
 			})
 			elapsed := time.Now().Sub(layerStart)
 			logrus.Infof("time elapsed retrieving layer: %fs", elapsed.Seconds())
@@ -216,7 +217,11 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 		logrus.Infof("time elapsed retrieving image layers: %fs", elapsed.Seconds())
 	}
 
-	path, err := getExtractPathForImage(imageName, img)
+	imageDigest, err := getImageDigest(img)
+	if err != nil {
+		return pkgutil.Image{}, err
+	}
+	path, err := getExtractPathForName(pkgutil.RemoveTag(imageName) + "@" + imageDigest.String())
 	if err != nil {
 		return pkgutil.Image{}, err
 	}
@@ -231,19 +236,20 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 		Image:  img,
 		Source: imageName,
 		FSPath: path,
+		Digest: imageDigest,
 		Layers: layers,
 	}, nil
 }
 
-func getExtractPathForImage(imageName string, image v1.Image) (string, error) {
+func getImageDigest(image v1.Image) (digest v1.Hash, err error) {
 	start := time.Now()
-	digest, err := image.Digest()
+	digest, err = image.Digest()
 	if err != nil {
-		return "", err
+		return digest, err
 	}
 	elapsed := time.Now().Sub(start)
 	logrus.Infof("time elapsed retrieving image digest: %fs", elapsed.Seconds())
-	return getExtractPathForName(pkgutil.RemoveTag(imageName) + "@" + digest.String())
+	return digest, nil
 }
 
 func getExtractPathForName(name string) (string, error) {
