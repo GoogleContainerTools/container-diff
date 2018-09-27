@@ -8,6 +8,7 @@ Status](https://travis-ci.org/GoogleContainerTools/container-diff.svg?branch=mas
 container-diff is a tool for analyzing and comparing container images. container-diff can examine images along several different criteria, including:
 - Docker Image History
 - Image file system
+- Image size
 - Apt packages
 - RPM packages
 - pip packages
@@ -45,6 +46,7 @@ To use `container-diff analyze` to perform analysis on a single image, you need 
 container-diff analyze <img>     [Run default analyzers]
 container-diff analyze <img> --type=history  [History]
 container-diff analyze <img> --type=file  [File System]
+container-diff analyze <img> --type=size  [Size]
 container-diff analyze <img> --type=rpm  [RPM]
 container-diff analyze <img> --type=pip  [Pip]
 container-diff analyze <img> --type=apt  [Apt]
@@ -60,6 +62,7 @@ To use container-diff to perform a diff analysis on two images, you need two Doc
 container-diff diff <img1> <img2>     [Run default differs]
 container-diff diff <img1> <img2> --type=history  [History]
 container-diff diff <img1> <img2> --type=file  [File System]
+container-diff diff <img1> <img2> --type=size  [Size]
 container-diff diff <img1> <img2> --type=rpm  [RPM]
 container-diff diff <img1> <img2> --type=pip  [Pip]
 container-diff diff <img1> <img2> --type=apt  [Apt]
