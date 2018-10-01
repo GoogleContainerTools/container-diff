@@ -45,15 +45,14 @@
   revision = "bd77b46c8352f74eb12c85bdc01f4b90f69d66b4"
 
 [[projects]]
-  digest = "1:3cabbabc9e0e4aa7e12b882bdc213f41cf8bd2b2ce2a7b5e0aceaf8a6a78049b"
+  digest = "1:4189ee6a3844f555124d9d2656fe7af02fca961c2a9bad9074789df13a0c62e0"
   name = "github.com/docker/distribution"
   packages = [
-    "digest",
+    "digestset",
     "reference",
   ]
   pruneopts = "NUT"
-  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
-  version = "v2.6.2"
+  revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
 
 [[projects]]
   branch = "master"
@@ -113,16 +112,14 @@
   version = "v0.3.3"
 
 [[projects]]
-  digest = "1:4f57c53dc1244bd265be71bc4e75fc48132f1cf2927b19de52ed600b7d73cd8e"
+  digest = "1:00d0d550a1f1d7ca03270ebc1e136f21f6b9dab37f0c37e9a90d56d2f7afcff9"
   name = "github.com/docker/libnetwork"
   packages = ["ipamutils"]
   pruneopts = "NUT"
-  revision = "6d23f11e681f24ee31802939e243fe8be41a75eb"
-  version = "v0.8.0-dev.2"
+  revision = "19279f0492417475b6bfbd0aa529f73e8f178fb5"
 
 [[projects]]
-  branch = "master"
-  digest = "1:5d274d23243efc7be3d88df7f9a5bf952b1f9e8ac9bb9419cf84f7e25765315b"
+  digest = "1:d0a3e7afbdc348a36faa023b59faf86a60404037f101bb4b8cc4ae63d8b94be1"
   name = "github.com/fsouza/go-dockerclient"
   packages = [
     ".",
@@ -131,7 +128,8 @@
     "internal/term",
   ]
   pruneopts = "NUT"
-  revision = "050dda146355762a475b0e0db58ce82fde85d5bc"
+  revision = "1b33efcb40bef3494af8bc6a1f73600f37a3c9d1"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:38e684375ef5b55e812332266d63f9fc5b6329ab303067c4cdda051db6d29ca4"
@@ -187,7 +185,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   digest = "1:26217ee135b8157549e648efe97dff3282e4bd597a912d784db964df41067f29"
   name = "github.com/nightlyone/lockfile"
   packages = ["."]
@@ -275,7 +272,7 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "5295e8364332db77d75fce11f1d19c053919a9c9"
+  revision = "e3636079e1a4c1f337f212cc5cd2aca108f6c900"
 
 [[projects]]
   branch = "master"
