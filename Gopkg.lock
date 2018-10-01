@@ -3,6 +3,7 @@
 
 [[projects]]
   branch = "master"
+<<<<<<< HEAD
   digest = "1:1e34eb32b95242aa7c64217164296b40fe026c14c46a8581aca7918118d7b6b8"
   name = "code.cloudfoundry.org/bytefmt"
   packages = ["."]
@@ -12,11 +13,23 @@
 [[projects]]
   branch = "master"
   digest = "1:81f8c061c3d18ed1710957910542bc17d2b789c6cd19e0f654c30b35fd255ca5"
+=======
+  digest = "1:69706f009abd714a03e16892f2632fe37cab837f72a7c3fed926de2f95277179"
+  name = "code.cloudfoundry.org/bytefmt"
+  packages = ["."]
+  pruneopts = ""
+  revision = "b31f603f5e1e047fdb38584e1a922dcc5c4de5c8"
+
+[[projects]]
+  branch = "master"
+  digest = "1:6978a38432a017763a148afbc7ce6491734b54292af7d3e969d84d2e9dd242e2"
+>>>>>>> add hack script to list all pull requests for each release
   name = "github.com/Azure/go-ansiterm"
   packages = [
     ".",
     "winterm",
   ]
+<<<<<<< HEAD
   pruneopts = "NUT"
   revision = "d6e3b3328b783f23731bc4d058875b0371ff8109"
 
@@ -34,10 +47,30 @@
   name = "github.com/Nvveen/Gotty"
   packages = ["."]
   pruneopts = "NUT"
+=======
+  pruneopts = ""
+  revision = "d6e3b3328b783f23731bc4d058875b0371ff8109"
+
+[[projects]]
+  digest = "1:6331095c1906771fbe129fe4a1f94ac5b5a97b0f60f2f80653bb95c3e5dad81e"
+  name = "github.com/Microsoft/go-winio"
+  packages = ["."]
+  pruneopts = ""
+  revision = "7da180ee92d8bd8bb8c37fc560e673e6557c392f"
+  version = "v0.4.7"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3721a10686511b80c052323423f0de17a8c06d417dbdd3b392b1578432a33aae"
+  name = "github.com/Nvveen/Gotty"
+  packages = ["."]
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "cd527374f1e5bff4938207604a14f2e38a9cf512"
 
 [[projects]]
   branch = "master"
+<<<<<<< HEAD
   digest = "1:4a029051269e04c040c092eb4ddd92732f8f3a3921a8b43b82b30804e00f3357"
   name = "github.com/containerd/continuity"
   packages = ["pathdriver"]
@@ -46,17 +79,35 @@
 
 [[projects]]
   digest = "1:4189ee6a3844f555124d9d2656fe7af02fca961c2a9bad9074789df13a0c62e0"
+=======
+  digest = "1:88e2e57d8169637a91af80db02f21ae0dc9a233f51d794ee5939884aa82c293b"
+  name = "github.com/containerd/continuity"
+  packages = ["pathdriver"]
+  pruneopts = ""
+  revision = "d3c23511c1bf5851696cba83143d9cbcd666869b"
+
+[[projects]]
+  digest = "1:85557947084dd9599b76d06e82f3e35bfdfa109dc4cf195ecf34bf78a91fa11c"
+>>>>>>> add hack script to list all pull requests for each release
   name = "github.com/docker/distribution"
   packages = [
     "digestset",
     "reference",
   ]
+<<<<<<< HEAD
   pruneopts = "NUT"
   revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
 
 [[projects]]
   branch = "master"
   digest = "1:678c256d4c5fb4be98f3c3d365d51f268b79d2d4e856e40f2d0cfb334110c145"
+=======
+  pruneopts = ""
+  revision = "f0cc927784781fa395c06317c58dea2841ece3a9"
+
+[[projects]]
+  digest = "1:c0f595126d94f6e395f1b2c3696dbc199cd10cf395673c7086be2a520a3b7ea7"
+>>>>>>> add hack script to list all pull requests for each release
   name = "github.com/docker/docker"
   packages = [
     "api",
@@ -87,18 +138,30 @@
     "pkg/pools",
     "pkg/stdcopy",
     "pkg/system",
+<<<<<<< HEAD
   ]
   pruneopts = "NUT"
   revision = "299015de409743b3c85a33872dce645ed748d804"
 
 [[projects]]
   digest = "1:2a47f7eb1a2c30428d1ee6808cb66d4deb17e68a3e55d696f03c8068552ba5e8"
+=======
+    "pkg/term",
+    "pkg/term/windows",
+  ]
+  pruneopts = ""
+  revision = "a422774e593b33bd287d9890544ad9e09b380d8c"
+
+[[projects]]
+  digest = "1:a5ecc2e70260a87aa263811281465a5effcfae8a54bac319cee87c4625f04d63"
+>>>>>>> add hack script to list all pull requests for each release
   name = "github.com/docker/go-connections"
   packages = [
     "nat",
     "sockets",
     "tlsconfig",
   ]
+<<<<<<< HEAD
   pruneopts = "NUT"
   revision = "7395e3f8aa162843a74ed6d48e79627d9792ac55"
   version = "v0.4.0"
@@ -108,10 +171,22 @@
   name = "github.com/docker/go-units"
   packages = ["."]
   pruneopts = "NUT"
+=======
+  pruneopts = ""
+  revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
+  version = "v0.3.0"
+
+[[projects]]
+  digest = "1:582d54fcb7233da8dde1dfd2210a5b9675d0685f84246a8d317b07d680c18b1b"
+  name = "github.com/docker/go-units"
+  packages = ["."]
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "47565b4f722fb6ceae66b95f853feed578a4a51c"
   version = "v0.3.3"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:00d0d550a1f1d7ca03270ebc1e136f21f6b9dab37f0c37e9a90d56d2f7afcff9"
   name = "github.com/docker/libnetwork"
   packages = ["ipamutils"]
@@ -141,6 +216,33 @@
 
 [[projects]]
   digest = "1:2271ce74ea1368c951255b70585fe2d41822bd887c645f7edf03ccec037eff46"
+=======
+  branch = "master"
+  digest = "1:f2cfaeef83b91cbd817cce987bf36e323a34ca54b5174435a4dbf6038a664bd5"
+  name = "github.com/fsouza/go-dockerclient"
+  packages = ["."]
+  pruneopts = ""
+  revision = "51bd33c0c7792b2566054672a4915b406d988cc6"
+
+[[projects]]
+  digest = "1:0a3f6a0c68ab8f3d455f8892295503b179e571b7fefe47cc6c556405d1f83411"
+  name = "github.com/gogo/protobuf"
+  packages = ["proto"]
+  pruneopts = ""
+  revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:3dd078fda7500c341bc26cfbc6c6a34614f295a2457149fc1045cab767cbcf18"
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  pruneopts = ""
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
+
+[[projects]]
+  digest = "1:d09df47b5f07e7918b33724dee52ee909e00413aae751e0b2cbef34011ed9b79"
+>>>>>>> add hack script to list all pull requests for each release
   name = "github.com/google/go-containerregistry"
   packages = [
     "pkg/authn",
@@ -157,6 +259,7 @@
     "pkg/v1/types",
     "pkg/v1/v1util",
   ]
+<<<<<<< HEAD
   pruneopts = "NUT"
   revision = "dc0a77702ddab8c3dc5630eca7c026d571c1c9b7"
 
@@ -165,11 +268,38 @@
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   pruneopts = "NUT"
+=======
+  pruneopts = ""
+  revision = "dc0a77702ddab8c3dc5630eca7c026d571c1c9b7"
+
+[[projects]]
+  digest = "1:4f646745e87604d6ac39bd2a96b3c2f4a898d1866069fff26b8281d6f84b919e"
+  name = "github.com/google/go-github"
+  packages = ["github"]
+  pruneopts = ""
+  revision = "f55b50f38167644bb7e4be03d9a2bde71d435239"
+  version = "v18.2.0"
+
+[[projects]]
+  digest = "1:cea4aa2038169ee558bf507d5ea02c94ca85bcca28a4c7bb99fd59b31e43a686"
+  name = "github.com/google/go-querystring"
+  packages = ["query"]
+  pruneopts = ""
+  revision = "44c6ddd0a2342c386950e880b658017258da92fc"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
 
 [[projects]]
   branch = "master"
+<<<<<<< HEAD
   digest = "1:c8a452cc8dd4ef9f857570ce2be31ca257a0928bf3c2b08cd7e11972b985c6d7"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
@@ -196,53 +326,114 @@
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
   pruneopts = "NUT"
+=======
+  digest = "1:99651e95333755cbe5c9768c1b80031300acca64a80870b40309202b32585a5a"
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  pruneopts = ""
+  revision = "3864e76763d94a6df2f9960b16a20a33da9f9a66"
+
+[[projects]]
+  branch = "master"
+  digest = "1:09b661e6a19992c3fef4ec71700d1f17dfe4640142e2918d6659cae3d62cb9d5"
+  name = "github.com/nightlyone/lockfile"
+  packages = ["."]
+  pruneopts = ""
+  revision = "6a197d5ea61168f2ac821de2b7f011b250904900"
+
+[[projects]]
+  digest = "1:5d9b668b0b4581a978f07e7d2e3314af18eb27b3fb5d19b70185b7c575723d11"
+  name = "github.com/opencontainers/go-digest"
+  packages = ["."]
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
   version = "v1.0.0-rc1"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:11db38d694c130c800d0aefb502fb02519e514dc53d9804ce51d1ad25ec27db6"
+=======
+  digest = "1:f26c8670b11e29a49c8e45f7ec7f2d5bac62e8fd4e3c0ae1662baa4a697f984a"
+>>>>>>> add hack script to list all pull requests for each release
   name = "github.com/opencontainers/image-spec"
   packages = [
     "specs-go",
     "specs-go/v1",
   ]
+<<<<<<< HEAD
   pruneopts = "NUT"
+=======
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "d60099175f88c47cd379c4738d158884749ed235"
   version = "v1.0.1"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:918dbd46ad099418ce9760291bb156ebf23d441aad4cb682dd9bf09e2d3c0c7b"
   name = "github.com/opencontainers/runc"
   packages = ["libcontainer/user"]
   pruneopts = "NUT"
+=======
+  digest = "1:fa19ddee0e5ee5951a6a450a4b6ec635a42957f86bfc87d9d778eeee04ad2036"
+  name = "github.com/opencontainers/runc"
+  packages = [
+    "libcontainer/system",
+    "libcontainer/user",
+  ]
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "baf6536d6259209c3edfa2b22237af82942d3dfa"
   version = "v0.1.1"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "NUT"
+=======
+  digest = "1:7365acd48986e205ccb8652cc746f09c8b7876030d53710ea6ef7d0bd0dcd7ca"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:de406937d444963016a8644b65e56e2f241a1d81f76418ce59ed12257fabb5ad"
   name = "github.com/pkg/profile"
   packages = ["."]
   pruneopts = "NUT"
+=======
+  digest = "1:1cbc6b98173422a756ae79e485952cb37a0a460c710541c75d3e9961c5a60782"
+  name = "github.com/pkg/profile"
+  packages = ["."]
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "5b67d428864e92711fcbd2f8629456121a56d91f"
   version = "v1.2.1"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   pruneopts = "NUT"
+=======
+  digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:01252cd79aac70f16cac02a72a1067dd136e0ad6d5b597d0129cf74c739fd8d1"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -255,10 +446,25 @@
   name = "github.com/spf13/cobra"
   packages = ["."]
   pruneopts = "NUT"
+=======
+  digest = "1:8cf46b6c18a91068d446e26b67512cf16f1540b45d90b28b9533706a127f0ca6"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = ""
+  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
+  version = "v1.0.5"
+
+[[projects]]
+  digest = "1:a1403cc8a94b8d7956ee5e9694badef0e7b051af289caad1cf668331e3ffa4f6"
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  pruneopts = ""
+>>>>>>> add hack script to list all pull requests for each release
   revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
   version = "v0.0.3"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:e3707aeaccd2adc89eba6c062fec72116fe1fc1ba71097da85b4d8ae1668a675"
   name = "github.com/spf13/pflag"
   packages = ["."]
@@ -277,6 +483,26 @@
 [[projects]]
   branch = "master"
   digest = "1:d9f9f45d3383b93ce1c7e744b3ede6974917ae4d100e1a7abfc2906e5e5e2e28"
+=======
+  digest = "1:8e243c568f36b09031ec18dff5f7d2769dcf5ca4d624ea511c8e3197dc3d352d"
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  pruneopts = ""
+  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
+  version = "v1.0.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:8af4dda167d0ef21ab0affc797bff87ed0e87c57bd1d9bf57ad8f72d348c7932"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  pruneopts = ""
+  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5dc6753986b9eeba4abdf05dedc5ba06bb52dad43cc8aad35ffb42bb7adfa68f"
+>>>>>>> add hack script to list all pull requests for each release
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -284,25 +510,70 @@
     "internal/socks",
     "proxy",
   ]
+<<<<<<< HEAD
   pruneopts = "NUT"
   revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"
 
 [[projects]]
   branch = "master"
   digest = "1:4ea08b5c4c51887a54caee2954db97b620736ae510bdc8514f691d3a9375d93a"
+=======
+  pruneopts = ""
+  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
+
+[[projects]]
+  branch = "master"
+  digest = "1:b697592485cb412be4188c08ca0beed9aab87f36b86418e21acc4a3998f63734"
+  name = "golang.org/x/oauth2"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = ""
+  revision = "d2e6202438beef2727060aa7cabdd924d92ebfd9"
+
+[[projects]]
+  branch = "master"
+  digest = "1:baee54aa41cb93366e76a9c29f8dd2e4c4e6a35ff89551721d5275d2c858edc9"
+>>>>>>> add hack script to list all pull requests for each release
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
+<<<<<<< HEAD
   pruneopts = "NUT"
   revision = "e4b3c5e9061176387e7cea65e4dc5853801f3fb7"
+=======
+  pruneopts = ""
+  revision = "bff228c7b664c5fce602223a05fb708fd8654986"
+>>>>>>> add hack script to list all pull requests for each release
+
+[[projects]]
+  digest = "1:8c432632a230496c35a15cfdf441436f04c90e724ad99c8463ef0c82bbe93edb"
+  name = "google.golang.org/appengine"
+  packages = [
+    "internal",
+    "internal/base",
+    "internal/datastore",
+    "internal/log",
+    "internal/remote_api",
+    "internal/urlfetch",
+    "urlfetch",
+  ]
+  pruneopts = ""
+  revision = "ae0ab99deb4dc413a2b4bd6c8bdd0eb67f1e4d06"
+  version = "v1.2.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "code.cloudfoundry.org/bytefmt",
+<<<<<<< HEAD
+=======
+    "github.com/docker/distribution",
+>>>>>>> add hack script to list all pull requests for each release
     "github.com/docker/docker/api/types",
     "github.com/docker/docker/client",
     "github.com/docker/docker/pkg/system",
@@ -317,6 +588,10 @@
     "github.com/google/go-containerregistry/pkg/v1/remote",
     "github.com/google/go-containerregistry/pkg/v1/tarball",
     "github.com/google/go-containerregistry/pkg/v1/types",
+<<<<<<< HEAD
+=======
+    "github.com/google/go-github/github",
+>>>>>>> add hack script to list all pull requests for each release
     "github.com/mitchellh/go-homedir",
     "github.com/nightlyone/lockfile",
     "github.com/pkg/errors",
@@ -325,6 +600,10 @@
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/spf13/pflag",
+<<<<<<< HEAD
+=======
+    "golang.org/x/oauth2",
+>>>>>>> add hack script to list all pull requests for each release
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

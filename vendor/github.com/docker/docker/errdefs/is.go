@@ -47,7 +47,11 @@ func IsConflict(err error) bool {
 	return ok
 }
 
+<<<<<<< HEAD
 // IsUnauthorized returns if the passed in error is an ErrUnauthorized
+=======
+// IsUnauthorized returns if the the passed in error is an ErrUnauthorized
+>>>>>>> add hack script to list all pull requests for each release
 func IsUnauthorized(err error) bool {
 	_, ok := getImplementer(err).(ErrUnauthorized)
 	return ok
