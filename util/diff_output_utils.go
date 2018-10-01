@@ -297,6 +297,78 @@ func (r DirDiffResult) OutputText(diffType string, format string) error {
 	return TemplateOutputFromFormat(strResult, "DirDiff", format)
 }
 
+type SizeDiffResult DiffResult
+
+func (r SizeDiffResult) OutputStruct() interface{} {
+	diff, valid := r.Diff.([]SizeDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should be of type []SizeDiff")
+		return errors.New("Could not output SizeAnalyzer diff result")
+	}
+
+	r.Diff = diff
+	return r
+}
+
+func (r SizeDiffResult) OutputText(diffType string, format string) error {
+	diff, valid := r.Diff.([]SizeDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should be of type []SizeDiff")
+		return errors.New("Could not output SizeAnalyzer diff result")
+	}
+
+	strDiff := stringifySizeDiffs(diff)
+
+	strResult := struct {
+		Image1   string
+		Image2   string
+		DiffType string
+		Diff     []StrSizeDiff
+	}{
+		Image1:   r.Image1,
+		Image2:   r.Image2,
+		DiffType: r.DiffType,
+		Diff:     strDiff,
+	}
+	return TemplateOutputFromFormat(strResult, "SizeDiff", format)
+}
+
+type SizeLayerDiffResult DiffResult
+
+func (r SizeLayerDiffResult) OutputStruct() interface{} {
+	diff, valid := r.Diff.([]SizeDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should be of type []SizeDiff")
+		return errors.New("Could not output SizeLayerAnalyzer diff result")
+	}
+
+	r.Diff = diff
+	return r
+}
+
+func (r SizeLayerDiffResult) OutputText(diffType string, format string) error {
+	diff, valid := r.Diff.([]SizeDiff)
+	if !valid {
+		logrus.Error("Unexpected structure of Diff.  Should be of type []SizeDiff")
+		return errors.New("Could not output SizeLayerAnalyzer diff result")
+	}
+
+	strDiff := stringifySizeDiffs(diff)
+
+	strResult := struct {
+		Image1   string
+		Image2   string
+		DiffType string
+		Diff     []StrSizeDiff
+	}{
+		Image1:   r.Image1,
+		Image2:   r.Image2,
+		DiffType: r.DiffType,
+		Diff:     strDiff,
+	}
+	return TemplateOutputFromFormat(strResult, "SizeLayerDiff", format)
+}
+
 type MultipleDirDiffResult DiffResult
 
 func (r MultipleDirDiffResult) OutputStruct() interface{} {

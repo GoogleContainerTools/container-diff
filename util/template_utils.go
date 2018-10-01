@@ -100,6 +100,22 @@ const FilenameDiffOutput = `
 {{.Diff}}
 `
 
+const SizeDiffOutput = `
+-----{{.DiffType}}-----
+
+Image size difference between {{.Image1}} and {{.Image2}}:{{if not .Diff}} None{{else}}
+SIZE1	SIZE2{{range .Diff}}{{"\n"}}{{.Size1}}	{{.Size2}}{{end}}
+{{end}}
+`
+
+const SizeLayerDiffOutput = `
+-----{{.DiffType}}-----
+
+Layer size differences between {{.Image1}} and {{.Image2}}:{{if not .Diff}} None{{else}}
+LAYER	SIZE1	SIZE2{{range .Diff}}{{"\n"}}{{.Name}}	{{.Size1}}	{{.Size2}}{{end}}
+{{end}}
+`
+
 const ListAnalysisOutput = `
 -----{{.AnalyzeType}}-----
 
@@ -121,6 +137,22 @@ const FileLayerAnalysisOutput = `
 Analysis for {{$.Image}} Layer {{$index}}:{{if not $analysis}} None{{else}}
 FILE	SIZE{{range $analysis}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}
 {{end}}
+{{end}}
+`
+
+const SizeAnalysisOutput = `
+-----{{.AnalyzeType}}-----
+
+Analysis for {{.Image}}:{{if not .Analysis}} None{{else}}
+IMAGE	DIGEST	SIZE{{range .Analysis}}{{"\n"}}{{.Name}}	{{.Digest}}	{{.Size}}{{end}}
+{{end}}
+`
+
+const SizeLayerAnalysisOutput = `
+-----{{.AnalyzeType}}-----
+
+Analysis for {{.Image}}:{{if not .Analysis}} None{{else}}
+LAYER	DIGEST	SIZE{{range .Analysis}}{{"\n"}}{{.Name}}	{{.Digest}}	{{.Size}}{{end}}
 {{end}}
 `
 

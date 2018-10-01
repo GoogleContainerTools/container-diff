@@ -1,0 +1,23 @@
+[
+  {
+    "Image": "gcr.io/gcp-runtimes/diff-layer-base",
+    "AnalyzeType": "SizeLayer",
+    "Analysis": [
+      {
+        "Name": "0",
+        "Digest": "sha256:74a9fa414ff7212ca555a1024826b94e27ec6a436fd971f8e6c2a909b23630a2",
+        "Size": 6
+      },
+      {
+        "Name": "1",
+        "Digest": "sha256:e39d9b94d5c118b34cce2f4af7efd4c7ed2553e697d7f676e24c4091e42a4998",
+        "Size": 7
+      },
+      {
+        "Name": "2",
+        "Digest": "sha256:bda36409f35ed9e71049d22abdce890d6335056ca15bfed9f323be69b0607e24",
+        "Size": 6
+      }
+    ]
+  }
+]
