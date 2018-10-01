@@ -1,5 +1,59 @@
 # container-diff Release Notes
 
+# Version 0.11.0 - 6/27/18
+* Don't overwrite loaded tarball image
+* Use local RPM binary (when possible) in RPM differ
+
+# Version 0.10.0 - 6/13/18
+* Switch to github.com/google/go-containerregistry
+* Fix entrypoint in RPM differ
+* Various metadata diffing fixes
+* Remove Bazel
+
+# Version 0.9.0 - 4/10/18
+* Add metadata diffing
+* Sanitize filepaths before joining to prevent filepath traversal
+* Fix appending of latest tag to tar files
+* Correctly clean up image filesystems
+* Set/unset write bit when unpacking directories out of permission scope
+* Add all docker config fields to image config
+* Various bug/panic fixes
+
+# Version 0.8.0 - 3/19/28
+* Allow updating env vars on MutableSource image
+* Save temp layers in cache directory instead of /tmp
+* Allow accessing and modifying MutableSource config
+* Fixed appending latest tag to images with no tag provided
+* Created default ImageSource if none is provided to prepper
+* Fixed issue where remote:// prefix was not being stripped correctly
+
+# Version 0.7.0 - 2/22/18
+* Download remote:// images in RPMAnalyzer
+* Add support for custom formatting strings
+* Refactors to the cache and image unpacking code
+* Add Label to ConfigObject
+* Add MutableSource for basic image modifications
+
+# Version 0.6.2 - 1/10/18
+* Fix issue with user.Current not working in some environments
+
+# Version 0.6.1 - 1/4/18
+* Fix incorrect version in binary
+
+# Version 0.6.0 - 12/27/17
+* Add support for diffing RPM packages
+* Fix a few unpack errors for images with whiteout layers
+* Switch dependency management from godep to dep
+
+# Version 0.5.2 - 11/25/17
+* Various docs fixes
+* Fix Makefile to preserve all build artifacts
+
+# Version 0.5.1 - 11/20/17
+* Change types flag from comma separated --types list to repeated --typeflag
+* Added --filename flag to show diffs of individual files
+* Added layer caching
+
 # Version 0.5.0 - 10/9/17
 * Apt diffing now done by default
 * Add support for building single platform with Bazel
@@ -8,11 +62,11 @@
 * Remove Docker dependency for local images
 
 
-# Version 0.4.1
+# Version 0.4.1 - 9/12/17
 * Fixed error with running container-diff with no analyzer specified
 * Fixed error where container-diff version was outputting an incorrect value
 
-# Version 0.4.0
+# Version 0.4.0 - 9/12/17
 * Added single image analysis #20 
 * Added file/package output sorting by size #36
 * Changed CLI to use "--types" flag #68 
