@@ -1,5 +1,17 @@
 # container-diff Release Notes
 
+# Version 0.12.0 - 10/1/18
+* Add script to list all pull requests for each release [#258](https://github.com/GoogleContainerTools/container-diff/pull/258)
+* Fix deps [#260](https://github.com/GoogleContainerTools/container-diff/pull/260)
+* Backfill changelog [#257](https://github.com/GoogleContainerTools/container-diff/pull/257)
+* Add maintainers file and new issue template [#259](https://github.com/GoogleContainerTools/container-diff/pull/259)
+* Add size analyzer [#256](https://github.com/GoogleContainerTools/container-diff/pull/256)
+* Fix destination path for clone in contrib guidance. [#255](https://github.com/GoogleContainerTools/container-diff/pull/255)
+* Add rpmlayer differ [#252](https://github.com/GoogleContainerTools/container-diff/pull/252)
+* Handle error gracefully when we can't retrieve an image [#251](https://github.com/GoogleContainerTools/container-diff/pull/251)
+* Layered analysis for single version packages [#248](https://github.com/GoogleContainerTools/container-diff/pull/248)
+* Reuse cached filesystems for layers [#247](https://github.com/GoogleContainerTools/container-diff/pull/247)
+
 # Version 0.11.0 - 6/27/18
 * Don't overwrite loaded tarball image
 * Use local RPM binary (when possible) in RPM differ
