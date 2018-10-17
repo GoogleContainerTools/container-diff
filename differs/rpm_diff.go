@@ -438,7 +438,7 @@ func rpmDataFromFS(fsPath string, dbPath string) (map[string]util.PackageInfo, e
 			return packages, err
 		}
 		output := strings.Split(string(out), "\n")
-		packages, err := parsePackageData(output)
+		packages, err = parsePackageData(output)
 		if err != nil {
 			return packages, err
 		}
