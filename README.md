@@ -55,7 +55,7 @@ container-diff analyze <img> --type=apt --type=node  [Apt and Node]
 # --type=<analyzer1> --type=<analyzer2> --type=<analyzer3>,...
 ```
 
-By default, with no `--type` flag specified, container-diff will run Apt package analysis.
+By default, with no `--type` flag specified, container-diff will run image size analysis.
 
 To use container-diff to perform a diff analysis on two images, you need two Docker images (in the form of an ID, tarball, or URL from a repo). Once you have those images, you can run any of the following differs:
 ```shell

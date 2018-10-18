@@ -120,7 +120,7 @@ func validateArgs(args []string, validatefxns ...validatefxn) error {
 
 func checkIfValidAnalyzer(_ []string) error {
 	if len(types) == 0 {
-		types = []string{"apt"}
+		types = []string{"size"}
 	}
 	for _, name := range types {
 		if _, exists := differs.Analyzers[name]; !exists {
