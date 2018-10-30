@@ -1,5 +1,10 @@
 # container-diff Release Notes
 
+# Version 0.13.0 - 10/30/18
+* Update go-containerregistry to pick up docker API client negotiation [#267](https://github.com/GoogleContainerTools/container-diff/pull/267)
+* Fix unintended variable shadowing [#263](https://github.com/GoogleContainerTools/container-diff/pull/263)
+* Change the default analysis type from apt to size [#266](https://github.com/GoogleContainerTools/container-diff/pull/266)
+
 # Version 0.12.0 - 10/1/18
 * Add script to list all pull requests for each release [#258](https://github.com/GoogleContainerTools/container-diff/pull/258)
 * Fix deps [#260](https://github.com/GoogleContainerTools/container-diff/pull/260)
