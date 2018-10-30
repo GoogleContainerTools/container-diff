@@ -52,7 +52,7 @@
     "reference",
   ]
   pruneopts = "NUT"
-  revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
+  revision = "master"
 
 [[projects]]
   branch = "master"
@@ -112,11 +112,12 @@
   version = "v0.3.3"
 
 [[projects]]
-  digest = "1:00d0d550a1f1d7ca03270ebc1e136f21f6b9dab37f0c37e9a90d56d2f7afcff9"
+  branch = "master"
+  digest = "1:3b4afe788202e2911355e54c30323ec56617c52015fcdff23380058f4cee8540"
   name = "github.com/docker/libnetwork"
   packages = ["ipamutils"]
   pruneopts = "NUT"
-  revision = "19279f0492417475b6bfbd0aa529f73e8f178fb5"
+  revision = "d7b61745d16675c9f548b19f06fda80d422a74f0"
 
 [[projects]]
   digest = "1:83e1563e140d0e650fbba6d1d4759c502b781143630b268ef3c3a121013cdfd7"

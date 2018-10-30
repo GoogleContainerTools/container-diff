@@ -13,11 +13,11 @@
 
 [[override]]	
   name = "github.com/docker/distribution"	
-  revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
+  revision = "master"
 
 [[override]]
   name = "github.com/docker/libnetwork"
-  revision = "19279f0492417475b6bfbd0aa529f73e8f178fb5"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/nightlyone/lockfile"
