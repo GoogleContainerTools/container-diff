@@ -28,27 +28,14 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote/transport"
 )
 
-// WriteOptions are used to expose optional information to guide or
-// control the image write.
-type WriteOptions struct {
-	// TODO(mattmoor): Expose "threads" to limit parallelism?
-}
-
 // Write pushes the provided img to the specified image reference.
-func Write(ref name.Reference, img v1.Image, auth authn.Authenticator, t http.RoundTripper,
-	wo WriteOptions) error {
-
+func Write(ref name.Reference, img v1.Image, auth authn.Authenticator, t http.RoundTripper) error {
 	ls, err := img.Layers()
 	if err != nil {
 		return err
 	}
-	scopes := []string{ref.Scope(transport.PushScope)}
-	for _, l := range ls {
-		if ml, ok := l.(*MountableLayer); ok {
-			scopes = append(scopes, ml.Repository.Scope(transport.PullScope))
-		}
-	}
 
+	scopes := scopesForUploadingImage(ref, ls)
 	tr, err := transport.New(ref.Context().Registry, auth, t, scopes)
 	if err != nil {
 		return err
@@ -57,7 +44,6 @@ func Write(ref name.Reference, img v1.Image, auth authn.Authenticator, t http.Ro
 		ref:     ref,
 		client:  &http.Client{Transport: tr},
 		img:     img,
-		options: wo,
 	}
 
 	bs, err := img.BlobSet()
@@ -97,13 +83,12 @@ type writer struct {
 	ref     name.Reference
 	client  *http.Client
 	img     v1.Image
-	options WriteOptions
 }
 
 // url returns a url.Url for the specified path in the context of this remote image reference.
 func (w *writer) url(path string) url.URL {
 	return url.URL{
-		Scheme: transport.Scheme(w.ref.Context().Registry),
+		Scheme: w.ref.Context().Registry.Scheme(),
 		Host:   w.ref.Context().RegistryStr(),
 		Path:   path,
 	}
@@ -125,6 +110,26 @@ func (w *writer) nextLocation(resp *http.Response) (string, error) {
 	return resp.Request.URL.ResolveReference(u).String(), nil
 }
 
+// checkExisting checks if a blob exists already in the repository by making a
+// HEAD request to the blob store API.  GCR performs an existence check on the
+// initiation if "mount" is specified, even if no "from" sources are specified.
+// However, this is not broadly applicable to all registries, e.g. ECR.
+func (w *writer) checkExisting(h v1.Hash) (bool, error) {
+	u := w.url(fmt.Sprintf("/v2/%s/blobs/%s", w.ref.Context().RepositoryStr(), h.String()))
+
+	resp, err := w.client.Head(u.String())
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	if err := CheckError(resp, http.StatusOK, http.StatusNotFound); err != nil {
+		return false, err
+	}
+
+	return resp.StatusCode == http.StatusOK, nil
+}
+
 // initiateUpload initiates the blob upload, which starts with a POST that can
 // optionally include the hash of the layer and a list of repositories from
 // which that layer might be read. On failure, an error is returned.
@@ -140,12 +145,11 @@ func (w *writer) initiateUpload(h v1.Hash) (location string, mounted bool, err e
 	if err != nil {
 		return "", false, err
 	}
-	// We currently avoid HEAD because it's semi-redundant with the mount that is part
-	// of initiating the blob upload.  GCR will perform an existence check on the initiation
-	// if "mount" is specified, even if no "from" sources are specified.  If this turns out
-	// to not be broadly applicable then we should replace mounts without "from"s with a HEAD.
+
 	if ml, ok := l.(*MountableLayer); ok {
-		uv["from"] = []string{ml.Repository.RepositoryStr()}
+		if w.ref.Context().RegistryStr() == ml.Reference.Context().RegistryStr() {
+			uv["from"] = []string{ml.Reference.Context().RepositoryStr()}
+		}
 	}
 	u.RawQuery = uv.Encode()
 
@@ -156,7 +160,7 @@ func (w *writer) initiateUpload(h v1.Hash) (location string, mounted bool, err e
 	}
 	defer resp.Body.Close()
 
-	if err := checkError(resp, http.StatusCreated, http.StatusAccepted); err != nil {
+	if err := CheckError(resp, http.StatusCreated, http.StatusAccepted); err != nil {
 		return "", false, err
 	}
 
@@ -199,7 +203,7 @@ func (w *writer) streamBlob(h v1.Hash, streamLocation string) (commitLocation st
 	}
 	defer resp.Body.Close()
 
-	if err := checkError(resp, http.StatusNoContent, http.StatusAccepted, http.StatusCreated); err != nil {
+	if err := CheckError(resp, http.StatusNoContent, http.StatusAccepted, http.StatusCreated); err != nil {
 		return "", err
 	}
 
@@ -229,11 +233,20 @@ func (w *writer) commitBlob(h v1.Hash, location string) (err error) {
 	}
 	defer resp.Body.Close()
 
-	return checkError(resp, http.StatusCreated)
+	return CheckError(resp, http.StatusCreated)
 }
 
 // uploadOne performs a complete upload of a single layer.
 func (w *writer) uploadOne(h v1.Hash) error {
+	existing, err := w.checkExisting(h)
+	if err != nil {
+		return err
+	}
+	if existing {
+		log.Printf("existing blob: %v", h)
+		return nil
+	}
+
 	location, mounted, err := w.initiateUpload(h)
 	if err != nil {
 		return err
@@ -280,7 +293,7 @@ func (w *writer) commitImage() error {
 	}
 	defer resp.Body.Close()
 
-	if err := checkError(resp, http.StatusOK, http.StatusCreated, http.StatusAccepted); err != nil {
+	if err := CheckError(resp, http.StatusOK, http.StatusCreated, http.StatusAccepted); err != nil {
 		return err
 	}
 
@@ -292,6 +305,30 @@ func (w *writer) commitImage() error {
 	// The image was successfully pushed!
 	log.Printf("%v: digest: %v size: %d", w.ref, digest, len(raw))
 	return nil
+}
+
+func scopesForUploadingImage(ref name.Reference, layers []v1.Layer) []string {
+	// use a map as set to remove duplicates scope strings
+	scopeSet := map[string]struct{}{}
+
+	for _, l := range layers {
+		if ml, ok := l.(*MountableLayer); ok {
+			// we add push scope for ref.Context() after the loop
+			if ml.Reference.Context() != ref.Context() {
+				scopeSet[ml.Reference.Context().Scope(transport.PullScope)] = struct{}{}
+			}
+		}
+	}
+
+	scopes := make([]string, 0)
+	// Push scope should be the first element because a few registries just look at the first scope to determine access.
+	scopes = append(scopes, ref.Scope(transport.PushScope))
+
+	for scope, _ := range scopeSet {
+		scopes = append(scopes, scope)
+	}
+
+	return scopes
 }
 
 // TODO(mattmoor): WriteIndex

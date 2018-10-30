@@ -7,7 +7,7 @@
   name = "github.com/fsouza/go-dockerclient"
   version = "v1.3.0"
 
-[[constraint]]
+[[override]]
   name = "github.com/docker/docker"
   branch = "master"
 
@@ -33,4 +33,4 @@
 
 [[constraint]]
   name = "github.com/google/go-containerregistry"
-  revision = "dc0a77702ddab8c3dc5630eca7c026d571c1c9b7"
+  revision = "eb57122f1bf944d0584c387c62c1a759c953684d"
