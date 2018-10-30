@@ -264,7 +264,7 @@ func parsePackageData(rpmOutput []string) (map[string]util.PackageInfo, error) {
 // loadImageToDaemon loads the image specified to the docker daemon.
 func loadImageToDaemon(img v1.Image) (string, error) {
 	tag := generateValidImageTag()
-	resp, err := daemon.Write(tag, img, daemon.WriteOptions{})
+	resp, err := daemon.Write(tag, img)
 	if err != nil {
 		return "", err
 	}
@@ -287,7 +287,7 @@ func generateValidImageTag() name.Tag {
 			logrus.Warn(err.Error())
 			continue
 		}
-		img, _ := daemon.Image(tag, &daemon.ReadOptions{})
+		img, _ := daemon.Image(tag)
 		if img == nil {
 			break
 		}

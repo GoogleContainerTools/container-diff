@@ -12,31 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package transport
+package authn
 
 import (
-	"regexp"
-	"strings"
-
 	"github.com/google/go-containerregistry/pkg/name"
 )
 
-// Detect more complex forms of local references.
-var reLocal = regexp.MustCompile(`.*\.local(?:host)?(?::\d{1,5})?$`)
+type multiKeychain struct {
+	keychains []Keychain
+}
 
-// Detect the loopback IP (127.0.0.1)
-var reLoopback = regexp.MustCompile(regexp.QuoteMeta("127.0.0.1"))
+// Assert that our multi-keychain implements Keychain.
+var _ (Keychain) = (*multiKeychain)(nil)
 
-// Scheme returns https scheme for all the endpoints except localhost.
-func Scheme(reg name.Registry) string {
-	if strings.HasPrefix(reg.Name(), "localhost:") {
-		return "http"
+// NewMultiKeychain composes a list of keychains into one new keychain.
+func NewMultiKeychain(kcs ...Keychain) Keychain {
+	return &multiKeychain{keychains: kcs}
+}
+
+// Resolve implements Keychain.
+func (mk *multiKeychain) Resolve(reg name.Registry) (Authenticator, error) {
+	for _, kc := range mk.keychains {
+		auth, err := kc.Resolve(reg)
+		if err != nil {
+			return nil, err
+		}
+		if auth != Anonymous {
+			return auth, nil
+		}
 	}
-	if reLocal.MatchString(reg.Name()) {
-		return "http"
-	}
-	if reLoopback.MatchString(reg.Name()) {
-		return "http"
-	}
-	return "https"
+	return Anonymous, nil
 }

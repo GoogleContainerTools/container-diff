@@ -36,17 +36,16 @@ type ImageLoader interface {
 
 // This is a variable so we can override in tests.
 var GetImageLoader = func() (ImageLoader, error) {
-	return client.NewEnvClient()
-}
-
-// WriteOptions are used to expose optional information to guide or
-// control the image write.
-type WriteOptions struct {
-	// TODO(dlorenc): What kinds of knobs does the daemon expose?
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		return nil, err
+	}
+	cli.NegotiateAPIVersion(context.Background())
+	return cli, nil
 }
 
 // Write saves the image into the daemon as the given tag.
-func Write(tag name.Tag, img v1.Image, wo WriteOptions) (string, error) {
+func Write(tag name.Tag, img v1.Image) (string, error) {
 	cli, err := GetImageLoader()
 	if err != nil {
 		return "", err
@@ -54,7 +53,7 @@ func Write(tag name.Tag, img v1.Image, wo WriteOptions) (string, error) {
 
 	pr, pw := io.Pipe()
 	go func() {
-		pw.CloseWithError(tarball.Write(tag, img, &tarball.WriteOptions{}, pw))
+		pw.CloseWithError(tarball.Write(tag, img, pw))
 	}()
 
 	// write the image in docker save format first, then load it

@@ -156,9 +156,7 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 
 		start := time.Now()
 		// TODO(nkubala): specify gzip.NoCompression here when functional options are supported
-		img, err = daemon.Image(ref, &daemon.ReadOptions{
-			Buffer: true,
-		})
+		img, err = daemon.Image(ref, daemon.WithBufferedOpener())
 		if err != nil {
 			return pkgutil.Image{}, errors.Wrap(err, "retrieving image from daemon")
 		}
@@ -176,7 +174,7 @@ func getImageForName(imageName string) (pkgutil.Image, error) {
 			return pkgutil.Image{}, errors.Wrap(err, "resolving auth")
 		}
 		start := time.Now()
-		img, err = remote.Image(ref, auth, http.DefaultTransport)
+		img, err = remote.Image(ref, remote.WithAuth(auth), remote.WithTransport(http.DefaultTransport))
 		if err != nil {
 			return pkgutil.Image{}, errors.Wrap(err, "retrieving remote image")
 		}
