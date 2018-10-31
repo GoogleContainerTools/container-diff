@@ -59,7 +59,7 @@ func analyzeImage(imageName string, analyzerArgs []string) error {
 		return errors.Wrap(err, "getting analyzers")
 	}
 
-	image, err := getImageForName(imageName)
+	image, err := getImage(imageName)
 	if err != nil {
 		return errors.Wrapf(err, "error retrieving image %s", imageName)
 	}

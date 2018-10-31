@@ -73,7 +73,7 @@ func checkFilenameFlag(_ []string) error {
 // processImage is a concurrency-friendly wrapper around getImageForName
 func processImage(imageName string, imageMap map[string]*pkgutil.Image, wg *sync.WaitGroup, errChan chan<- error) {
 	defer wg.Done()
-	image, err := getImageForName(imageName)
+	image, err := getImage(imageName)
 	if err != nil {
 		errChan <- fmt.Errorf("error retrieving image %s: %s", imageName, err)
 	}

@@ -19,26 +19,15 @@ package cmd
 import (
 	goflag "flag"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
-
-	"github.com/google/go-containerregistry/pkg/authn"
-	"github.com/google/go-containerregistry/pkg/name"
-	"github.com/google/go-containerregistry/pkg/v1/daemon"
-	"github.com/google/go-containerregistry/pkg/v1/remote"
-	"github.com/google/go-containerregistry/pkg/v1/tarball"
 
 	"github.com/GoogleContainerTools/container-diff/differs"
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
-	"github.com/google/go-containerregistry/pkg/v1"
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -54,11 +43,6 @@ var LogLevel string
 var format string
 
 type validatefxn func(args []string) error
-
-const (
-	DaemonPrefix = "daemon://"
-	RemotePrefix = "remote://"
-)
 
 var RootCmd = &cobra.Command{
 	Use:   "container-diff",
@@ -130,153 +114,6 @@ func checkIfValidAnalyzer(_ []string) error {
 	return nil
 }
 
-// getImageForName infers the source of an image and retrieves a v1.Image reference to it.
-// Once a reference is obtained, it attempts to unpack the v1.Image's reader's contents
-// into a temp directory on the local filesystem.
-func getImageForName(imageName string) (pkgutil.Image, error) {
-	logrus.Infof("retrieving image: %s", imageName)
-	var img v1.Image
-	var err error
-	if pkgutil.IsTar(imageName) {
-		start := time.Now()
-		img, err = tarball.ImageFromPath(imageName, nil)
-		if err != nil {
-			return pkgutil.Image{}, errors.Wrap(err, "retrieving tar from path")
-		}
-		elapsed := time.Now().Sub(start)
-		logrus.Infof("retrieving image ref from tar took %f seconds", elapsed.Seconds())
-	} else if strings.HasPrefix(imageName, DaemonPrefix) {
-		// remove the daemon prefix
-		imageName = strings.Replace(imageName, DaemonPrefix, "", -1)
-
-		ref, err := name.ParseReference(imageName, name.WeakValidation)
-		if err != nil {
-			return pkgutil.Image{}, errors.Wrap(err, "parsing image reference")
-		}
-
-		start := time.Now()
-		// TODO(nkubala): specify gzip.NoCompression here when functional options are supported
-		img, err = daemon.Image(ref, daemon.WithBufferedOpener())
-		if err != nil {
-			return pkgutil.Image{}, errors.Wrap(err, "retrieving image from daemon")
-		}
-		elapsed := time.Now().Sub(start)
-		logrus.Infof("retrieving local image ref took %f seconds", elapsed.Seconds())
-	} else {
-		// either has remote prefix or has no prefix, in which case we force remote
-		imageName = strings.Replace(imageName, RemotePrefix, "", -1)
-		ref, err := name.ParseReference(imageName, name.WeakValidation)
-		if err != nil {
-			return pkgutil.Image{}, errors.Wrap(err, "parsing image reference")
-		}
-		auth, err := authn.DefaultKeychain.Resolve(ref.Context().Registry)
-		if err != nil {
-			return pkgutil.Image{}, errors.Wrap(err, "resolving auth")
-		}
-		start := time.Now()
-		img, err = remote.Image(ref, remote.WithAuth(auth), remote.WithTransport(http.DefaultTransport))
-		if err != nil {
-			return pkgutil.Image{}, errors.Wrap(err, "retrieving remote image")
-		}
-		elapsed := time.Now().Sub(start)
-		logrus.Infof("retrieving remote image ref took %f seconds", elapsed.Seconds())
-	}
-
-	// create tempdir and extract fs into it
-	var layers []pkgutil.Layer
-	if includeLayers() {
-		start := time.Now()
-		imgLayers, err := img.Layers()
-		if err != nil {
-			return pkgutil.Image{}, errors.Wrap(err, "getting image layers")
-		}
-		for _, layer := range imgLayers {
-			layerStart := time.Now()
-			digest, err := layer.Digest()
-			path, err := getExtractPathForName(digest.String())
-			if err != nil {
-				return pkgutil.Image{
-					Layers: layers,
-				}, errors.Wrap(err, "getting extract path for layer")
-			}
-			if err := pkgutil.GetFileSystemForLayer(layer, path, nil); err != nil {
-				return pkgutil.Image{
-					Layers: layers,
-				}, errors.Wrap(err, "getting filesystem for layer")
-			}
-			layers = append(layers, pkgutil.Layer{
-				FSPath: path,
-				Digest: digest,
-			})
-			elapsed := time.Now().Sub(layerStart)
-			logrus.Infof("time elapsed retrieving layer: %fs", elapsed.Seconds())
-		}
-		elapsed := time.Now().Sub(start)
-		logrus.Infof("time elapsed retrieving image layers: %fs", elapsed.Seconds())
-	}
-
-	imageDigest, err := getImageDigest(img)
-	if err != nil {
-		return pkgutil.Image{}, err
-	}
-	path, err := getExtractPathForName(pkgutil.RemoveTag(imageName) + "@" + imageDigest.String())
-	if err != nil {
-		return pkgutil.Image{}, err
-	}
-	// extract fs into provided dir
-	if err := pkgutil.GetFileSystemForImage(img, path, nil); err != nil {
-		return pkgutil.Image{
-			FSPath: path,
-			Layers: layers,
-		}, errors.Wrap(err, "getting filesystem for image")
-	}
-	return pkgutil.Image{
-		Image:  img,
-		Source: imageName,
-		FSPath: path,
-		Digest: imageDigest,
-		Layers: layers,
-	}, nil
-}
-
-func getImageDigest(image v1.Image) (digest v1.Hash, err error) {
-	start := time.Now()
-	digest, err = image.Digest()
-	if err != nil {
-		return digest, err
-	}
-	elapsed := time.Now().Sub(start)
-	logrus.Infof("time elapsed retrieving image digest: %fs", elapsed.Seconds())
-	return digest, nil
-}
-
-func getExtractPathForName(name string) (string, error) {
-	var path string
-	var err error
-	if !noCache {
-		path, err = cacheDir(name)
-		if err != nil {
-			return "", err
-		}
-		// if cachedir doesn't exist, create it
-		if _, err := os.Stat(path); err != nil && os.IsNotExist(err) {
-			err = os.MkdirAll(path, 0700)
-			if err != nil {
-				return "", err
-			}
-			logrus.Infof("caching filesystem at %s", path)
-		}
-	} else {
-		// otherwise, create tempdir
-		logrus.Infof("skipping caching")
-		path, err = ioutil.TempDir("", strings.Replace(name, "/", "", -1))
-		if err != nil {
-			return "", err
-		}
-	}
-	return path, nil
-}
-
 func includeLayers() bool {
 	for _, t := range types {
 		for _, a := range differs.LayerAnalyzers {
@@ -286,6 +123,18 @@ func includeLayers() bool {
 		}
 	}
 	return false
+}
+
+func getImage(imageName string) (pkgutil.Image, error) {
+	var cachePath string
+	var err error
+	if !noCache {
+		cachePath, err = cacheDir(imageName)
+		if err != nil {
+			return pkgutil.Image{}, err
+		}
+	}
+	return pkgutil.GetImage(imageName, includeLayers(), cachePath)
 }
 
 func cacheDir(imageName string) (string, error) {
