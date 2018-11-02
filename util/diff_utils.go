@@ -167,8 +167,8 @@ func DiffFile(image1, image2 *pkgutil.Image, filename string) (*FileNameDiff, er
 	}
 
 	//Carry on with diffing, make string array for difflib requirements
-	image1Contents := []string{string(*image1FileContents)}
-	image2Contents := []string{string(*image2FileContents)}
+	image1Contents := difflib.SplitLines(string(*image1FileContents))
+	image2Contents := difflib.SplitLines(string(*image2FileContents))
 
 	//Run diff
 	diff := difflib.UnifiedDiff{
