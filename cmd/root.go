@@ -43,6 +43,8 @@ var cacheDir string
 var LogLevel string
 var format string
 
+const containerDiffEnvCacheDir = "CONTAINER_DIFF_CACHEDIR"
+
 type validatefxn func(args []string) error
 
 var RootCmd = &cobra.Command{
@@ -130,7 +132,7 @@ func getImage(imageName string) (pkgutil.Image, error) {
 	var cachePath string
 	var err error
 	if !noCache {
-		cachePath, err = getCacheDir(imageName, cacheDir)
+		cachePath, err = getCacheDir(imageName)
 		if err != nil {
 			return pkgutil.Image{}, err
 		}
@@ -138,15 +140,25 @@ func getImage(imageName string) (pkgutil.Image, error) {
 	return pkgutil.GetImage(imageName, includeLayers(), cachePath)
 }
 
-func getCacheDir(imageName string, cacheDir string) (string, error) {
-	// If the user has specified a custom cache directory
-        // TODO: write me
-        // else
-	dir, err := homedir.Dir()
-	if err != nil {
-		return "", err
-	}
-	rootDir := filepath.Join(dir, ".container-diff", "cache")
+func getCacheDir(imageName string) (string, error) {
+
+	// First preference for cache is set at command line
+        if cacheDir == "" {
+
+                // second preference is environment
+                cacheDir = os.Getenv(containerDiffEnvCacheDir)
+        }
+
+        // Third preference (default) is set at $HOME
+        if cacheDir == "" {
+                dir, err := homedir.Dir()
+	        if err != nil {
+	                 return "", err
+                } else {
+                        cacheDir = dir
+                }
+        }
+	rootDir := filepath.Join(cacheDir, ".container-diff", "cache")
 	imageName = strings.Replace(imageName, string(os.PathSeparator), "", -1)
 	return filepath.Join(rootDir, filepath.Clean(imageName)), nil
 }
@@ -189,5 +201,6 @@ func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 	cmd.Flags().BoolVarP(&noCache, "no-cache", "n", false, "Set this to force retrieval of image filesystem on each run.")
-        cmd.Flags().StringVar(&cacheDir, "cache", "", "cache directory base to create .container-diff (default is $HOME).")
+        cmd.Flags().StringVarP(&cacheDir, "cache", "c", "", "cache directory base to create .container-diff (default is $HOME).")
+
 }
