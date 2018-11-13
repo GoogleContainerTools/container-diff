@@ -143,21 +143,21 @@ func getImage(imageName string) (pkgutil.Image, error) {
 func getCacheDir(imageName string) (string, error) {
 
 	// First preference for cache is set at command line
-        if cacheDir == "" {
+	if cacheDir == "" {
 
-                // second preference is environment
-                cacheDir = os.Getenv(containerDiffEnvCacheDir)
-        }
+		// second preference is environment
+		cacheDir = os.Getenv(containerDiffEnvCacheDir)
+	}
 
-        // Third preference (default) is set at $HOME
-        if cacheDir == "" {
-                dir, err := homedir.Dir()
-	        if err != nil {
-	                 return "", err
-                } else {
-                        cacheDir = dir
-                }
-        }
+	// Third preference (default) is set at $HOME
+	if cacheDir == "" {
+		dir, err := homedir.Dir()
+		if err != nil {
+			return "", err
+		} else {
+			cacheDir = dir
+		}
+	}
 	rootDir := filepath.Join(cacheDir, ".container-diff", "cache")
 	imageName = strings.Replace(imageName, string(os.PathSeparator), "", -1)
 	return filepath.Join(rootDir, filepath.Clean(imageName)), nil
