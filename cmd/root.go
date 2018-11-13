@@ -201,6 +201,6 @@ func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 	cmd.Flags().BoolVarP(&noCache, "no-cache", "n", false, "Set this to force retrieval of image filesystem on each run.")
-        cmd.Flags().StringVarP(&cacheDir, "cache", "c", "", "cache directory base to create .container-diff (default is $HOME).")
+	cmd.Flags().StringVarP(&cacheDir, "cache", "c", "", "cache directory base to create .container-diff (default is $HOME).")
 
 }
