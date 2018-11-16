@@ -151,7 +151,7 @@ func getCacheDir(imageName string) (string, error) {
 	if cacheDir == "" {
 		dir, err := homedir.Dir()
 		if err != nil {
-                        return "", errors.Wrap(err, "retrieving home dir")
+                        return "", err
 		} else {
 			cacheDir = dir
 		}
