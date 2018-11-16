@@ -20,3 +20,21 @@ type testpair struct {
 	input       []string
 	shouldError bool
 }
+
+func TestCacheDir(t *testing.T) {
+  tests := []struct{
+    name        string
+    cliFlag     string
+    envVar      string
+    expectedDir string
+  }{
+    // your tests cases here
+  }
+
+  for _, tt := range tests {
+    t.Run(tt.name, func(t *testing.T) {
+      // actual testing logic. probably set the env var, set the global flag based on the cliFlag, then
+      // call getCacheDir() and make sure the return value is equal to the expectedDir
+    }
+  }
+}
