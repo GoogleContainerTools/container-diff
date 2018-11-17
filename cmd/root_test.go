@@ -16,7 +16,76 @@ limitations under the License.
 
 package cmd
 
+import (
+	"os"
+	"path"
+	"path/filepath"
+	"testing"
+
+	homedir "github.com/mitchellh/go-homedir"
+)
+
 type testpair struct {
 	input       []string
 	shouldError bool
+}
+
+func TestCacheDir(t *testing.T) {
+	homeDir, _ := homedir.Dir()
+	tests := []struct {
+		name        string
+		cliFlag     string
+		envVar      string
+		expectedDir string
+		imageName   string
+	}{
+		// name, cliFlag, envVar, expectedDir
+		{
+			name:        "default cache is at $HOME",
+			cliFlag:     "",
+			envVar:      "",
+			expectedDir: filepath.Join(homeDir, ".container-diff", "cache"),
+			imageName:   "pancakes",
+		},
+		{
+			name:        "setting cache via --cache-dir",
+			cliFlag:     "/tmp",
+			envVar:      "",
+			expectedDir: "/tmp/.container-diff/cache",
+			imageName:   "pancakes",
+		},
+		{
+			name:        "setting cache via CONTAINER_DIFF_CACHEDIR",
+			cliFlag:     "",
+			envVar:      "/tmp",
+			expectedDir: "/tmp/.container-diff/cache",
+			imageName:   "pancakes",
+		},
+		{
+			name:        "command line --cache-dir takes preference to CONTAINER_DIFF_CACHEDIR",
+			cliFlag:     "/tmp",
+			envVar:      "/opt",
+			expectedDir: "/tmp/.container-diff/cache",
+			imageName:   "pancakes",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// set any environment variables
+			if tt.envVar != "" {
+				os.Setenv("CONTAINER_DIFF_CACHEDIR", tt.envVar)
+			}
+			// Set global flag for cache based on --cache-dir
+			cacheDir = tt.cliFlag
+
+			// call getCacheDir and make sure return is equal to expected
+			actualDir, _ := getCacheDir(tt.imageName)
+
+			if path.Dir(actualDir) != tt.expectedDir {
+				t.Errorf("%s\nExpected: %v\nGot: %v", tt.name, tt.expectedDir, actualDir)
+			}
+		},
+		)
+	}
 }
