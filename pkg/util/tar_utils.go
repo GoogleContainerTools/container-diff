@@ -36,7 +36,7 @@ type OriginalPerm struct {
 	perm os.FileMode
 }
 
-func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
+func unpackTar(tr *tar.Reader, path string, whitelist []string, keepOwner bool) error {
 	originalPerms := make([]OriginalPerm, 0)
 	for {
 		header, err := tr.Next()
@@ -135,6 +135,13 @@ func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
 				resolveHardlink(linkname, target)
 			} else {
 				hardlinks[target] = linkname
+			}
+		}
+
+		if keepOwner {
+			if err := os.Lchown(target, header.Uid, header.Gid); err != nil {
+				logrus.Errorf("Error updating owner on %s", target)
+				return err
 			}
 		}
 	}

@@ -69,13 +69,13 @@ type ImageHistoryItem struct {
 // GetImageForName retrieves an image by name alone.
 // It does not return layer information, or respect caching.
 func GetImageForName(imageName string) (Image, error) {
-	return GetImage(imageName, false, "")
+	return GetImage(imageName, false, false, "")
 }
 
 // GetImage infers the source of an image and retrieves a v1.Image reference to it.
 // Once a reference is obtained, it attempts to unpack the v1.Image's reader's contents
 // into a temp directory on the local filesystem.
-func GetImage(imageName string, includeLayers bool, cacheDir string) (Image, error) {
+func GetImage(imageName string, includeLayers, keepOwner bool, cacheDir string) (Image, error) {
 	logrus.Infof("retrieving image: %s", imageName)
 	var img v1.Image
 	var err error
@@ -141,7 +141,7 @@ func GetImage(imageName string, includeLayers bool, cacheDir string) (Image, err
 					Layers: layers,
 				}, errors.Wrap(err, "getting extract path for layer")
 			}
-			if err := GetFileSystemForLayer(layer, path, nil); err != nil {
+			if err := GetFileSystemForLayer(layer, path, nil, keepOwner); err != nil {
 				return Image{
 					Layers: layers,
 				}, errors.Wrap(err, "getting filesystem for layer")
@@ -166,7 +166,7 @@ func GetImage(imageName string, includeLayers bool, cacheDir string) (Image, err
 		return Image{}, err
 	}
 	// extract fs into provided dir
-	if err := GetFileSystemForImage(img, path, nil); err != nil {
+	if err := GetFileSystemForImage(img, path, nil, keepOwner); err != nil {
 		return Image{
 			FSPath: path,
 			Layers: layers,
@@ -241,7 +241,7 @@ func SortMap(m map[string]string) string {
 }
 
 // GetFileSystemForLayer unpacks a layer to local disk
-func GetFileSystemForLayer(layer v1.Layer, root string, whitelist []string) error {
+func GetFileSystemForLayer(layer v1.Layer, root string, whitelist []string, keepOwner bool) error {
 	empty, err := DirIsEmpty(root)
 	if err != nil {
 		return err
@@ -254,12 +254,12 @@ func GetFileSystemForLayer(layer v1.Layer, root string, whitelist []string) erro
 	if err != nil {
 		return err
 	}
-	return unpackTar(tar.NewReader(contents), root, whitelist)
+	return unpackTar(tar.NewReader(contents), root, whitelist, keepOwner)
 }
 
 // unpack image filesystem to local disk
 // if provided directory is not empty, do nothing
-func GetFileSystemForImage(image v1.Image, root string, whitelist []string) error {
+func GetFileSystemForImage(image v1.Image, root string, whitelist []string, keepOwner bool) error {
 	empty, err := DirIsEmpty(root)
 	if err != nil {
 		return err
@@ -268,7 +268,7 @@ func GetFileSystemForImage(image v1.Image, root string, whitelist []string) erro
 		logrus.Infof("using cached filesystem in %s", root)
 		return nil
 	}
-	if err := unpackTar(tar.NewReader(mutate.Extract(image)), root, whitelist); err != nil {
+	if err := unpackTar(tar.NewReader(mutate.Extract(image)), root, whitelist, keepOwner); err != nil {
 		return err
 	}
 	return nil

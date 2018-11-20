@@ -42,6 +42,8 @@ var noCache bool
 var LogLevel string
 var format string
 
+var keepOwner bool
+
 type validatefxn func(args []string) error
 
 var RootCmd = &cobra.Command{
@@ -134,7 +136,7 @@ func getImage(imageName string) (pkgutil.Image, error) {
 			return pkgutil.Image{}, err
 		}
 	}
-	return pkgutil.GetImage(imageName, includeLayers(), cachePath)
+	return pkgutil.GetImage(imageName, includeLayers(), keepOwner, cachePath)
 }
 
 func cacheDir(imageName string) (string, error) {
@@ -185,4 +187,5 @@ func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 	cmd.Flags().BoolVarP(&noCache, "no-cache", "n", false, "Set this to force retrieval of image filesystem on each run.")
+	cmd.Flags().BoolVarP(&keepOwner, "keep-owner", "k", false, "Set this to keep the owner of image filesystem. Make sure you are a root user for setting this value.")
 }
