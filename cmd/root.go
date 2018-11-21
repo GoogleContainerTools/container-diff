@@ -28,6 +28,7 @@ import (
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -151,7 +152,7 @@ func getCacheDir(imageName string) (string, error) {
 	if cacheDir == "" {
 		dir, err := homedir.Dir()
 		if err != nil {
-			return "", err
+			return "", errors.Wrap(err, "retrieving home dir")
 		} else {
 			cacheDir = dir
 		}

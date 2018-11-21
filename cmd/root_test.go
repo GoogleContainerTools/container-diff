@@ -31,7 +31,11 @@ type testpair struct {
 }
 
 func TestCacheDir(t *testing.T) {
-	homeDir, _ := homedir.Dir()
+	homeDir, err := homedir.Dir()
+	if err != nil {
+		t.Errorf("\nError getting home dir")
+	}
+
 	tests := []struct {
 		name        string
 		cliFlag     string
@@ -39,7 +43,6 @@ func TestCacheDir(t *testing.T) {
 		expectedDir string
 		imageName   string
 	}{
-		// name, cliFlag, envVar, expectedDir
 		{
 			name:        "default cache is at $HOME",
 			cliFlag:     "",
@@ -80,7 +83,10 @@ func TestCacheDir(t *testing.T) {
 			cacheDir = tt.cliFlag
 
 			// call getCacheDir and make sure return is equal to expected
-			actualDir, _ := getCacheDir(tt.imageName)
+			actualDir, err := getCacheDir(tt.imageName)
+			if err != nil {
+				t.Errorf("%s\nError getting cache dir", tt.name)
+			}
 
 			if path.Dir(actualDir) != tt.expectedDir {
 				t.Errorf("%s\nExpected: %v\nGot: %v", tt.name, tt.expectedDir, actualDir)
