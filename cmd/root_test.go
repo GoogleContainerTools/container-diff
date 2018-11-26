@@ -33,9 +33,8 @@ type testpair struct {
 func TestCacheDir(t *testing.T) {
 	homeDir, err := homedir.Dir()
 	if err != nil {
-		t.Errorf("\nError getting home dir")
+		t.Errorf("error getting home dir: %s", err.Error())
 	}
-
 	tests := []struct {
 		name        string
 		cliFlag     string
