@@ -84,11 +84,11 @@ func TestCacheDir(t *testing.T) {
 			// call getCacheDir and make sure return is equal to expected
 			actualDir, err := getCacheDir(tt.imageName)
 			if err != nil {
-				t.Errorf("%s\nError getting cache dir", tt.name)
+				t.Errorf("%s\nerror getting cache dir", tt.name)
 			}
 
 			if path.Dir(actualDir) != tt.expectedDir {
-				t.Errorf("%s\nExpected: %v\nGot: %v", tt.name, tt.expectedDir, actualDir)
+				t.Errorf("%s\nexpected: %v\ngot: %v", tt.name, tt.expectedDir, actualDir)
 			}
 		},
 		)
