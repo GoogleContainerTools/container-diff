@@ -158,7 +158,11 @@ func diffFile(image1, image2 *pkgutil.Image) error {
 	if err != nil {
 		return err
 	}
-	util.TemplateOutput(diff, "FilenameDiff")
+	writer, err := getWriter(outputFile)
+	if err != nil {
+		return err
+	}
+	util.TemplateOutput(writer, diff, "FilenameDiff")
 	return nil
 }
 

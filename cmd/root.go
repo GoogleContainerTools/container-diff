@@ -19,6 +19,7 @@ package cmd
 import (
 	goflag "flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -40,6 +41,7 @@ var save bool
 var types diffTypes
 var noCache bool
 
+var outputFile string
 var cacheDir string
 var LogLevel string
 var format string
@@ -70,6 +72,7 @@ Tarballs can also be specified by simply providing the path to the .tar, .tar.gz
 }
 
 func outputResults(resultMap map[string]util.Result) {
+
 	// Outputs diff/analysis results in alphabetical order by analyzer name
 	sortedTypes := []string{}
 	for analyzerType := range resultMap {
@@ -77,20 +80,27 @@ func outputResults(resultMap map[string]util.Result) {
 	}
 	sort.Strings(sortedTypes)
 
+	// Get the writer
+	writer, err := getWriter(outputFile)
+	if err != nil {
+		logrus.Error(err)
+	}
+
 	results := make([]interface{}, len(resultMap))
 	for i, analyzerType := range sortedTypes {
 		result := resultMap[analyzerType]
 		if json {
 			results[i] = result.OutputStruct()
 		} else {
-			err := result.OutputText(analyzerType, format)
+			err := result.OutputText(writer, analyzerType, format)
 			if err != nil {
 				logrus.Error(err)
 			}
 		}
 	}
 	if json {
-		err := util.JSONify(results)
+
+		err := util.JSONify(writer, results)
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -162,6 +172,29 @@ func getCacheDir(imageName string) (string, error) {
 	return filepath.Join(rootDir, filepath.Clean(imageName)), nil
 }
 
+func getWriter(outputFile string) (io.Writer, error) {
+	var err error
+	var outWriter io.Writer
+
+	// If the user specifies an output file, ensure exists
+	if outputFile != "" {
+
+		// The file can't exist, we would overwrite it
+		if _, err := os.Stat(outputFile); !os.IsNotExist(err) {
+			return os.Stdout, errors.Wrap(err, "file exists, will not overwrite")
+		}
+
+		// Otherwise, output file is an io.writer
+		outWriter, err = os.Create(outputFile)
+
+	}
+	// If still doesn't exist, return stdout as the io.Writer
+	if outputFile == "" {
+		outWriter = os.Stdout
+	}
+	return outWriter, err
+}
+
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&LogLevel, "verbosity", "v", "warning", "This flag controls the verbosity of container-diff.")
 	RootCmd.PersistentFlags().StringVarP(&format, "format", "", "", "Format to output diff in.")
@@ -201,5 +234,5 @@ func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 	cmd.Flags().BoolVarP(&noCache, "no-cache", "n", false, "Set this to force retrieval of image filesystem on each run.")
 	cmd.Flags().StringVarP(&cacheDir, "cache-dir", "c", "", "cache directory base to create .container-diff (default is $HOME).")
-
+	cmd.Flags().StringVarP(&outputFile, "output", "w", "", "output file to write to (default writes to STDOUT).")
 }
