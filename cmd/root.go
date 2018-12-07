@@ -42,6 +42,7 @@ var types diffTypes
 var noCache bool
 
 var outputFile string
+var forceWrite bool
 var cacheDir string
 var LogLevel string
 var format string
@@ -179,9 +180,11 @@ func getWriter(outputFile string) (io.Writer, error) {
 	// If the user specifies an output file, ensure exists
 	if outputFile != "" {
 
-		// The file can't exist, we would overwrite it
+		// Don't overwrite a file that exists, unless given --force
 		if _, err := os.Stat(outputFile); !os.IsNotExist(err) {
-			return os.Stdout, errors.Wrap(err, "file exists, will not overwrite")
+			if !forceWrite {
+				logrus.Error("file exist, will not overwrite.")
+			}
 		}
 
 		// Otherwise, output file is an io.writer
@@ -234,5 +237,6 @@ func addSharedFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 	cmd.Flags().BoolVarP(&noCache, "no-cache", "n", false, "Set this to force retrieval of image filesystem on each run.")
 	cmd.Flags().StringVarP(&cacheDir, "cache-dir", "c", "", "cache directory base to create .container-diff (default is $HOME).")
-	cmd.Flags().StringVarP(&outputFile, "output", "w", "", "output file to write to (default writes to STDOUT).")
+	cmd.Flags().StringVarP(&outputFile, "output", "w", "", "output file to write to (default writes to the screen).")
+	cmd.Flags().BoolVar(&forceWrite, "force", false, "force overwrite output file, if exists already.")
 }
