@@ -163,6 +163,10 @@ func diffFile(image1, image2 *pkgutil.Image) error {
 		return err
 	}
 	util.TemplateOutput(writer, diff, "FilenameDiff")
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
 	return nil
 }
 

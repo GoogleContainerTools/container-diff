@@ -73,7 +73,6 @@ Tarballs can also be specified by simply providing the path to the .tar, .tar.gz
 }
 
 func outputResults(resultMap map[string]util.Result) {
-
 	// Outputs diff/analysis results in alphabetical order by analyzer name
 	sortedTypes := []string{}
 	for analyzerType := range resultMap {
@@ -84,7 +83,7 @@ func outputResults(resultMap map[string]util.Result) {
 	// Get the writer
 	writer, err := getWriter(outputFile)
 	if err != nil {
-		logrus.Error(err)
+		errors.Wrap(err, "getting writer for output file")
 	}
 
 	results := make([]interface{}, len(resultMap))
@@ -100,7 +99,6 @@ func outputResults(resultMap map[string]util.Result) {
 		}
 	}
 	if json {
-
 		err := util.JSONify(writer, results)
 		if err != nil {
 			logrus.Error(err)
@@ -176,20 +174,14 @@ func getCacheDir(imageName string) (string, error) {
 func getWriter(outputFile string) (io.Writer, error) {
 	var err error
 	var outWriter io.Writer
-
 	// If the user specifies an output file, ensure exists
 	if outputFile != "" {
-
 		// Don't overwrite a file that exists, unless given --force
-		if _, err := os.Stat(outputFile); !os.IsNotExist(err) {
-			if !forceWrite {
-				logrus.Error("file exist, will not overwrite.")
-			}
+		if _, err := os.Stat(outputFile); !os.IsNotExist(err) && !forceWrite {
+			errors.Wrap(err, "file exist, will not overwrite.")
 		}
-
 		// Otherwise, output file is an io.writer
 		outWriter, err = os.Create(outputFile)
-
 	}
 	// If still doesn't exist, return stdout as the io.Writer
 	if outputFile == "" {
