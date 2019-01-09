@@ -1,3 +1,3 @@
 #!/bin/sh -l
 
-sh -c "container-diff $*"
+sh -c "exec /go/bin/container-diff $*"
