@@ -1,3 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 
-sh -c "exec /go/bin/container-diff ${@}"
+echo "$@"
+/go/bin/container-diff "${@}"
