@@ -207,3 +207,11 @@ func DirIsEmpty(path string) (bool, error) {
 	}
 	return false, err
 }
+
+// CleanFilePath removes characters from a given path that cannot be used
+// in paths by the underlying platform (e.g. Windows)
+func CleanFilePath(dirtyPath string) string {
+	var windowsReplacements = []string{"<", "_", ">", "_", ":", "_", "?", "_", "*", "_", "?", "_", "|", "_"}
+	replacer := strings.NewReplacer(windowsReplacements...)
+	return filepath.Clean(replacer.Replace(dirtyPath))
+}

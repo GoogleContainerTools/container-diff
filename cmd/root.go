@@ -168,7 +168,7 @@ func getCacheDir(imageName string) (string, error) {
 	}
 	rootDir := filepath.Join(cacheDir, ".container-diff", "cache")
 	imageName = strings.Replace(imageName, string(os.PathSeparator), "", -1)
-	return filepath.Join(rootDir, filepath.Clean(imageName)), nil
+	return filepath.Join(rootDir, pkgutil.CleanFilePath(imageName)), nil
 }
 
 func getWriter(outputFile string) (io.Writer, error) {
