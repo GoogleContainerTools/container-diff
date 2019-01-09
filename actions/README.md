@@ -21,7 +21,7 @@ workflow "Run container-diff isolated" {
 
 action "Run container-diff" {
   uses = "GoogleContainerTools/container-diff/actions@master"
-  args = ["analyze", "vanessa/salad", "--type=pip", "type=apt", "--type=history", "--output", "/github/workspace/data.json", "--type=file", "--json", "--quiet", "--verbosity=panic" ]
+  args = "analyze remote://vanessa/salad --type=pip type=apt --type=history --output /github/workspace/data.json --type=file --json --quiet --verbosity=panic"
 }
 
 action "list" {
@@ -66,7 +66,7 @@ action "push" {
 action "Run container-diff" {
   needs = ["build", "login", "push"]
   uses = "GoogleContainerTools/container-diff/actions@master"
-  args = ["analyze", "daemon://vanessa/salad", "--type=pip", "type=apt", "--type=history", "--output=/github/workspace/data.json", "--type=file", "--json", "--quiet", "--verbosity=panic" ]
+  args = "analyze vanessa/salad --type=pip type=apt --type=history --output /github/workspace/data.json --type=file --json --quiet --verbosity=panic"
 }
 
 action "list" {

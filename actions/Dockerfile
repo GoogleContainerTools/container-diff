@@ -43,3 +43,5 @@ ADD entrypoint.sh /entrypoint.sh
 RUN mkdir -p /root/.docker && \
     echo {} > /root/.docker/config.json && \
     chmod u+x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
