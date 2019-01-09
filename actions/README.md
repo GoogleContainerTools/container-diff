@@ -20,6 +20,7 @@ workflow "Run container-diff" {
 }
 
 action "Run container-diff" {
+  uses = "GoogleContainerTools/container-diff/actions@master"
   args = ["analyze", "vanessa/salad", "--type=pip", "type=apt", "--type=history", --output "/github/workspace/data.json", "--type=file", "--json", "--quiet", "--verbosity=panic" ]
 }
 
@@ -63,6 +64,7 @@ action "push" {
 }
 
 action "Run container-diff" {
+  uses = "GoogleContainerTools/container-diff/actions@master"
   needs = ["build", "login", "push"]
   args = ["analyze", "vanessa/salad", "--type=pip", "type=apt", "--type=history", --output "/github/workspace/data.json", "--type=file", "--json", "--quiet", "--verbosity=panic" ]
 }
