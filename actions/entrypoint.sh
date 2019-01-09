@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "$@"
-/go/bin/container-diff "${@}"
+/go/bin/container-diff ${@}
