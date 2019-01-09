@@ -38,7 +38,10 @@ RUN go get github.com/GoogleContainerTools/container-diff && \
     mkdir -p /code && \
     apt-get autoremove
 
-RUN mkdir -p /root/.docker && \
-    echo {} > /root/.docker/config.json
+ADD entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT ["container-diff"]
+RUN mkdir -p /root/.docker && \
+    echo {} > /root/.docker/config.json && \
+    chmod u+x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
