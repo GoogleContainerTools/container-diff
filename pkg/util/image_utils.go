@@ -161,7 +161,8 @@ func GetImage(imageName string, includeLayers bool, cacheDir string) (Image, err
 	if err != nil {
 		return Image{}, err
 	}
-	path, err := getExtractPathForName(RemoveTag(imageName)+"@"+imageDigest.String(), cacheDir)
+	dirName := strings.Replace(RemoveTag(imageName)+"@"+imageDigest.String(), ":", "", -1)
+	path, err := getExtractPathForName(dirName, cacheDir)
 	if err != nil {
 		return Image{}, err
 	}
