@@ -17,7 +17,9 @@ limitations under the License.
 package differs
 
 import (
+	"bufio"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -92,18 +94,42 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 				packageName := packageMatch[1]
 				version := packageMatch[2][:len(packageMatch[2])-1]
 
-				// Retrieves size for actual package/script corresponding to each dist-info metadata directory
-				// by taking the file entry alphabetically before it (for a package) or after it (for a script)
+				// First, try and use the "top_level.txt",
+				// Many egg packages contains a "top_level.txt" file describing the directories containing the
+				// required code. Combining the sizes of each of these directories should give the total size.
 				var size int64
-				if i-1 >= 0 && contents[i-1].Name() == packageName {
-					packagePath := filepath.Join(pythonPath, packageName)
-					size = pkgutil.GetSize(packagePath)
-				} else if i+1 < len(contents) && contents[i+1].Name() == packageName+".py" {
-					size = contents[i+1].Size()
+				topLevelReader, err := os.Open(filepath.Join(pythonPath, fileName, "top_level.txt"))
+				if err == nil {
+					scanner := bufio.NewScanner(topLevelReader)
+					scanner.Split(bufio.ScanLines)
+					for scanner.Scan() {
+						// check if directory exists first, then retrieve size
+						contentPath := filepath.Join(pythonPath, scanner.Text())
+						if _, err := os.Stat(contentPath); err == nil {
+							size = size + pkgutil.GetSize(contentPath)
+						} else if _, err := os.Stat(contentPath + ".py"); err == nil {
+							// sometimes the top level content is just a single python file; try this too
+							size = size + pkgutil.GetSize(contentPath+".py")
+						}
+					}
 				} else {
-					logrus.Errorf("Could not find Python package %s for corresponding metadata info", packageName)
-					continue
+					// if we didn't find a top_level.txt, we'll try the previous alphabetical directory entry heuristic
+					logrus.Infof("unable to use top_level.txt: falling back to previous alphabetical directory entry heuristic...")
+
+					// Retrieves size for actual package/script corresponding to each dist-info metadata directory
+					// by taking the file entry alphabetically before it (for a package) or after it (for a script)
+					// var size int64
+					if i-1 >= 0 && contents[i-1].Name() == packageName {
+						packagePath := filepath.Join(pythonPath, packageName)
+						size = pkgutil.GetSize(packagePath)
+					} else if i+1 < len(contents) && contents[i+1].Name() == packageName+".py" {
+						size = contents[i+1].Size()
+					} else {
+						logrus.Errorf("Could not find Python package %s for corresponding metadata info", packageName)
+						continue
+					}
 				}
+
 				currPackage := util.PackageInfo{Version: version, Size: size}
 				mapPath := strings.Replace(pythonPath, path, "", 1)
 				addToMap(packages, packageName, mapPath, currPackage)

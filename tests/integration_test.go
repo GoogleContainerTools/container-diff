@@ -141,14 +141,6 @@ func TestDiffAndAnalysis(t *testing.T) {
 			differFlags:  []string{"--type=apt", "--no-cache"},
 			expectedFile: "apt_diff_expected.json",
 		},
-		// {
-		// 	description:  "rpm differ",
-		// 	subcommand:   "diff",
-		// 	imageA:       rpmBase,
-		// 	imageB:       rpmModified,
-		// 	differFlags:  []string{"--type=rpm"},
-		// 	expectedFile: "rpm_diff_expected.json",
-		// },
 		{
 			description:  "node differ",
 			subcommand:   "diff",
@@ -204,13 +196,6 @@ func TestDiffAndAnalysis(t *testing.T) {
 			differFlags:  []string{"--type=apt", "--no-cache"},
 			expectedFile: "apt_analysis_expected.json",
 		},
-		// {
-		// 	description:  "rpm analysis",
-		// 	subcommand:   "analyze",
-		// 	imageA:       rpmModified,
-		// 	differFlags:  []string{"--type=rpm"},
-		// 	expectedFile: "rpm_analysis_expected.json",
-		// },
 		{
 			description:  "file sorted analysis",
 			subcommand:   "analyze",
