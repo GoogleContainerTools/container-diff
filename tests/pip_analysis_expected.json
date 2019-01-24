@@ -7,7 +7,7 @@
         "Name": "configobj",
         "Path": "/usr/lib/python2.7/dist-packages",
         "Version": "5.0.6",
-        "Size": 89613
+        "Size": 136871
       },
       {
         "Name": "mercurial",
@@ -37,7 +37,7 @@
         "Name": "setuptools",
         "Path": "/usr/local/lib/python3.6/site-packages",
         "Version": "36.0.1",
-        "Size": 837337
+        "Size": 1282800
       },
       {
         "Name": "six",
