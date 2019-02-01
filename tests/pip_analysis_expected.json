@@ -4,6 +4,18 @@
     "AnalyzeType": "Pip",
     "Analysis": [
       {
+        "Name": "argparse",
+        "Path": "/usr/lib/python2.7",
+        "Version": "1.2.1",
+        "Size": 89124
+      },
+      {
+        "Name": "bzr",
+        "Path": "/usr/lib/python2.7/dist-packages",
+        "Version": "2.7.0dev1",
+        "Size": 13063022
+      },
+      {
         "Name": "configobj",
         "Path": "/usr/lib/python2.7/dist-packages",
         "Version": "5.0.6",
@@ -56,6 +68,12 @@
         "Path": "/usr/local/lib/python3.6/site-packages",
         "Version": "0.29.0",
         "Size": 103509
+      },
+      {
+        "Name": "wsgiref",
+        "Path": "/usr/lib/python2.7",
+        "Version": "0.1.2",
+        "Size": 101007
       }
     ]
   }
