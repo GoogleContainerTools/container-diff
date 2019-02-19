@@ -24,6 +24,7 @@ func CanonicalTarNameForPath(p string) (string, error) {
 	// in file names, it is mostly safe to replace however we must
 	// check just in case
 	if strings.Contains(p, "/") {
+		//lint:ignore ST1005 Windows should be capitalized :)
 		return "", fmt.Errorf("Windows path contains forward slash: %s", p)
 	}
 	return strings.Replace(p, string(os.PathSeparator), "/", -1), nil
