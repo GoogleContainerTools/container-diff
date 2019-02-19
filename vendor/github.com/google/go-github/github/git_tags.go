@@ -33,7 +33,7 @@ type createTagRequest struct {
 	Tagger  *CommitAuthor `json:"tagger,omitempty"`
 }
 
-// GetTag fetchs a tag from a repo given a SHA.
+// GetTag fetches a tag from a repo given a SHA.
 //
 // GitHub API docs: https://developer.github.com/v3/git/tags/#get-a-tag
 func (s *GitService) GetTag(ctx context.Context, owner string, repo string, sha string) (*Tag, *Response, error) {
@@ -42,9 +42,6 @@ func (s *GitService) GetTag(ctx context.Context, owner string, repo string, sha 
 	if err != nil {
 		return nil, nil, err
 	}
-
-	// TODO: remove custom Accept headers when APIs fully launch.
-	req.Header.Set("Accept", mediaTypeGitSigningPreview)
 
 	tag := new(Tag)
 	resp, err := s.client.Do(ctx, req, tag)
