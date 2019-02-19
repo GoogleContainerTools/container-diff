@@ -78,9 +78,9 @@ PACKAGE	IMAGE1 ({{.Image1}})	IMAGE2 ({{.Image2}}){{range .Diff.InfoDiff}}{{"\n"}
 const HistoryDiffOutput = `
 -----{{.DiffType}}-----
 
-Docker history lines found only in {{.Image1}}:{{if not .Diff.Adds}} None{{else}}{{block "list" .Diff.Adds}}{{"\n"}}{{range .}}{{print "-" .}}{{"\n"}}{{end}}{{end}}{{end}}
+Docker history lines found only in {{.Image1}}:{{if not .Diff.Adds}} None{{else}}{{block "list" .Diff.Dels}}{{"\n"}}{{range .}}{{print "-" .}}{{"\n"}}{{end}}{{end}}{{end}}
 
-Docker history lines found only in {{.Image2}}:{{if not .Diff.Dels}} None{{else}}{{block "list2" .Diff.Dels}}{{"\n"}}{{range .}}{{print "-" .}}{{"\n"}}{{end}}{{end}}{{end}}
+Docker history lines found only in {{.Image2}}:{{if not .Diff.Dels}} None{{else}}{{block "list2" .Diff.Adds}}{{"\n"}}{{range .}}{{print "-" .}}{{"\n"}}{{end}}{{end}}{{end}}
 `
 
 const MetadataDiffOutput = `
