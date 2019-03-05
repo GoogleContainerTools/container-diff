@@ -223,8 +223,19 @@ func (d *diffTypes) Type() string {
 }
 
 func addSharedFlags(cmd *cobra.Command) {
+	sortedTypes := []string{}
+	for analyzerType := range differs.Analyzers {
+		sortedTypes = append(sortedTypes, analyzerType)
+	}
+	sort.Strings(sortedTypes)
+	supportedTypes := strings.Join(sortedTypes, ", ")
+
 	cmd.Flags().BoolVarP(&json, "json", "j", false, "JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).")
-	cmd.Flags().VarP(&types, "type", "t", "This flag sets the list of analyzer types to use. Set it repeatedly to use multiple analyzers.")
+	cmd.Flags().VarP(&types, "type", "t",
+		fmt.Sprintf("This flag sets the list of analyzer types to use.\n"+
+			"Set it repeatedly to use multiple analyzers.\n"+
+			"Supported types: %s.",
+			supportedTypes))
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 	cmd.Flags().BoolVarP(&noCache, "no-cache", "n", false, "Set this to force retrieval of image filesystem on each run.")

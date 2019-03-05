@@ -34,9 +34,11 @@ import (
 var filename string
 
 var diffCmd = &cobra.Command{
-	Use:   "diff",
-	Short: "Compare two images: [image1] [image2]",
-	Long:  `Compares two images using the specifed analyzers as indicated via flags (see documentation for available ones).`,
+	Use:   "diff image1 image2",
+	Short: "Compare two images: container-diff image1 image2",
+	Long: `Compares two images using the specifed analyzers as indicated via --type flag(s).
+
+For details on how to specify images, run: container-diff help`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if err := validateArgs(args, checkDiffArgNum, checkIfValidAnalyzer, checkFilenameFlag); err != nil {
 			return err
