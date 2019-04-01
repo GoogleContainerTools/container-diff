@@ -29,10 +29,18 @@ var versionCmd = &cobra.Command{
 	Long:  `Print the version of container-diff.`,
 	Args:  cobra.ExactArgs(0),
 	Run: func(command *cobra.Command, args []string) {
-		fmt.Println(version.GetVersion())
+		if shortVersion {
+			fmt.Println(version.GetShortVersion())
+		} else {
+			fmt.Println(version.GetVersion())
+		}
 	},
 }
 
+// `version --short` is useful for `make release`
+var shortVersion bool
+
 func init() {
+	versionCmd.Flags().BoolVarP(&shortVersion, "short", "", false, "Output single vX.Y.Z word")
 	RootCmd.AddCommand(versionCmd)
 }

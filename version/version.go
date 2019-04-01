@@ -16,8 +16,19 @@ limitations under the License.
 
 package version
 
-var version = "v0.0.0-unset"
+import "fmt"
+
+// Bump this on release
+var version = "v0.15.0"
+
+// When built using `make` this is overridden via -ldflags
+var gitVersion = "(unknown)"
+
+// returns just the vX.Y.Z version suitable for `make release`
+func GetShortVersion() string {
+	return version
+}
 
 func GetVersion() string {
-	return version
+	return fmt.Sprintf("%s built from git %s", version, gitVersion)
 }

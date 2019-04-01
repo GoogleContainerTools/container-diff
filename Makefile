@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Bump these on release
-VERSION_MAJOR ?= 0
-VERSION_MINOR ?= 15
-VERSION_BUILD ?= 0
-
-VERSION ?= v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_BUILD)
+# On release, remember to also bump const in version/version.go
+GIT_VERSION ?= $(shell git describe --always --tags --long --dirty)
 
 GOOS ?= $(shell go env GOOS)
 GOARCH = amd64
@@ -31,11 +27,11 @@ SUPPORTED_PLATFORMS := linux-$(GOARCH) darwin-$(GOARCH) windows-$(GOARCH).exe
 BUILD_PACKAGE = $(REPOPATH)
 
 # These build tags are from the containers/image library.
-# 
+#
 # container_image_ostree_stub allows building the library without requiring the libostree development libraries
 # container_image_openpgp forces a Golang-only OpenPGP implementation for signature verification instead of the default cgo/gpgme-based implementation
 GO_BUILD_TAGS := "container_image_ostree_stub containers_image_openpgp"
-GO_LDFLAGS := "-X $(REPOPATH)/version.version=$(VERSION)"
+GO_LDFLAGS := "-X $(REPOPATH)/version.gitVersion=$(GIT_VERSION)"
 GO_FILES := $(shell go list  -f '{{join .Deps "\n"}}' $(BUILD_PACKAGE) | grep $(ORG) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}')
 
 $(BUILD_DIR)/$(PROJECT): $(BUILD_DIR)/$(PROJECT)-$(GOOS)-$(GOARCH)
@@ -68,7 +64,7 @@ integration: $(BUILD_DIR)/$(PROJECT)
 
 .PHONY: release
 release: cross
-	gsutil cp $(BUILD_DIR)/$(PROJECT)-* gs://$(RELEASE_BUCKET)/$(VERSION)/
+	gsutil cp $(BUILD_DIR)/$(PROJECT)-* gs://$(RELEASE_BUCKET)/$(shell $(BUILD_DIR)/$(PROJECT) version --short)/
 	gsutil cp $(BUILD_DIR)/$(PROJECT)-* gs://$(RELEASE_BUCKET)/latest/
 
 .PHONY: clean
