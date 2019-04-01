@@ -34,6 +34,12 @@ OR, if you want to avoid using sudo:
 curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64 && chmod +x container-diff-linux-amd64 && mkdir -p $HOME/bin && export PATH=$PATH:$HOME/bin && mv container-diff-linux-amd64 $HOME/bin/container-diff
 ```
 
+There is also an [Arch Linux package](https://www.archlinux.org/packages/community/x86_64/container-diff/). You can install by running:
+
+```shell
+pacman -S container-diff
+```
+
 ### Windows
 Download the [container-diff-windows-amd64.exe](https://storage.googleapis.com/container-diff/latest/container-diff-windows-amd64.exe) file, rename it to `container-diff.exe` and add it to your path
 
