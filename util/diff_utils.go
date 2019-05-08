@@ -133,6 +133,25 @@ func DiffFile(image1, image2 *pkgutil.Image, filename string) (*FileNameDiff, er
 	image1FilePath := filepath.Join(image1.FSPath, filename)
 	image2FilePath := filepath.Join(image2.FSPath, filename)
 
+	// Diff file metadata.
+	s1, err := os.Stat(image1FilePath)
+	if err != nil {
+		return nil, err
+	}
+	s2, err := os.Stat(image2FilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if s1.ModTime() != s2.ModTime() {
+		description := fmt.Sprintf("%s was modified at %s, %s at %s:", image1.Source, s1.ModTime(), image2.Source, s2.ModTime())
+		return &FileNameDiff{filename, description, ""}, nil
+	}
+	if s1.Mode() != s2.Mode() {
+		description := fmt.Sprintf("%s had permission bits %s, %s had %s:", image1.Source, s1.Mode(), image2.Source, s2.Mode())
+		return &FileNameDiff{filename, description, ""}, nil
+	}
+
 	//Get contents of files
 	image1FileContents, err := pkgutil.GetFileContents(image1FilePath)
 	if err != nil {
@@ -237,6 +256,13 @@ func GetModifiedEntries(d1, d2 pkgutil.Directory) []string {
 			if err != nil {
 				logrus.Errorf("Error diffing contents of %s and %s: %s\n", f1path, f2path, err)
 				continue
+			}
+			// Consider the files as different if their metadata differ.
+			if f1stat.ModTime() != f2stat.ModTime() {
+				same = false
+			}
+			if f1stat.Mode() != f2stat.Mode() {
+				same = false
 			}
 			if !same {
 				modified = append(modified, f)
