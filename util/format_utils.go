@@ -20,7 +20,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
-	"os"
+	"io"
 	"strings"
 	"text/tabwriter"
 	"text/template"
@@ -48,12 +48,12 @@ var templates = map[string]string{
 	"SingleVersionPackageLayerAnalyze": SingleVersionPackageLayerOutput,
 }
 
-func JSONify(diff interface{}) error {
+func JSONify(writer io.Writer, diff interface{}) error {
 	diffBytes, err := json.MarshalIndent(diff, "", "  ")
 	if err != nil {
 		return err
 	}
-	f := bufio.NewWriter(os.Stdout)
+	f := bufio.NewWriter(writer)
 	defer f.Flush()
 	f.Write(diffBytes)
 	return nil
@@ -66,11 +66,10 @@ func getTemplate(templateType string) (string, error) {
 	return "", errors.New("No available template")
 }
 
-func TemplateOutput(diff interface{}, templateType string) error {
+func TemplateOutput(writer io.Writer, diff interface{}, templateType string) error {
 	outputTmpl, err := getTemplate(templateType)
 	if err != nil {
 		logrus.Error(err)
-
 	}
 	funcs := template.FuncMap{"join": strings.Join}
 	tmpl, err := template.New("tmpl").Funcs(funcs).Parse(outputTmpl)
@@ -78,7 +77,7 @@ func TemplateOutput(diff interface{}, templateType string) error {
 		logrus.Error(err)
 		return err
 	}
-	w := tabwriter.NewWriter(os.Stdout, 8, 8, 8, ' ', 0)
+	w := tabwriter.NewWriter(writer, 8, 8, 8, ' ', 0)
 	err = tmpl.Execute(w, diff)
 	if err != nil {
 		logrus.Error(err)
@@ -88,18 +87,18 @@ func TemplateOutput(diff interface{}, templateType string) error {
 	return nil
 }
 
-func TemplateOutputFromFormat(diff interface{}, templateType string, format string) error {
+func TemplateOutputFromFormat(writer io.Writer, diff interface{}, templateType string, format string) error {
 	if format == "" {
-		return TemplateOutput(diff, templateType)
+		return TemplateOutput(writer, diff, templateType)
 	}
 	funcs := template.FuncMap{"join": strings.Join}
 	tmpl, err := template.New("tmpl").Funcs(funcs).Parse(format)
 	if err != nil {
 		logrus.Warningf("User specified format resulted in error, printing default output.")
 		logrus.Error(err)
-		return TemplateOutput(diff, templateType)
+		return TemplateOutput(writer, diff, templateType)
 	}
-	w := tabwriter.NewWriter(os.Stdout, 8, 8, 8, ' ', 0)
+	w := tabwriter.NewWriter(writer, 8, 8, 8, ' ', 0)
 	err = tmpl.Execute(w, diff)
 	if err != nil {
 		return err

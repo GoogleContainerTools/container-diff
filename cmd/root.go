@@ -19,6 +19,7 @@ package cmd
 import (
 	goflag "flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -28,6 +29,7 @@ import (
 	pkgutil "github.com/GoogleContainerTools/container-diff/pkg/util"
 	"github.com/GoogleContainerTools/container-diff/util"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -39,10 +41,14 @@ var save bool
 var types diffTypes
 var noCache bool
 
+var outputFile string
+var forceWrite bool
+var cacheDir string
 var LogLevel string
 var format string
 
 var keepOwner bool
+const containerDiffEnvCacheDir = "CONTAINER_DIFF_CACHEDIR"
 
 type validatefxn func(args []string) error
 
@@ -75,20 +81,26 @@ func outputResults(resultMap map[string]util.Result) {
 	}
 	sort.Strings(sortedTypes)
 
+	// Get the writer
+	writer, err := getWriter(outputFile)
+	if err != nil {
+		errors.Wrap(err, "getting writer for output file")
+	}
+
 	results := make([]interface{}, len(resultMap))
 	for i, analyzerType := range sortedTypes {
 		result := resultMap[analyzerType]
 		if json {
 			results[i] = result.OutputStruct()
 		} else {
-			err := result.OutputText(analyzerType, format)
+			err := result.OutputText(writer, analyzerType, format)
 			if err != nil {
 				logrus.Error(err)
 			}
 		}
 	}
 	if json {
-		err := util.JSONify(results)
+		err := util.JSONify(writer, results)
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -131,7 +143,7 @@ func getImage(imageName string) (pkgutil.Image, error) {
 	var cachePath string
 	var err error
 	if !noCache {
-		cachePath, err = cacheDir(imageName)
+		cachePath, err = getCacheDir(imageName)
 		if err != nil {
 			return pkgutil.Image{}, err
 		}
@@ -139,14 +151,44 @@ func getImage(imageName string) (pkgutil.Image, error) {
 	return pkgutil.GetImage(imageName, includeLayers(), keepOwner, cachePath)
 }
 
-func cacheDir(imageName string) (string, error) {
-	dir, err := homedir.Dir()
-	if err != nil {
-		return "", err
+func getCacheDir(imageName string) (string, error) {
+	// First preference for cache is set at command line
+	if cacheDir == "" {
+		// second preference is environment
+		cacheDir = os.Getenv(containerDiffEnvCacheDir)
 	}
-	rootDir := filepath.Join(dir, ".container-diff", "cache")
+
+	// Third preference (default) is set at $HOME
+	if cacheDir == "" {
+		dir, err := homedir.Dir()
+		if err != nil {
+			return "", errors.Wrap(err, "retrieving home dir")
+		} else {
+			cacheDir = dir
+		}
+	}
+	rootDir := filepath.Join(cacheDir, ".container-diff", "cache")
 	imageName = strings.Replace(imageName, string(os.PathSeparator), "", -1)
-	return filepath.Join(rootDir, filepath.Clean(imageName)), nil
+	return filepath.Join(rootDir, pkgutil.CleanFilePath(imageName)), nil
+}
+
+func getWriter(outputFile string) (io.Writer, error) {
+	var err error
+	var outWriter io.Writer
+	// If the user specifies an output file, ensure exists
+	if outputFile != "" {
+		// Don't overwrite a file that exists, unless given --force
+		if _, err := os.Stat(outputFile); !os.IsNotExist(err) && !forceWrite {
+			errors.Wrap(err, "file exist, will not overwrite.")
+		}
+		// Otherwise, output file is an io.writer
+		outWriter, err = os.Create(outputFile)
+	}
+	// If still doesn't exist, return stdout as the io.Writer
+	if outputFile == "" {
+		outWriter = os.Stdout
+	}
+	return outWriter, err
 }
 
 func init() {
@@ -182,10 +224,24 @@ func (d *diffTypes) Type() string {
 }
 
 func addSharedFlags(cmd *cobra.Command) {
+	sortedTypes := []string{}
+	for analyzerType := range differs.Analyzers {
+		sortedTypes = append(sortedTypes, analyzerType)
+	}
+	sort.Strings(sortedTypes)
+	supportedTypes := strings.Join(sortedTypes, ", ")
+
 	cmd.Flags().BoolVarP(&json, "json", "j", false, "JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).")
-	cmd.Flags().VarP(&types, "type", "t", "This flag sets the list of analyzer types to use. Set it repeatedly to use multiple analyzers.")
+	cmd.Flags().VarP(&types, "type", "t",
+		fmt.Sprintf("This flag sets the list of analyzer types to use.\n"+
+			"Set it repeatedly to use multiple analyzers.\n"+
+			"Supported types: %s.",
+			supportedTypes))
 	cmd.Flags().BoolVarP(&save, "save", "s", false, "Set this flag to save rather than remove the final image filesystems on exit.")
 	cmd.Flags().BoolVarP(&util.SortSize, "order", "o", false, "Set this flag to sort any file/package results by descending size. Otherwise, they will be sorted by name.")
 	cmd.Flags().BoolVarP(&noCache, "no-cache", "n", false, "Set this to force retrieval of image filesystem on each run.")
 	cmd.Flags().BoolVarP(&keepOwner, "keep-owner", "k", false, "Set this to keep the owner of image filesystem. Make sure you are a root user for setting this value.")
+	cmd.Flags().StringVarP(&cacheDir, "cache-dir", "c", "", "cache directory base to create .container-diff (default is $HOME).")
+	cmd.Flags().StringVarP(&outputFile, "output", "w", "", "output file to write to (default writes to the screen).")
+	cmd.Flags().BoolVar(&forceWrite, "force", false, "force overwrite output file, if exists already.")
 }

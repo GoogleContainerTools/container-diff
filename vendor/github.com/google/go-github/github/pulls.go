@@ -52,6 +52,7 @@ type PullRequest struct {
 	CommentsURL         *string    `json:"comments_url,omitempty"`
 	ReviewCommentsURL   *string    `json:"review_comments_url,omitempty"`
 	ReviewCommentURL    *string    `json:"review_comment_url,omitempty"`
+	ReviewComments      *int       `json:"review_comments,omitempty"`
 	Assignee            *User      `json:"assignee,omitempty"`
 	Assignees           []*User    `json:"assignees,omitempty"`
 	Milestone           *Milestone `json:"milestone,omitempty"`
@@ -59,6 +60,10 @@ type PullRequest struct {
 	AuthorAssociation   *string    `json:"author_association,omitempty"`
 	NodeID              *string    `json:"node_id,omitempty"`
 	RequestedReviewers  []*User    `json:"requested_reviewers,omitempty"`
+
+	// RequestedTeams is populated as part of the PullRequestEvent.
+	// See, https://developer.github.com/v3/activity/events/types/#pullrequestevent for an example.
+	RequestedTeams []*Team `json:"requested_teams,omitempty"`
 
 	Links *PRLinks           `json:"_links,omitempty"`
 	Head  *PullRequestBranch `json:"head,omitempty"`
@@ -103,7 +108,7 @@ type PullRequestBranch struct {
 // PullRequestsService.List method.
 type PullRequestListOptions struct {
 	// State filters pull requests based on their state. Possible values are:
-	// open, closed. Default is "open".
+	// open, closed, all. Default is "open".
 	State string `url:"state,omitempty"`
 
 	// Head filters pull requests by head user and branch name in the format of:
@@ -298,9 +303,6 @@ func (s *PullRequestsService) ListCommits(ctx context.Context, owner string, rep
 	if err != nil {
 		return nil, nil, err
 	}
-
-	// TODO: remove custom Accept header when this API fully launches.
-	req.Header.Set("Accept", mediaTypeGitSigningPreview)
 
 	var commits []*RepositoryCommit
 	resp, err := s.client.Do(ctx, req, &commits)

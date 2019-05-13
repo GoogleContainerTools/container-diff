@@ -44,6 +44,7 @@ var imageDiffs = []imageDiff{
 	{"", "", true},
 	{"gcr.io/google-appengine/python", "gcr.io/google-appengine/debian9", false},
 	{"gcr.io/google-appengine/python", "cats", true},
+	{"mcr.microsoft.com/mcr/hello-world:latest", "mcr.microsoft.com/mcr/hello-world:latest", false},
 }
 
 func TestDiffImages(t *testing.T) {

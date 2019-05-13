@@ -10,6 +10,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,7 +19,6 @@ import (
 	"github.com/docker/docker/pkg/idtools"
 	"github.com/docker/docker/pkg/pools"
 	"github.com/docker/docker/pkg/system"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -65,25 +65,25 @@ type WhiteoutFormat int
 
 // TarOptions wraps the tar options.
 type TarOptions struct {
-	IncludeFiles     []string
-	ExcludePatterns  []string
-	Compression      Compression
-	NoLchown         bool
-	UIDMaps          []idtools.IDMap
-	GIDMaps          []idtools.IDMap
-	ChownOpts        *idtools.Identity
-	IncludeSourceDir bool
+	IncludeFiles    []string
+	ExcludePatterns []string
+	Compression     Compression
+	UIDMaps         []idtools.IDMap
+	GIDMaps         []idtools.IDMap
+	ChownOpts       *idtools.Identity
 	// WhiteoutFormat is the expected on disk format for whiteout files.
 	// This format will be converted to the standard format on pack
 	// and from the standard format on unpack.
 	WhiteoutFormat WhiteoutFormat
 	// When unpacking, specifies whether overwriting a directory with a
 	// non-directory is allowed and vice versa.
-	NoOverwriteDirNonDir bool
 	// For each include when creating an archive, the included name will be
 	// replaced with the matching name from this map.
-	RebaseNames map[string]string
-	InUserNS    bool
+	RebaseNames          map[string]string
+	NoLchown             bool
+	InUserNS             bool
+	IncludeSourceDir     bool
+	NoOverwriteDirNonDir bool
 }
 
 // TarWithOptions creates an archive from the directory at `path`, only including files whose relative
@@ -117,13 +117,13 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error) 
 		defer func() {
 			// Make sure to check the error on Close.
 			if err := ta.TarWriter.Close(); err != nil {
-				logrus.Errorf("Can't close tar writer: %s", err)
+				log.Printf("Can't close tar writer: %s", err)
 			}
 			if err := compressWriter.Close(); err != nil {
-				logrus.Errorf("Can't close compress writer: %s", err)
+				log.Printf("Can't close compress writer: %s", err)
 			}
 			if err := pipeWriter.Close(); err != nil {
-				logrus.Errorf("Can't close pipe writer: %s", err)
+				log.Printf("Can't close pipe writer: %s", err)
 			}
 		}()
 
@@ -146,7 +146,7 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error) 
 			// directory. So, we must split the source path and use the
 			// basename as the include.
 			if len(options.IncludeFiles) > 0 {
-				logrus.Warn("Tar: Can't archive a file with includes")
+				log.Print("Tar: Can't archive a file with includes")
 			}
 
 			dir, base := SplitPathDirEntry(srcPath)
@@ -161,12 +161,13 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error) 
 		seen := make(map[string]bool)
 
 		for _, include := range options.IncludeFiles {
+			include := include
 			rebaseName := options.RebaseNames[include]
 
 			walkRoot := getWalkRoot(srcPath, include)
 			filepath.Walk(walkRoot, func(filePath string, f os.FileInfo, err error) error {
 				if err != nil {
-					logrus.Errorf("Tar: Can't stat file %s to tar: %s", srcPath, err)
+					log.Printf("Tar: Can't stat file %s to tar: %s", srcPath, err)
 					return nil
 				}
 
@@ -191,7 +192,7 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error) 
 				if include != relFilePath {
 					skip, err = pm.Matches(relFilePath)
 					if err != nil {
-						logrus.Errorf("Error matching %s: %v", relFilePath, err)
+						log.Printf("Error matching %s: %v", relFilePath, err)
 						return err
 					}
 				}
@@ -247,7 +248,7 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error) 
 				}
 
 				if err := ta.addTarFile(filePath, relFilePath); err != nil {
-					logrus.Errorf("Can't add file %s to tar: %s", filePath, err)
+					log.Printf("Can't add file %s to tar: %s", filePath, err)
 					// if pipe is broken, stop writing tar stream to it
 					if err == io.ErrClosedPipe {
 						return err
@@ -276,8 +277,10 @@ func CompressStream(dest io.Writer, compression Compression) (io.WriteCloser, er
 	case Bzip2, Xz:
 		// archive/bzip2 does not support writing, and there is no xz support at all
 		// However, this is not a problem as docker only currently generates gzipped tars
+		//lint:ignore ST1005 this is vendored/copied code
 		return nil, fmt.Errorf("Unsupported compression format %s", (&compression).Extension())
 	default:
+		//lint:ignore ST1005 this is vendored/copied code
 		return nil, fmt.Errorf("Unsupported compression format %s", (&compression).Extension())
 	}
 }
@@ -437,7 +440,9 @@ func (ta *tarAppender) addTarFile(path, name string) error {
 func ReadSecurityXattrToTarHeader(path string, hdr *tar.Header) error {
 	capability, _ := system.Lgetxattr(path, "security.capability")
 	if capability != nil {
+		//lint:ignore SA1019 this is vendored/copied code
 		hdr.Xattrs = make(map[string]string)
+		//lint:ignore SA1019 this is vendored/copied code
 		hdr.Xattrs["security.capability"] = string(capability)
 	}
 	return nil

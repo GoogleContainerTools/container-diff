@@ -17,7 +17,9 @@ limitations under the License.
 package differs
 
 import (
+	"bufio"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -85,29 +87,97 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 		for i := 0; i < len(contents); i++ {
 			c := contents[i]
 			fileName := c.Name()
-			// check if package
-			packageDir := regexp.MustCompile("^([a-z|A-Z|0-9|_]+)-(([0-9]+?\\.){2,3})(dist-info|egg-info)$")
-			packageMatch := packageDir.FindStringSubmatch(fileName)
-			if len(packageMatch) != 0 {
-				packageName := packageMatch[1]
-				version := packageMatch[2][:len(packageMatch[2])-1]
+			var metadata *os.File
+			var err error
+			if strings.HasSuffix(fileName, "egg-info") {
+				// wheel directory
+				metadata, err = os.Open(filepath.Join(pythonPath, fileName, "PKG-INFO"))
+				if err != nil {
+					logrus.Debugf("unable to open PKG-INFO for egg %s", fileName)
+				}
+			} else if strings.HasSuffix(fileName, "dist-info") {
+				// egg directory
+				metadata, err = os.Open(filepath.Join(pythonPath, fileName, "METADATA"))
+				if err != nil {
+					logrus.Debugf("unable to open METADATA for wheel %s", fileName)
+				}
+			} else {
+				// no match
+				continue
+			}
+
+			var line, packageName, version string
+			if metadata == nil {
+				// unable to open metadata file: try reading the package itself
+				mPath := filepath.Join(pythonPath, fileName)
+				metadata, err = os.Open(mPath)
+				fInfo, _ := os.Stat(mPath)
+				if err != nil || fInfo.IsDir() {
+					// if this also doesn't work, the package doesn't have the correct metadata structure
+					// try and parse the name using a regex anyway
+					logrus.Debugf("failed to locate package metadata: attempting to infer package name")
+					packageDir := regexp.MustCompile("^([a-z|A-Z|0-9|_]+)-(([0-9]+?\\.){2,3})(dist-info|egg-info)$")
+					packageMatch := packageDir.FindStringSubmatch(fileName)
+					if len(packageMatch) != 0 {
+						packageName = packageMatch[1]
+						version = packageMatch[2][:len(packageMatch[2])-1]
+					}
+				}
+			}
+
+			if metadata != nil {
+				scanner := bufio.NewScanner(metadata)
+				scanner.Split(bufio.ScanLines)
+				for scanner.Scan() {
+					line = scanner.Text()
+					if strings.HasPrefix(line, "Name") {
+						packageName = strings.Split(line, ": ")[1]
+						// next line is always the version
+						scanner.Scan()
+						version = strings.Split(scanner.Text(), ": ")[1]
+						break
+					}
+				}
+			}
+
+			// First, try and use the "top_level.txt",
+			// Many egg packages contains a "top_level.txt" file describing the directories containing the
+			// required code. Combining the sizes of each of these directories should give the total size.
+			var size int64
+			topLevelReader, err := os.Open(filepath.Join(pythonPath, fileName, "top_level.txt"))
+			if err == nil {
+				scanner := bufio.NewScanner(topLevelReader)
+				scanner.Split(bufio.ScanLines)
+				for scanner.Scan() {
+					// check if directory exists first, then retrieve size
+					contentPath := filepath.Join(pythonPath, scanner.Text())
+					if _, err := os.Stat(contentPath); err == nil {
+						size = size + pkgutil.GetSize(contentPath)
+					} else if _, err := os.Stat(contentPath + ".py"); err == nil {
+						// sometimes the top level content is just a single python file; try this too
+						size = size + pkgutil.GetSize(contentPath+".py")
+					}
+				}
+			} else {
+				logrus.Debugf("unable to use top_level.txt: falling back to alphabetical directory entry heuristic...")
 
 				// Retrieves size for actual package/script corresponding to each dist-info metadata directory
-				// by taking the file entry alphabetically before it (for a package) or after it (for a script)
-				var size int64
-				if i-1 >= 0 && contents[i-1].Name() == packageName {
-					packagePath := filepath.Join(pythonPath, packageName)
+				// by examining the file entries directly before and after it
+				if i-1 >= 0 && strings.Contains(contents[i-1].Name(), packageName) {
+					packagePath := filepath.Join(pythonPath, contents[i-1].Name())
 					size = pkgutil.GetSize(packagePath)
-				} else if i+1 < len(contents) && contents[i+1].Name() == packageName+".py" {
-					size = contents[i+1].Size()
+				} else if i+1 < len(contents) && strings.Contains(contents[i+1].Name(), packageName) {
+					packagePath := filepath.Join(pythonPath, contents[i+1].Name())
+					size = pkgutil.GetSize(packagePath)
 				} else {
-					logrus.Errorf("Could not find Python package %s for corresponding metadata info", packageName)
+					logrus.Errorf("failed to locate python package for corresponding package metadata %s", packageName)
 					continue
 				}
-				currPackage := util.PackageInfo{Version: version, Size: size}
-				mapPath := strings.Replace(pythonPath, path, "", 1)
-				addToMap(packages, packageName, mapPath, currPackage)
 			}
+
+			currPackage := util.PackageInfo{Version: version, Size: size}
+			mapPath := strings.Replace(pythonPath, path, "", 1)
+			addToMap(packages, packageName, mapPath, currPackage)
 		}
 	}
 

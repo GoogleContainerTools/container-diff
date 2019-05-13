@@ -7,13 +7,19 @@
 
 package github
 
+// RequestedAction is included in a CheckRunEvent when a user has invoked an action,
+// i.e. when the CheckRunEvent's Action field is "requested_action".
+type RequestedAction struct {
+	Identifier string `json:"identifier"` // The integrator reference of the action requested by the user.
+}
+
 // CheckRunEvent is triggered when a check run is "created", "updated", or "re-requested".
 // The Webhook event name is "check_run".
 //
 // GitHub API docs: https://developer.github.com/v3/activity/events/types/#checkrunevent
 type CheckRunEvent struct {
 	CheckRun *CheckRun `json:"check_run,omitempty"`
-	// The action performed. Can be "created", "updated" or "re-requested".
+	// The action performed. Can be "created", "updated", "rerequested" or "requested_action".
 	Action *string `json:"action,omitempty"`
 
 	// The following fields are only populated by Webhook events.
@@ -21,6 +27,9 @@ type CheckRunEvent struct {
 	Org          *Organization `json:"organization,omitempty"`
 	Sender       *User         `json:"sender,omitempty"`
 	Installation *Installation `json:"installation,omitempty"`
+
+	// The action requested by the user. Populated when the Action is "requested_action".
+	RequestedAction *RequestedAction `json:"requested_action,omitempty"` //
 }
 
 // CheckSuiteEvent is triggered when a check suite is "completed", "requested", or "re-requested".
@@ -137,6 +146,18 @@ type ForkEvent struct {
 	Repo         *Repository   `json:"repository,omitempty"`
 	Sender       *User         `json:"sender,omitempty"`
 	Installation *Installation `json:"installation,omitempty"`
+}
+
+// GitHubAppAuthorizationEvent is triggered when a user's authorization for a
+// GitHub Application is revoked.
+//
+// GitHub API docs: https://developer.github.com/v3/activity/events/types/#githubappauthorizationevent
+type GitHubAppAuthorizationEvent struct {
+	// The action performed. Can be "revoked".
+	Action *string `json:"action,omitempty"`
+
+	// The following fields are only populated by Webhook events.
+	Sender *User `json:"sender,omitempty"`
 }
 
 // Page represents a single Wiki page.
@@ -308,7 +329,7 @@ type LabelEvent struct {
 // Github API docs: https://developer.github.com/v3/activity/events/types/#marketplacepurchaseevent
 type MarketplacePurchaseEvent struct {
 	// Action is the action that was performed. Possible values are:
-	// "purchased", "cancelled", "changed".
+	// "purchased", "cancelled", "pending_change", "pending_change_cancelled", "changed".
 	Action *string `json:"action,omitempty"`
 
 	// The following fields are only populated by Webhook events.
@@ -708,6 +729,27 @@ type RepositoryEvent struct {
 	Org          *Organization `json:"organization,omitempty"`
 	Sender       *User         `json:"sender,omitempty"`
 	Installation *Installation `json:"installation,omitempty"`
+}
+
+// RepositoryVulnerabilityAlertEvent is triggered when a security alert is created, dismissed, or resolved.
+//
+// GitHub API docs: https://developer.github.com/v3/activity/events/types/#repositoryvulnerabilityalertevent
+type RepositoryVulnerabilityAlertEvent struct {
+	// Action is the action that was performed. This can be: "create", "dismiss", "resolve".
+	Action *string `json:"action,omitempty"`
+
+	//The security alert of the vulnerable dependency.
+	Alert *struct {
+		ID                  *int64     `json:"id,omitempty"`
+		AffectedRange       *string    `json:"affected_range,omitempty"`
+		AffectedPackageName *string    `json:"affected_package_name,omitempty"`
+		ExternalReference   *string    `json:"external_reference,omitempty"`
+		ExternalIdentifier  *string    `json:"external_identifier,omitempty"`
+		FixedIn             *string    `json:"fixed_in,omitempty"`
+		Dismisser           *User      `json:"dismisser,omitempty"`
+		DismissReason       *string    `json:"dismiss_reason,omitempty"`
+		DismissedAt         *Timestamp `json:"dismissed_at,omitempty"`
+	} `json:"alert,omitempty"`
 }
 
 // StatusEvent is triggered when the status of a Git commit changes.

@@ -1,5 +1,26 @@
 # container-diff Release Notes
 
+# Version 0.15.0 - 02/19/19
+* Update deps [#298](https://github.com/GoogleContainerTools/container-diff/pull/298)
+* Fix result switch while viewing with type history [#296](https://github.com/GoogleContainerTools/container-diff/pull/296)
+* Use PKG-INFO and METADATA to infer package names in pip analysis [#292](https://github.com/GoogleContainerTools/container-diff/pull/292)
+* Remove characters from cache path that are invalid on Windows [#285](https://github.com/GoogleContainerTools/container-diff/pull/285)
+* Use top_level.txt when analyzing pip modules [#291](https://github.com/GoogleContainerTools/container-diff/pull/291)
+* Strip colons from file path before creating cache dir [#290](https://github.com/GoogleContainerTools/container-diff/pull/290)
+* Adding Github Action to run Container Diff [#286](https://github.com/GoogleContainerTools/container-diff/pull/286)
+
+# Version 0.14.0 - 12/18/18
+* Enhancement - save to file [#279](https://github.com/GoogleContainerTools/container-diff/pull/279)
+* Fixed concurrent map write in image diffing [#278](https://github.com/GoogleContainerTools/container-diff/pull/278)
+* Adding custom cache envar and command line argument [#274](https://github.com/GoogleContainerTools/container-diff/pull/274)
+* Split lines prior to diffing [#272](https://github.com/GoogleContainerTools/container-diff/pull/272)
+* Move all image processing logic into utils, and expose publically [#270](https://github.com/GoogleContainerTools/container-diff/pull/270)
+* Enhancement - save to file [#279](https://github.com/GoogleContainerTools/container-diff/pull/279)
+* Fixed concurrent map write in image diffing [#278](https://github.com/GoogleContainerTools/container-diff/pull/278)
+* Adding custom cache envar and command line argument [#274](https://github.com/GoogleContainerTools/container-diff/pull/274)
+* Split lines prior to diffing [#272](https://github.com/GoogleContainerTools/container-diff/pull/272)
+* Move all image processing logic into utils, and expose publically [#270](https://github.com/GoogleContainerTools/container-diff/pull/270)
+
 # Version 0.13.0 - 10/30/18
 * Update go-containerregistry to pick up docker API client negotiation [#267](https://github.com/GoogleContainerTools/container-diff/pull/267)
 * Fix unintended variable shadowing [#263](https://github.com/GoogleContainerTools/container-diff/pull/263)

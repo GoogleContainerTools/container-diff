@@ -29,9 +29,11 @@ import (
 )
 
 var analyzeCmd = &cobra.Command{
-	Use:   "analyze",
-	Short: "Analyzes an image: [image]",
-	Long:  `Analyzes an image using the specifed analyzers as indicated via flags (see documentation for available ones).`,
+	Use:   "analyze image",
+	Short: "Analyzes an image: container-diff image",
+	Long: `Analyzes an image using the specifed analyzers as indicated via --type flag(s).
+
+For details on how to specify images, run: container-diff help`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if err := validateArgs(args, checkAnalyzeArgNum, checkIfValidAnalyzer); err != nil {
 			return err
