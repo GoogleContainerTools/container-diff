@@ -143,12 +143,8 @@ func DiffFile(image1, image2 *pkgutil.Image, filename string) (*FileNameDiff, er
 		return nil, err
 	}
 
-	if s1.ModTime() != s2.ModTime() {
-		description := fmt.Sprintf("%s was modified at %s, %s at %s:", image1.Source, s1.ModTime(), image2.Source, s2.ModTime())
-		return &FileNameDiff{filename, description, ""}, nil
-	}
 	if s1.Mode() != s2.Mode() {
-		description := fmt.Sprintf("%s had permission bits %s, %s had %s:", image1.Source, s1.Mode(), image2.Source, s2.Mode())
+		description := fmt.Sprintf("%s in image %s had permission bits %s vs in image %s had %s", filename, image1.Source, s1.Mode(), image2.Source, s2.Mode())
 		return &FileNameDiff{filename, description, ""}, nil
 	}
 
@@ -258,9 +254,6 @@ func GetModifiedEntries(d1, d2 pkgutil.Directory) []string {
 				continue
 			}
 			// Consider the files as different if their metadata differ.
-			if f1stat.ModTime() != f2stat.ModTime() {
-				same = false
-			}
 			if f1stat.Mode() != f2stat.Mode() {
 				same = false
 			}
