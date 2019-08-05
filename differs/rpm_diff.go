@@ -51,7 +51,7 @@ const rpmMacros string = "/usr/lib/rpm/macros"
 //RPM command to extract packages from the rpm database
 var rpmCmd = []string{
 	"rpm", "--nodigest", "--nosignature",
-	"-qa", "--qf", "%{NAME}\t%{VERSION}\t%{SIZE}\n",
+	"-qa", "--qf", "%{NAME}\t%{VERSION}-%{RELEASE}\t%{SIZE}\n",
 }
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
