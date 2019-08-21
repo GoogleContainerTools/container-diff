@@ -197,20 +197,6 @@ func TestDiffAndAnalysis(t *testing.T) {
 			expectedFile: "apt_analysis_expected.json",
 		},
 		{
-			description:  "file sorted analysis",
-			subcommand:   "analyze",
-			imageA:       diffModified,
-			differFlags:  []string{"--type=file", "-o", "--no-cache"},
-			expectedFile: "file_sorted_analysis_expected.json",
-		},
-		{
-			description:  "file layer analysis",
-			subcommand:   "analyze",
-			imageA:       diffLayerBase,
-			differFlags:  []string{"--type=layer", "--no-cache"},
-			expectedFile: "file_layer_analysis_expected.json",
-		},
-		{
 			description:  "size analysis",
 			subcommand:   "analyze",
 			imageA:       diffBase,
