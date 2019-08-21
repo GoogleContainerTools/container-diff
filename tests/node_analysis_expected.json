@@ -1,6 +1,6 @@
 [
   {
-    "Image": "gcr.io/gcp-runtimes/node-modified",
+    "Image": "gcr.io/gcp-runtimes/container-diff-tests/node-modified",
     "AnalyzeType": "Node",
     "Analysis": [
       {

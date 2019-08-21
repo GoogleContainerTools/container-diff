@@ -35,7 +35,7 @@ fi
 
 
 # Ignore these paths in the following tests.
-ignore="vendor\|out\|actions"
+ignore="vendor\|out\|actions\|setup-tests"
 
 # Check boilerplate
 echo "Checking boilerplate..."

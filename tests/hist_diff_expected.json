@@ -1,16 +1,14 @@
 [
   {
-    "Image1": "gcr.io/gcp-runtimes/diff-base",
-    "Image2": "gcr.io/gcp-runtimes/diff-modified",
+    "Image1": "gcr.io/gcp-runtimes/container-diff-tests/diff-base",
+    "Image2": "gcr.io/gcp-runtimes/container-diff-tests/diff-modified",
     "DiffType": "History",
     "Diff": {
       "Adds": [
-        "/bin/sh -c #(nop) ADD file:aa56bc8f2fea9c0c81ca085bfa273ad1a3b0d46f51b8c9c61b483340c902024f in /"
+        "/bin/sh -c rm -rf /second \u0026\u0026 mkdir /modified \u0026\u0026 echo \"Modified\" \u003e /modified/modified.txt",
+        "/bin/sh -c yum -q -y install gcc"
       ],
-      "Dels": [
-        "/bin/sh -c #(nop) ADD file:5dde1d6e0f6362350d7ebbc85ce82cf4c5032fb74d2c6235dac172e8e102c00f in /",
-        "mkdir /home/test"
-      ]
+      "Dels": []
     }
   }
 ]

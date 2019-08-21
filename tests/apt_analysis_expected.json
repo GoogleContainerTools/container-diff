@@ -1,6 +1,6 @@
 [
   {
-    "Image": "gcr.io/gcp-runtimes/apt-modified",
+    "Image": "gcr.io/gcp-runtimes/container-diff-tests/apt-modified",
     "AnalyzeType": "Apt",
     "Analysis": [
       {
