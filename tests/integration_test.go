@@ -35,32 +35,32 @@ import (
 )
 
 const (
-	diffBase     = "gcr.io/gcp-runtimes/diff-base"
-	diffModified = "gcr.io/gcp-runtimes/diff-modified"
+	diffBase     = "gcr.io/gcp-runtimes/container-diff-tests/diff-base"
+	diffModified = "gcr.io/gcp-runtimes/container-diff-tests/diff-modified"
 
-	diffLayerBase    = "gcr.io/gcp-runtimes/diff-layer-base"
-	diffLayerModifed = "gcr.io/gcp-runtimes/diff-layer-modified"
+	diffLayerBase     = "gcr.io/gcp-runtimes/container-diff-tests/diff-layer-base"
+	diffLayerModified = "gcr.io/gcp-runtimes/container-diff-tests/diff-layer-modified"
 
-	metadataBase     = "gcr.io/gcp-runtimes/metadata-base"
-	metadataModified = "gcr.io/gcp-runtimes/metadata-modified"
+	metadataBase     = "gcr.io/gcp-runtimes/container-diff-tests/metadata-base"
+	metadataModified = "gcr.io/gcp-runtimes/container-diff-tests/metadata-modified"
 
-	aptBase     = "gcr.io/gcp-runtimes/apt-base"
-	aptModified = "gcr.io/gcp-runtimes/apt-modified"
+	aptBase     = "gcr.io/gcp-runtimes/container-diff-tests/apt-base"
+	aptModified = "gcr.io/gcp-runtimes/container-diff-tests/apt-modified"
 
 	rpmBase     = "valentinrothberg/containerdiff:diff-base"
 	rpmModified = "valentinrothberg/containerdiff:diff-modified"
 
 	// Why is this node-modified:2.0?
-	nodeBase     = "gcr.io/gcp-runtimes/node-modified:2.0"
-	nodeModified = "gcr.io/gcp-runtimes/node-modified"
+	nodeBase     = "gcr.io/gcp-runtimes/container-diff-tests/node-modified:2.0"
+	nodeModified = "gcr.io/gcp-runtimes/container-diff-tests/node-modified"
 
-	pipModified = "gcr.io/gcp-runtimes/pip-modified"
+	pipModified = "gcr.io/gcp-runtimes/container-diff-tests/pip-modified"
 
-	multiBase     = "gcr.io/gcp-runtimes/multi-base"
-	multiModified = "gcr.io/gcp-runtimes/multi-modified"
+	multiBase     = "gcr.io/gcp-runtimes/container-diff-tests/multi-base"
+	multiModified = "gcr.io/gcp-runtimes/container-diff-tests/multi-modified"
 
-	multiBaseLocal     = "daemon://gcr.io/gcp-runtimes/multi-base"
-	multiModifiedLocal = "daemon://gcr.io/gcp-runtimes/multi-modified"
+	multiBaseLocal     = "daemon://gcr.io/gcp-runtimes/container-diff-tests/multi-base"
+	multiModifiedLocal = "daemon://gcr.io/gcp-runtimes/container-diff-tests/multi-modified"
 )
 
 type ContainerDiffRunner struct {
@@ -113,7 +113,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			description:  "file layer differ",
 			subcommand:   "diff",
 			imageA:       diffLayerBase,
-			imageB:       diffLayerModifed,
+			imageB:       diffLayerModified,
 			differFlags:  []string{"--type=layer", "--no-cache"},
 			expectedFile: "file_layer_diff_expected.json",
 		},
@@ -121,7 +121,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			description:  "size differ",
 			subcommand:   "diff",
 			imageA:       diffLayerBase,
-			imageB:       diffLayerModifed,
+			imageB:       diffLayerModified,
 			differFlags:  []string{"--type=size", "--no-cache"},
 			expectedFile: "size_diff_expected.json",
 		},
@@ -129,7 +129,7 @@ func TestDiffAndAnalysis(t *testing.T) {
 			description:  "size layer differ",
 			subcommand:   "diff",
 			imageA:       diffLayerBase,
-			imageB:       diffLayerModifed,
+			imageB:       diffLayerModified,
 			differFlags:  []string{"--type=sizelayer", "--no-cache"},
 			expectedFile: "size_layer_diff_expected.json",
 		},

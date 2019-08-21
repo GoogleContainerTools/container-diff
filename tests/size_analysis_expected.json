@@ -1,12 +1,12 @@
 [
   {
-    "Image": "gcr.io/gcp-runtimes/diff-base",
+    "Image": "gcr.io/gcp-runtimes/container-diff-tests/diff-base",
     "AnalyzeType": "Size",
     "Analysis": [
       {
-        "Name": "gcr.io/gcp-runtimes/diff-base",
-        "Digest": "sha256:d4e51212be9fffca8d3573a35ac12a69d050c3f65f706e053d24f41317762cca",
-        "Size": 383043168
+        "Name": "gcr.io/gcp-runtimes/container-diff-tests/diff-base",
+        "Digest": "sha256:b48cce984ba2ddfbc56e1b44cfe3080145ab8c432309cab7010cb6ea725b7e0e",
+        "Size": 295151156
       }
     ]
   }

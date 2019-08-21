@@ -1,13 +1,13 @@
 [
   {
-    "Image1": "gcr.io/gcp-runtimes/diff-layer-base",
-    "Image2": "gcr.io/gcp-runtimes/diff-layer-modified",
+    "Image1": "gcr.io/gcp-runtimes/container-diff-tests/diff-layer-base",
+    "Image2": "gcr.io/gcp-runtimes/container-diff-tests/diff-layer-modified",
     "DiffType": "Size",
     "Diff": [
       {
         "Name": "",
-        "Size1": 19,
-        "Size2": 15
+        "Size1": 143747263,
+        "Size2": 143747259
       }
     ]
   }

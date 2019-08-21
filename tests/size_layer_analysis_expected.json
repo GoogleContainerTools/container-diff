@@ -1,21 +1,36 @@
 [
   {
-    "Image": "gcr.io/gcp-runtimes/diff-layer-base",
+    "Image": "gcr.io/gcp-runtimes/container-diff-tests/diff-layer-base",
     "AnalyzeType": "SizeLayer",
     "Analysis": [
       {
         "Name": "0",
-        "Digest": "sha256:74a9fa414ff7212ca555a1024826b94e27ec6a436fd971f8e6c2a909b23630a2",
-        "Size": 6
+        "Digest": "sha256:ea92ce749ad4f3ac86c3d674c027c4fd81875a765a43ae78b6ee1ac9c0296967",
+        "Size": 120852579
       },
       {
         "Name": "1",
-        "Digest": "sha256:e39d9b94d5c118b34cce2f4af7efd4c7ed2553e697d7f676e24c4091e42a4998",
-        "Size": 7
+        "Digest": "sha256:e4e5d1283791b38034a3d21092953b595fab077f46b33971ec2b2d70a83b2468",
+        "Size": 23439251
       },
       {
         "Name": "2",
-        "Digest": "sha256:bda36409f35ed9e71049d22abdce890d6335056ca15bfed9f323be69b0607e24",
+        "Digest": "sha256:3c2cba919283a210665e480bcbf943eaaf4ed87a83f02e81bb286b8bdead0e75",
+        "Size": 0
+      },
+      {
+        "Name": "3",
+        "Digest": "sha256:f81e220940ad2f723a83d57e1e8551f996eaf14275fe4f15c09e844210e3e544",
+        "Size": 6
+      },
+      {
+        "Name": "4",
+        "Digest": "sha256:fed95766b55ca840f9d31c412056a529483a57afc652e795a5ebf1b067e93498",
+        "Size": 7
+      },
+      {
+        "Name": "5",
+        "Digest": "sha256:b307cf1c717a06b5d7a35987ca627073e1052db774cadf90904dd2641424634a",
         "Size": 6
       }
     ]

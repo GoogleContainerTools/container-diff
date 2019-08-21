@@ -1,26 +1,55 @@
 [
   {
-    "Image1": "valentinrothberg/containerdiff:diff-base",
-    "Image2": "valentinrothberg/containerdiff:diff-modified",
+    "Image1": "gcr.io/gcp-runtimes/container-diff-tests/diff-base:latest",
+    "Image2": "gcr.io/gcp-runtimes/container-diff-tests/diff-modified:latest",
     "DiffType": "RPM",
     "Diff": {
-      "Packages1": [
-        {
-          "Name": "git",
-          "Version": "2.13.6",
-          "Size": 3001
-        }
-      ],
+      "Packages1": [],
       "Packages2": [
         {
-          "Name": "nano",
-          "Version": "2.8.5",
-          "Size": 1289435
+          "Name": "binutils",
+          "Version": "2.27-34.base.el7",
+          "Size": 25150000
         },
         {
-          "Name": "vim",
-          "Version": "7.4.326",
-          "Size": 2715080
+          "Name": "cpp",
+          "Version": "4.8.5-36.el7_6.2",
+          "Size": 15636661
+        },
+        {
+          "Name": "gcc",
+          "Version": "4.8.5-36.el7_6.2",
+          "Size": 39230745
+        },
+        {
+          "Name": "glibc-devel",
+          "Version": "2.17-260.el7_6.6",
+          "Size": 1066078
+        },
+        {
+          "Name": "glibc-headers",
+          "Version": "2.17-260.el7_6.6",
+          "Size": 2338328
+        },
+        {
+          "Name": "kernel-headers",
+          "Version": "3.10.0-957.27.2.el7",
+          "Size": 3824341
+        },
+        {
+          "Name": "libgomp",
+          "Version": "4.8.5-36.el7_6.2",
+          "Size": 212184
+        },
+        {
+          "Name": "libmpc",
+          "Version": "1.0.1-3.el7",
+          "Size": 113833
+        },
+        {
+          "Name": "mpfr",
+          "Version": "3.1.1-4.el7",
+          "Size": 554279
         }
       ],
       "InfoDiff": []

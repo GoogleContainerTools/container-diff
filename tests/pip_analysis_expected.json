@@ -1,6 +1,6 @@
 [
   {
-    "Image": "gcr.io/gcp-runtimes/pip-modified",
+    "Image": "gcr.io/gcp-runtimes/container-diff-tests/pip-modified",
     "AnalyzeType": "Pip",
     "Analysis": [
       {
