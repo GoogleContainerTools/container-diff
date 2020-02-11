@@ -16,6 +16,8 @@ container-diff is a tool for analyzing and comparing container images. container
 
 These analyses can be performed on a single image, or a diff can be performed on two images to compare. The tool can help users better understand what is changing inside their images, and give them a better look at what their images contain.
 
+container-diff is not an officially supported Google project, and is currently in maintenance mode. Contributors are welcome!
+
 ## Installation
 
 ### macOS
