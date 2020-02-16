@@ -38,7 +38,7 @@ import (
 var json bool
 
 var save bool
-var types diffTypes
+var types multiValueFlag
 var noCache bool
 
 var outputFile string
@@ -46,6 +46,8 @@ var forceWrite bool
 var cacheDir string
 var LogLevel string
 var format string
+var skipTsVerifyRegistries multiValueFlag
+var registriesCertificates keyValueFlag
 
 const containerDiffEnvCacheDir = "CONTAINER_DIFF_CACHEDIR"
 
@@ -69,6 +71,7 @@ Tarballs can also be specified by simply providing the path to the .tar, .tar.gz
 			os.Exit(1)
 		}
 		logrus.SetLevel(ll)
+		pkgutil.ConfigureTLS(skipTsVerifyRegistries, registriesCertificates)
 	},
 }
 
@@ -147,6 +150,7 @@ func getImage(imageName string) (pkgutil.Image, error) {
 			return pkgutil.Image{}, err
 		}
 	}
+
 	return pkgutil.GetImage(imageName, includeLayers(), cachePath)
 }
 
@@ -193,33 +197,59 @@ func getWriter(outputFile string) (io.Writer, error) {
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&LogLevel, "verbosity", "v", "warning", "This flag controls the verbosity of container-diff.")
 	RootCmd.PersistentFlags().StringVarP(&format, "format", "", "", "Format to output diff in.")
+	RootCmd.PersistentFlags().VarP(&skipTsVerifyRegistries, "skip-tls-verify-registry", "", "Insecure registry ignoring TLS verify to push and pull. Set it repeatedly for multiple registries.")
+	registriesCertificates = make(keyValueFlag)
+	RootCmd.PersistentFlags().VarP(&registriesCertificates, "registry-certificate", "", "Use the provided certificate for TLS communication with the given registry. Expected format is 'my.registry=/path/to/the/server/certificate'.")
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 }
 
-// Define a type named "diffSlice" as a slice of strings
-type diffTypes []string
+// Define a type named "multiValueFlag" as a slice of strings
+type multiValueFlag []string
 
 // Now, for our new type, implement the two methods of
 // the flag.Value interface...
 // The first method is String() string
-func (d *diffTypes) String() string {
-	return strings.Join(*d, ",")
+func (f *multiValueFlag) String() string {
+	return strings.Join(*f, ",")
 }
 
 // The second method is Set(value string) error
-func (d *diffTypes) Set(value string) error {
+func (f *multiValueFlag) Set(value string) error {
 	// Dedupe repeated elements.
-	for _, t := range *d {
+	for _, t := range *f {
 		if t == value {
 			return nil
 		}
 	}
-	*d = append(*d, value)
+	*f = append(*f, value)
 	return nil
 }
 
-func (d *diffTypes) Type() string {
-	return "Diff Types"
+func (f *multiValueFlag) Type() string {
+	return "multiValueFlag"
+}
+
+type keyValueFlag map[string]string
+
+func (f *keyValueFlag) String() string {
+	var result []string
+	for key, value := range *f {
+		result = append(result, fmt.Sprintf("%s=%s", key, value))
+	}
+	return strings.Join(result, ",")
+}
+
+func (f *keyValueFlag) Set(value string) error {
+	parts := strings.SplitN(value, "=", 2)
+	if len(parts) < 2 {
+		return fmt.Errorf("invalid argument value. expect key=value, got %s", value)
+	}
+	(*f)[parts[0]] = parts[1]
+	return nil
+}
+
+func (f *keyValueFlag) Type() string {
+	return "keyValueFlag"
 }
 
 func addSharedFlags(cmd *cobra.Command) {
