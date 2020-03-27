@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -116,7 +115,7 @@ func GetImage(imageName string, includeLayers bool, cacheDir string) (Image, err
 			return Image{}, errors.Wrap(err, "resolving auth")
 		}
 		start := time.Now()
-		img, err = remote.Image(ref, remote.WithAuth(auth), remote.WithTransport(http.DefaultTransport))
+		img, err = remote.Image(ref, remote.WithAuth(auth), remote.WithTransport(BuildTransport(ref.Context().Registry)))
 		if err != nil {
 			return Image{}, errors.Wrap(err, "retrieving remote image")
 		}

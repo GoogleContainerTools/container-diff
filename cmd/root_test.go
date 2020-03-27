@@ -20,6 +20,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -92,5 +93,33 @@ func TestCacheDir(t *testing.T) {
 			}
 		},
 		)
+	}
+}
+
+func TestMultiValueFlag_Set_shouldDedupeRepeatedArguments(t *testing.T) {
+	var arg multiValueFlag
+	arg.Set("value1")
+	arg.Set("value2")
+	arg.Set("value3")
+
+	arg.Set("value2")
+	if len(arg) != 3 || reflect.DeepEqual(arg, []string{"value1", "value2", "value3"}) {
+		t.Error("multiValueFlag should dedupe repeated arguments")
+	}
+}
+
+func Test_KeyValueArg_Set_shouldSplitArgument(t *testing.T) {
+	arg := make(keyValueFlag)
+	arg.Set("key=value")
+	if arg["key"] != "value" {
+		t.Error("Invalid split. key=value should be split to key=>value")
+	}
+}
+
+func Test_KeyValueArg_Set_shouldAcceptEqualAsValue(t *testing.T) {
+	arg := make(keyValueFlag)
+	arg.Set("key=value=something")
+	if arg["key"] != "value=something" {
+		t.Error("Invalid split. key=value=something should be split to key=>value=something")
 	}
 }
