@@ -58,7 +58,7 @@ func (c CommitAuthor) String() string {
 	return Stringify(c)
 }
 
-// GetCommit fetches the Commit object for a given SHA.
+// GetCommit fetchs the Commit object for a given SHA.
 //
 // GitHub API docs: https://developer.github.com/v3/git/commits/#get-a-commit
 func (s *GitService) GetCommit(ctx context.Context, owner string, repo string, sha string) (*Commit, *Response, error) {
@@ -67,6 +67,9 @@ func (s *GitService) GetCommit(ctx context.Context, owner string, repo string, s
 	if err != nil {
 		return nil, nil, err
 	}
+
+	// TODO: remove custom Accept headers when APIs fully launch.
+	req.Header.Set("Accept", mediaTypeGitSigningPreview)
 
 	c := new(Commit)
 	resp, err := s.client.Do(ctx, req, c)

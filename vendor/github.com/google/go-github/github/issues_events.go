@@ -8,7 +8,6 @@ package github
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -69,14 +68,13 @@ type IssueEvent struct {
 	Issue     *Issue     `json:"issue,omitempty"`
 
 	// Only present on certain events; see above.
-	Assignee    *User        `json:"assignee,omitempty"`
-	Assigner    *User        `json:"assigner,omitempty"`
-	CommitID    *string      `json:"commit_id,omitempty"`
-	Milestone   *Milestone   `json:"milestone,omitempty"`
-	Label       *Label       `json:"label,omitempty"`
-	Rename      *Rename      `json:"rename,omitempty"`
-	LockReason  *string      `json:"lock_reason,omitempty"`
-	ProjectCard *ProjectCard `json:"project_card,omitempty"`
+	Assignee   *User      `json:"assignee,omitempty"`
+	Assigner   *User      `json:"assigner,omitempty"`
+	CommitID   *string    `json:"commit_id,omitempty"`
+	Milestone  *Milestone `json:"milestone,omitempty"`
+	Label      *Label     `json:"label,omitempty"`
+	Rename     *Rename    `json:"rename,omitempty"`
+	LockReason *string    `json:"lock_reason,omitempty"`
 }
 
 // ListIssueEvents lists events for the specified issue.
@@ -94,8 +92,7 @@ func (s *IssuesService) ListIssueEvents(ctx context.Context, owner, repo string,
 		return nil, nil, err
 	}
 
-	acceptHeaders := []string{mediaTypeLockReasonPreview, mediaTypeProjectCardDetailsPreview}
-	req.Header.Set("Accept", strings.Join(acceptHeaders, ", "))
+	req.Header.Set("Accept", mediaTypeLockReasonPreview)
 
 	var events []*IssueEvent
 	resp, err := s.client.Do(ctx, req, &events)
