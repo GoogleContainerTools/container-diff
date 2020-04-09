@@ -392,10 +392,10 @@ func TestConsoleOutput(t *testing.T) {
 			}
 			actual, stderr, err := runner.Run(args...)
 			if err != nil {
-				if !test.producesError {
-					t.Fatalf("Error running command: %s. Stderr: %s", err, stderr)
-				} else {
+				if test.producesError {
 					actual = err.Error()
+				} else {
+					t.Fatalf("Error running command: %s. Stderr: %s", err, stderr)
 				}
 			}
 			actual = strings.TrimSpace(actual)
