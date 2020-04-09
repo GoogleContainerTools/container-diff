@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -28,7 +27,6 @@ import (
 const containerDiffEnvPrefix = "CONTAINER_DIFF_ENABLE_PROFILING"
 
 func main() {
-	flag.Parse()
 	if os.Getenv(containerDiffEnvPrefix) == "1" {
 		defer profile.Start(profile.TraceProfile).Stop()
 	}
