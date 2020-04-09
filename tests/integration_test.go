@@ -284,3 +284,127 @@ func TestMain(m *testing.M) {
 	closer.Close()
 	os.Exit(m.Run())
 }
+
+func TestConsoleOutput(t *testing.T) {
+	runner := ContainerDiffRunner{
+		t:          t,
+		binaryPath: "../out/container-diff",
+	}
+
+	tests := []struct {
+		description    string
+		subCommand     string
+		extraFlag      string
+		expectedOutput []string
+		producesError  bool
+	}{
+		{
+			description: "analysis --help",
+			subCommand:  "analyze",
+			extraFlag:   "--help",
+			expectedOutput: []string{
+				"Analyzes an image using the specifed analyzers as indicated via --type flag(s).",
+				"For details on how to specify images, run: container-diff help",
+				"container-diff analyze image [flags]",
+				"-c, --cache-dir string      cache directory base to create .container-diff (default is $HOME).",
+				"-j, --json                  JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).",
+				"-w, --output string         output file to write to (default writes to the screen).",
+				"-t, --type multiValueFlag   This flag sets the list of analyzer types to use.",
+			},
+		},
+		{
+			description: "analysis help",
+			subCommand:  "analyze",
+			extraFlag:   "help",
+			expectedOutput: []string{
+				"Analyzes an image using the specifed analyzers as indicated via --type flag(s).",
+				"For details on how to specify images, run: container-diff help",
+				"container-diff analyze image [flags]",
+				"-c, --cache-dir string      cache directory base to create .container-diff (default is $HOME).",
+				"-j, --json                  JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).",
+				"-w, --output string         output file to write to (default writes to the screen).",
+				"-t, --type multiValueFlag   This flag sets the list of analyzer types to use.",
+			},
+		},
+		{
+			description: "container-diff --help",
+			subCommand:  "--help",
+			extraFlag:   "",
+			expectedOutput: []string{
+				"container-diff is a CLI tool for analyzing and comparing container images.",
+				"Images can be specified from either a local Docker daemon, or from a remote registry.",
+				"analyze     Analyzes an image: container-diff image",
+				"diff        Compare two images: container-diff image1 image2",
+				"--format string                             Format to output diff in.",
+				"--skip-tls-verify-registry multiValueFlag   Insecure registry ignoring TLS verify to push and pull. Set it repeatedly for multiple registries.",
+				"-v, --verbosity string                          This flag controls the verbosity of container-diff. (default \"warning\")",
+			},
+		},
+		{
+			description: "container-diff help",
+			subCommand:  "help",
+			extraFlag:   "",
+			expectedOutput: []string{
+				"container-diff is a CLI tool for analyzing and comparing container images.",
+				"Images can be specified from either a local Docker daemon, or from a remote registry.",
+				"analyze     Analyzes an image: container-diff image",
+				"diff        Compare two images: container-diff image1 image2",
+				"--format string                             Format to output diff in.",
+				"--skip-tls-verify-registry multiValueFlag   Insecure registry ignoring TLS verify to push and pull. Set it repeatedly for multiple registries.",
+				"-v, --verbosity string                          This flag controls the verbosity of container-diff. (default \"warning\")",
+			},
+		},
+		{
+			description: "container-diff diff --help",
+			subCommand:  "diff",
+			extraFlag:   "--help",
+			expectedOutput: []string{
+				"Compares two images using the specifed analyzers as indicated via --type flag(s).",
+				"For details on how to specify images, run: container-diff help",
+				"container-diff diff image1 image2 [flags]",
+				"-c, --cache-dir string      cache directory base to create .container-diff (default is $HOME).",
+				"-j, --json                  JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).",
+				"-w, --output string         output file to write to (default writes to the screen).",
+				"--skip-tls-verify-registry multiValueFlag   Insecure registry ignoring TLS verify to push and pull. Set it repeatedly for multiple registries.",
+			},
+		},
+		{
+			description: "container-diff diff --help",
+			subCommand:  "diff",
+			extraFlag:   "help",
+			expectedOutput: []string{
+				"Error: 'diff' requires two images as arguments: container-diff diff [image1] [image2]",
+				"container-diff diff image1 image2 [flags]",
+				"-c, --cache-dir string      cache directory base to create .container-diff (default is $HOME).",
+				"-j, --json                  JSON Output defines if the diff should be returned in a human readable format (false) or a JSON (true).",
+				"-w, --output string         output file to write to (default writes to the screen).",
+				"--skip-tls-verify-registry multiValueFlag   Insecure registry ignoring TLS verify to push and pull. Set it repeatedly for multiple registries.",
+			},
+			producesError: true,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.description, func(t *testing.T) {
+			t.Parallel()
+			args := []string{test.subCommand}
+			if test.extraFlag != "" {
+				args = append(args, test.extraFlag)
+			}
+			actual, stderr, err := runner.Run(args...)
+			if err != nil {
+				if !test.producesError {
+					t.Fatalf("Error running command: %s. Stderr: %s", err, stderr)
+				} else {
+					actual = err.Error()
+				}
+			}
+			actual = strings.TrimSpace(actual)
+			for _, expectedLine := range test.expectedOutput {
+				if !strings.Contains(actual, expectedLine) {
+					t.Errorf("Error actual output does not contain expected line.  \n\nExpected: %s\n\n Actual: %s\n\n, Stderr: %s", expectedLine, actual, stderr)
+				}
+			}
+
+		})
+	}
+}
