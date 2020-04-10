@@ -284,3 +284,127 @@ func TestMain(m *testing.M) {
 	closer.Close()
 	os.Exit(m.Run())
 }
+
+func TestConsoleOutput(t *testing.T) {
+	runner := ContainerDiffRunner{
+		t:          t,
+		binaryPath: "../out/container-diff",
+	}
+
+	tests := []struct {
+		description    string
+		subCommand     string
+		extraFlag      string
+		expectedOutput []string
+		producesError  bool
+	}{
+		{
+			description: "analysis --help",
+			subCommand:  "analyze",
+			extraFlag:   "--help",
+			expectedOutput: []string{
+				"Analyzes an image using the specifed analyzers as indicated via --type flag(s).",
+				"For details on how to specify images, run: container-diff help",
+				"container-diff",
+				"-c, --cache-dir string",
+				"-j, --json",
+				"-w, --output string",
+				"-t, --type multiValueFlag",
+			},
+		},
+		{
+			description: "analysis help",
+			subCommand:  "analyze",
+			extraFlag:   "help",
+			expectedOutput: []string{
+				"Analyzes an image using the specifed analyzers as indicated via --type flag(s).",
+				"For details on how to specify images, run: container-diff help",
+				"container-diff",
+				"-c, --cache-dir string",
+				"-j, --json",
+				"-w, --output string",
+				"-t, --type multiValueFlag",
+			},
+		},
+		{
+			description: "container-diff --help",
+			subCommand:  "--help",
+			extraFlag:   "",
+			expectedOutput: []string{
+				"container-diff is a CLI tool for analyzing and comparing container images.",
+				"Images can be specified from either a local Docker daemon, or from a remote registry.",
+				"analyze",
+				"diff",
+				"--format string",
+				"--skip-tls-verify-registry multiValueFlag",
+				"-v, --verbosity string",
+			},
+		},
+		{
+			description: "container-diff help",
+			subCommand:  "help",
+			extraFlag:   "",
+			expectedOutput: []string{
+				"container-diff is a CLI tool for analyzing and comparing container images.",
+				"Images can be specified from either a local Docker daemon, or from a remote registry.",
+				"analyze",
+				"diff",
+				"--format string",
+				"--skip-tls-verify-registry multiValueFlag",
+				"-v, --verbosity string",
+			},
+		},
+		{
+			description: "container-diff diff --help",
+			subCommand:  "diff",
+			extraFlag:   "--help",
+			expectedOutput: []string{
+				"Compares two images using the specifed analyzers as indicated via --type flag(s).",
+				"For details on how to specify images, run: container-diff help",
+				"container-diff diff image1 image2 [flags]",
+				"-c, --cache-dir string",
+				"-j, --json",
+				"-w, --output string",
+				"--skip-tls-verify-registry multiValueFlag",
+			},
+		},
+		{
+			description: "container-diff diff --help",
+			subCommand:  "diff",
+			extraFlag:   "help",
+			expectedOutput: []string{
+				"Error: 'diff' requires two images as arguments: container-diff diff [image1] [image2]",
+				"container-diff diff image1 image2 [flags]",
+				"-c, --cache-dir string",
+				"-j, --json",
+				"-w, --output string",
+				"--skip-tls-verify-registry multiValueFlag",
+			},
+			producesError: true,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.description, func(t *testing.T) {
+			t.Parallel()
+			args := []string{test.subCommand}
+			if test.extraFlag != "" {
+				args = append(args, test.extraFlag)
+			}
+			actual, stderr, err := runner.Run(args...)
+			if err != nil {
+				if test.producesError {
+					actual = err.Error()
+				} else {
+					t.Fatalf("Error running command: %s. Stderr: %s", err, stderr)
+				}
+			}
+			actual = strings.TrimSpace(actual)
+			for _, expectedLine := range test.expectedOutput {
+				if !strings.Contains(actual, expectedLine) {
+					t.Errorf("Error actual output does not contain expected line.  \n\nExpected: %s\n\n Actual: %s\n\n, Stderr: %s", expectedLine, actual, stderr)
+				}
+			}
+
+		})
+	}
+}
