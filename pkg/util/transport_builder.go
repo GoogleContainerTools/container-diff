@@ -19,13 +19,10 @@ package util
 import (
 	"crypto/tls"
 	"crypto/x509"
+	. "github.com/google/go-containerregistry/pkg/name"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
-	"net"
 	"net/http"
-	"time"
-
-	. "github.com/google/go-containerregistry/pkg/name"
 )
 
 var tlsConfiguration = struct {
@@ -48,7 +45,8 @@ func ConfigureTLS(skipTsVerifyRegistries []string, registriesToCertificates map[
 }
 
 func BuildTransport(registry Registry) http.RoundTripper {
-	var tr http.RoundTripper = newTransport()
+	var tr http.RoundTripper = http.DefaultTransport.(*http.Transport).Clone()
+
 	if _, present := tlsConfiguration.skipTLSVerifyRegistries[registry.RegistryStr()]; present {
 		tr.(*http.Transport).TLSClientConfig = &tls.Config{
 			InsecureSkipVerify: true,
@@ -64,22 +62,6 @@ func BuildTransport(registry Registry) http.RoundTripper {
 		}
 	}
 	return tr
-}
-
-// TODO replace it with "http.DefaultTransport.(*http.Transport).Clone()" once in golang 1.12
-func newTransport() http.RoundTripper {
-	return &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-			DualStack: true,
-		}).DialContext,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-	}
 }
 
 func appendCertificate(pool *x509.CertPool, path string) error {

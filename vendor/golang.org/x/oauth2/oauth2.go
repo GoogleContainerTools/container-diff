@@ -117,7 +117,7 @@ var (
 	// ApprovalForce forces the users to view the consent dialog
 	// and confirm the permissions request at the URL returned
 	// from AuthCodeURL, even if they've already done so.
-	ApprovalForce AuthCodeOption = SetAuthURLParam("approval_prompt", "force")
+	ApprovalForce AuthCodeOption = SetAuthURLParam("prompt", "consent")
 )
 
 // An AuthCodeOption is passed to Config.AuthCodeURL.
@@ -145,7 +145,7 @@ func SetAuthURLParam(key, value string) AuthCodeOption {
 //
 // Opts may include AccessTypeOnline or AccessTypeOffline, as well
 // as ApprovalForce.
-// It can also be used to pass the PKCE challange.
+// It can also be used to pass the PKCE challenge.
 // See https://www.oauth.com/oauth2-servers/pkce/ for more info.
 func (c *Config) AuthCodeURL(state string, opts ...AuthCodeOption) string {
 	var buf bytes.Buffer
