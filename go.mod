@@ -1,6 +1,8 @@
 module github.com/GoogleContainerTools/container-diff
 
-go 1.14
+go 1.15
+
+replace golang.org/x/sys => golang.org/x/sys v0.0.0-20190830141801-acfa387b8d69
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20180906201452-2aa6f33b730c
