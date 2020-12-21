@@ -1,7 +1,7 @@
 language: go
 os: linux
 go:
-  - "1.14"
+  - "1.15.x"
 sudo: required
 services:
   - docker
@@ -9,4 +9,5 @@ services:
 go_import_path: github.com/GoogleContainerTools/container-diff
 
 script:
+ - travis_wait make cross
  - travis_wait make test integration
