@@ -1,4 +1,49 @@
-# container-diff Release Notes
+# v0.16.0 Release - 12/21/2020
+**Linux**
+`curl -LO https://storage.googleapis.com/container-diff/v0.16.0/container-diff-linux-amd64 && mv container-diff-linux-amd64 container-diff && chmod +x container-diff && sudo mv container-diff /usr/local/bin/`
+
+**macOS**
+`curl -LO https://storage.googleapis.com/container-diff/v0.16.0/container-diff-darwin-amd64 && mv container-diff-darwin-amd64 container-diff && chmod +x container-diff && sudo mv container-diff /usr/local/bin/`
+
+**Windows**
+https://storage.googleapis.com/container-diff/v0.16.0/container-diff-windows-amd64.exe
+
+
+**Note from the maintainers**: container-diff has been moved to maintenance mode, but this does NOT mean the project is shutting down! Unfortunately, our team at Google does not have the bandwidth to actively maintain this project, and we want to be sure that the OSS community knows that we're not ignoring our users and contributors. We'll continue to provide critical fixes, and review and ship new contributions as they're submitted to the project.
+
+Highlights:
+* container-diff now supports packages installed with [Emerge](https://wiki.gentoo.org/wiki/Portage)!
+
+New Features:
+* feat: support emerge packages analyzer [#337](https://github.com/GoogleContainerTools/container-diff/pull/337)
+* Add two options to handle self-signed certificates registries [#327](https://github.com/GoogleContainerTools/container-diff/pull/327)
+
+Fixes:
+* version: Move vX.Y.Z to version.go so it works with `go get`, add git info [#304](https://github.com/GoogleContainerTools/container-diff/pull/304)
+* Fix RPM differ to to include release of version [#315](https://github.com/GoogleContainerTools/container-diff/pull/315)
+* --help: List available analyzers, improve Usage line [#303](https://github.com/GoogleContainerTools/container-diff/pull/303)
+* Fix concurrent map write for hardlink [#324](https://github.com/GoogleContainerTools/container-diff/pull/324)
+* Remove unnecessary flag parsing [#330](https://github.com/GoogleContainerTools/container-diff/pull/330)
+
+Updates:
+* Upgrade to go 1.14 and go.mod [#329](https://github.com/GoogleContainerTools/container-diff/pull/329)
+* Update codeowners [#341](https://github.com/GoogleContainerTools/container-diff/pull/341)
+
+Docs Updates:
+* README: mention archlinux-specific instructions [#307](https://github.com/GoogleContainerTools/container-diff/pull/307)
+* Document official support level from Google [#342](https://github.com/GoogleContainerTools/container-diff/pull/342)
+
+Huge thanks goes out to all of our contributors for this release:
+
+- Ben Einaudi
+- Beni Cherniavsky-Paskin
+- Callum Reardon
+- Don McCasland
+- Lexus Lee
+- Luis Plazas
+- Nick Kubala
+- Santiago Torres
+
 
 # Version 0.15.0 - 02/19/19
 * Update deps [#298](https://github.com/GoogleContainerTools/container-diff/pull/298)
