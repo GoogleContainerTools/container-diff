@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Google, Inc. All rights reserved.
+Copyright 2020 Google, Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,8 +31,7 @@ import (
 //Emerge package database location
 const emergePkgFile string = "/var/db/pkg"
 
-type EmergeAnalyzer struct {
-}
+type EmergeAnalyzer struct{}
 
 func (em EmergeAnalyzer) Name() string {
 	return "EmergeAnalyzer"
@@ -51,13 +50,12 @@ func (em EmergeAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 
 func (em EmergeAnalyzer) getPackages(image pkgutil.Image) (map[string]util.PackageInfo, error) {
 	var path string
-	path = image.FSPath
-	switch path {
-	case "":
+	if image.FSPath == "" {
 		path = emergePkgFile
-	default:
-		path = filepath.Join(path, emergePkgFile)
+	} else {
+		path = filepath.Join(image.FSPath, emergePkgFile)
 	}
+
 	packages := make(map[string]util.PackageInfo)
 	if _, err := os.Stat(path); err != nil {
 		// invalid image directory path
@@ -71,17 +69,19 @@ func (em EmergeAnalyzer) getPackages(image pkgutil.Image) (map[string]util.Packa
 		return packages, err
 	}
 
-	for i := 0; i < len(contents); i++ {
-		c := contents[i]
+	// for i := 0; i < len(contents); i++ {
+	for _, c := range contents {
+		// c := contents[i]
 		pkgPrefix := c.Name()
 		pkgContents, err := ioutil.ReadDir(filepath.Join(path, pkgPrefix))
 		if err != nil {
 			return packages, err
 		}
-		for j := 0; j < len(pkgContents); j++ {
-			c := pkgContents[j]
+		// for j := 0; j < len(pkgContents); j++ {
+		for _, c := range pkgContents {
+			// c := pkgContents[j]
 			pkgRawName := c.Name()
-			// in usual, name of package installed by emerge is formatted as '{pkgName}-{version}' e.g.(pymongo-3.9.0)
+			// usually, the name of a package installed by emerge is formatted as '{pkgName}-{version}' e.g.(pymongo-3.9.0)
 			s := strings.Split(pkgRawName, "-")
 			if len(s) != 2 {
 				continue
@@ -104,20 +104,22 @@ func (em EmergeAnalyzer) getPackages(image pkgutil.Image) (map[string]util.Packa
 // emerge will count the total size of a package and store it as a SIZE file in pkg metadata directory
 // getPkgSize read this SIZE file of a given package
 func getPkgSize(pkgPath string) (int64, error) {
-	var sizeFile *os.File
-	var err error
-	sizeFile, err = os.Open(pkgPath)
+	sizeFile, err := os.Open(pkgPath)
 	if err != nil {
-		logrus.Debugf("unable to open SIZE file for pkg %s", pkgPath)
+		logrus.Warnf("unable to open SIZE file for pkg %s", pkgPath)
 		return 0, err
 	}
 	defer sizeFile.Close()
 	fileBody, err := ioutil.ReadAll(sizeFile)
 	if err != nil {
-		logrus.Debugf("unable to read SIZE file for pkg %s", pkgPath)
+		logrus.Warnf("unable to read SIZE file for pkg %s", pkgPath)
 		return 0, err
 	}
 	strFileBody := strings.Replace(string(fileBody), "\n", "", -1)
-	size, _ := strconv.ParseInt(strFileBody, 10, 64)
+	size, err := strconv.ParseInt(strFileBody, 10, 64)
+	if err != nil {
+		logrus.Warnf("unable to compute size for pkg %s", pkgPath)
+		return 0, err
+	}
 	return size, nil
 }
