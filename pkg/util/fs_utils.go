@@ -39,7 +39,7 @@ type DirectoryEntry struct {
 }
 
 func GetSize(path string) int64 {
-	stat, err := os.Stat(path)
+	stat, err := os.Lstat(path)
 	if err != nil {
 		logrus.Errorf("Could not obtain size for %s: %s", path, err)
 		return -1
@@ -56,7 +56,7 @@ func GetSize(path string) int64 {
 
 //GetFileContents returns the contents of a file at the specified path
 func GetFileContents(path string) (*string, error) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	if _, err := os.Lstat(path); os.IsNotExist(err) {
 		return nil, err
 	}
 
@@ -145,11 +145,11 @@ func CheckSameSymlink(f1name, f2name string) (bool, error) {
 
 func CheckSameFile(f1name, f2name string) (bool, error) {
 	// Check first if files differ in size and immediately return
-	f1stat, err := os.Stat(f1name)
+	f1stat, err := os.Lstat(f1name)
 	if err != nil {
 		return false, err
 	}
-	f2stat, err := os.Stat(f2name)
+	f2stat, err := os.Lstat(f2name)
 	if err != nil {
 		return false, err
 	}
