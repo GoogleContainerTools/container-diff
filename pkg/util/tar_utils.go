@@ -31,15 +31,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Thread safe Map of target:linkname
-var hardlinks sync.Map
-
 type OriginalPerm struct {
 	path string
 	perm os.FileMode
 }
 
 func unpackTar(tr *tar.Reader, path string, whitelist []string) error {
+	// Thread safe Map of target:linkname
+	var hardlinks sync.Map
+
 	originalPerms := make([]OriginalPerm, 0)
 	for {
 		header, err := tr.Next()
