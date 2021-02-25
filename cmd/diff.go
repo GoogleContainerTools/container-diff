@@ -85,11 +85,7 @@ func processImage(imageName string, errChan chan<- error) *pkgutil.Image {
 // assumes channel has already been closed
 func readErrorsFromChannel(c chan error) error {
 	errs := []string{}
-	for {
-		err, ok := <-c
-		if !ok {
-			break
-		}
+	for err := range c {
 		errs = append(errs, err.Error())
 	}
 
