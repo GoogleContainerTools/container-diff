@@ -23,7 +23,7 @@
         },
         {
           "Name": "/usr/bin/cc",
-          "Size": 768648
+          "Size": 3
         },
         {
           "Name": "/usr/bin/cpp",
@@ -5043,7 +5043,7 @@
         },
         {
           "Name": "/usr/lib/cpp",
-          "Size": 772720
+          "Size": 10
         },
         {
           "Name": "/usr/lib/gcc",
@@ -5099,7 +5099,7 @@
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libasan.a",
-          "Size": -1
+          "Size": 42
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libasan.so",
@@ -5111,7 +5111,7 @@
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libatomic.a",
-          "Size": -1
+          "Size": 44
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libatomic.so",
@@ -5127,7 +5127,7 @@
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libgcc_s.so",
-          "Size": -1
+          "Size": 18
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libgcov.a",
@@ -5139,11 +5139,11 @@
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libgomp.so",
-          "Size": -1
+          "Size": 28
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libitm.a",
-          "Size": -1
+          "Size": 41
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libitm.so",
@@ -5151,7 +5151,7 @@
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libmudflap.a",
-          "Size": -1
+          "Size": 45
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libmudflap.so",
@@ -5159,7 +5159,7 @@
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libmudflapth.a",
-          "Size": -1
+          "Size": 47
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libmudflapth.so",
@@ -5167,7 +5167,7 @@
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libquadmath.a",
-          "Size": -1
+          "Size": 46
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/32/libquadmath.so",
@@ -5451,7 +5451,7 @@
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/libgcc_s.so",
-          "Size": -1
+          "Size": 20
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/libgcov.a",
@@ -5463,7 +5463,7 @@
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/libgomp.so",
-          "Size": 154880
+          "Size": 34
         },
         {
           "Name": "/usr/lib/gcc/x86_64-redhat-linux/4.8.2/libgomp.spec",
@@ -5511,11 +5511,11 @@
         },
         {
           "Name": "/usr/lib64/libBrokenLocale.so",
-          "Size": 8480
+          "Size": 32
         },
         {
           "Name": "/usr/lib64/libanl.so",
-          "Size": 19840
+          "Size": 23
         },
         {
           "Name": "/usr/lib64/libbsd-compat.a",
@@ -5523,7 +5523,7 @@
         },
         {
           "Name": "/usr/lib64/libbsd.a",
-          "Size": 1330
+          "Size": 15
         },
         {
           "Name": "/usr/lib64/libc.so",
@@ -5535,15 +5535,15 @@
         },
         {
           "Name": "/usr/lib64/libcidn.so",
-          "Size": 201064
+          "Size": 24
         },
         {
           "Name": "/usr/lib64/libcrypt.so",
-          "Size": 40664
+          "Size": 25
         },
         {
           "Name": "/usr/lib64/libdl.so",
-          "Size": 19288
+          "Size": 22
         },
         {
           "Name": "/usr/lib64/libg.a",
@@ -5551,7 +5551,7 @@
         },
         {
           "Name": "/usr/lib64/libgomp.so.1",
-          "Size": 154880
+          "Size": 16
         },
         {
           "Name": "/usr/lib64/libgomp.so.1.0.0",
@@ -5563,7 +5563,7 @@
         },
         {
           "Name": "/usr/lib64/libm.so",
-          "Size": 1137024
+          "Size": 21
         },
         {
           "Name": "/usr/lib64/libmcheck.a",
@@ -5571,7 +5571,7 @@
         },
         {
           "Name": "/usr/lib64/libmpc.so.3",
-          "Size": 99664
+          "Size": 15
         },
         {
           "Name": "/usr/lib64/libmpc.so.3.0.0",
@@ -5579,7 +5579,7 @@
         },
         {
           "Name": "/usr/lib64/libmpfr.so.4",
-          "Size": 377424
+          "Size": 16
         },
         {
           "Name": "/usr/lib64/libmpfr.so.4.1.1",
@@ -5587,35 +5587,35 @@
         },
         {
           "Name": "/usr/lib64/libnsl.so",
-          "Size": 115848
+          "Size": 23
         },
         {
           "Name": "/usr/lib64/libnss_compat.so",
-          "Size": 46432
+          "Size": 30
         },
         {
           "Name": "/usr/lib64/libnss_db.so",
-          "Size": 38088
+          "Size": 26
         },
         {
           "Name": "/usr/lib64/libnss_dns.so",
-          "Size": 31408
+          "Size": 27
         },
         {
           "Name": "/usr/lib64/libnss_files.so",
-          "Size": 61624
+          "Size": 29
         },
         {
           "Name": "/usr/lib64/libnss_hesiod.so",
-          "Size": 23680
+          "Size": 30
         },
         {
           "Name": "/usr/lib64/libnss_nis.so",
-          "Size": 56656
+          "Size": 27
         },
         {
           "Name": "/usr/lib64/libnss_nisplus.so",
-          "Size": 69680
+          "Size": 31
         },
         {
           "Name": "/usr/lib64/libpthread.so",
@@ -5627,7 +5627,7 @@
         },
         {
           "Name": "/usr/lib64/libresolv.so",
-          "Size": 105824
+          "Size": 26
         },
         {
           "Name": "/usr/lib64/librpcsvc.a",
@@ -5635,15 +5635,15 @@
         },
         {
           "Name": "/usr/lib64/librt.so",
-          "Size": 43776
+          "Size": 22
         },
         {
           "Name": "/usr/lib64/libthread_db.so",
-          "Size": 38232
+          "Size": 29
         },
         {
           "Name": "/usr/lib64/libutil.so",
-          "Size": 14496
+          "Size": 24
         },
         {
           "Name": "/usr/libexec/gcc",
@@ -5667,11 +5667,11 @@
         },
         {
           "Name": "/usr/libexec/gcc/x86_64-redhat-linux/4.8.2/liblto_plugin.so",
-          "Size": 76584
+          "Size": 22
         },
         {
           "Name": "/usr/libexec/gcc/x86_64-redhat-linux/4.8.2/liblto_plugin.so.0",
-          "Size": 76584
+          "Size": 22
         },
         {
           "Name": "/usr/libexec/gcc/x86_64-redhat-linux/4.8.2/liblto_plugin.so.0.0.0",
@@ -5691,7 +5691,7 @@
         },
         {
           "Name": "/usr/libexec/getconf/default",
-          "Size": 26544
+          "Size": 19
         },
         {
           "Name": "/usr/share/doc/gcc-4.8.5",
