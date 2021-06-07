@@ -1,3 +1,28 @@
+# v0.17.0 Release - 06/07/2021
+**Linux**
+`curl -LO https://storage.googleapis.com/container-diff/v0.17.0/container-diff-linux-amd64 && mv container-diff-linux-amd64 container-diff && chmod +x container-diff && sudo mv container-diff /usr/local/bin/`
+
+**macOS**
+`curl -LO https://storage.googleapis.com/container-diff/v0.17.0/container-diff-darwin-amd64 && mv container-diff-darwin-amd64 container-diff && chmod +x container-diff && sudo mv container-diff /usr/local/bin/`
+
+**Windows**
+https://storage.googleapis.com/container-diff/v0.17.0/container-diff-windows-amd64.exe
+
+
+**Note from the maintainers**: container-diff has been moved to maintenance mode, but this does NOT mean the project is shutting down! Unfortunately, our team at Google does not have the bandwidth to actively maintain this project, and we want to be sure that the OSS community knows that we're not ignoring our users and contributors. We'll continue to provide critical fixes, and review and ship new contributions as they're submitted to the project.
+
+Fixes:
+* Resolve symlink issue. [#355](https://github.com/GoogleContainerTools/container-diff/pull/355)
+* Remove global variable [#349](https://github.com/GoogleContainerTools/container-diff/pull/349)
+* Code improvement in function readErrorsFromChannel() [#347](https://github.com/GoogleContainerTools/container-diff/pull/347)
+
+Huge thank you to all of our dedicated contributors:
+- Leonor Resende
+- Nick Kubala
+- nicolasdilley
+- zhongjie
+
+
 # v0.16.0 Release - 12/21/2020
 **Linux**
 `curl -LO https://storage.googleapis.com/container-diff/v0.16.0/container-diff-linux-amd64 && mv container-diff-linux-amd64 container-diff && chmod +x container-diff && sudo mv container-diff /usr/local/bin/`
