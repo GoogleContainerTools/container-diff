@@ -19,7 +19,7 @@ package version
 import "fmt"
 
 // Bump this on release
-var version = "v0.15.0"
+var version = "v0.17.0"
 
 // When built using `make` this is overridden via -ldflags
 var gitVersion = "(unknown)"
