@@ -30,7 +30,7 @@ import (
 
 var analyzeCmd = &cobra.Command{
 	Use:   "analyze image",
-	Short: "Analyzes an image: container-diff image",
+	Short: "Analyzes an image: container-diff analyze image",
 	Long: `Analyzes an image using the specifed analyzers as indicated via --type flag(s).
 
 For details on how to specify images, run: container-diff help`,
