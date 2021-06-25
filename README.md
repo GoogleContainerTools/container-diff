@@ -22,18 +22,22 @@ These analyses can be performed on a single image, or a diff can be performed on
 
 ### macOS
 ```shell
-curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-darwin-amd64 && sudo install container-diff-darwin-amd64 /usr/local/bin/container-diff
+curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-darwin-amd64 && \
+sudo install container-diff-darwin-amd64 /usr/local/bin/container-diff
 ```
 
 ### Linux
 ```shell
-curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64 && sudo install container-diff-linux-amd64 /usr/local/bin/container-diff
+curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64 && \
+sudo install container-diff-linux-amd64 /usr/local/bin/container-diff
 ```
 
 OR, if you want to avoid using sudo:
 
 ```shell
-curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64 && mkdir -p $HOME/bin && export PATH=$PATH:$HOME/bin && install container-diff-linux-amd64 $HOME/bin/container-diff
+curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64 && \
+mkdir -p "$HOME/bin" && export PATH="$PATH:$HOME/bin" && \
+install container-diff-linux-amd64 $HOME/bin/container-diff
 ```
 
 There is also an [Arch Linux package](https://www.archlinux.org/packages/community/x86_64/container-diff/). You can install by running:
