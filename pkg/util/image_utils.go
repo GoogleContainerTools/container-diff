@@ -181,16 +181,17 @@ func GetImage(imageName string, includeLayers bool, cacheDir string) (Image, err
 }
 
 func getExtractPathForName(name string, cacheDir string) (string, error) {
-	path := cacheDir
+	path := filepath.Join(cacheDir, strings.TrimPrefix(name, "sha256:"))
 	var err error
 	if cacheDir != "" {
 		// if cachedir doesn't exist, create it
-		if _, err := os.Stat(cacheDir); err != nil && os.IsNotExist(err) {
-			err = os.MkdirAll(cacheDir, 0700)
+		if _, err := os.Stat(path); err != nil && os.IsNotExist(err) {
+			err = os.MkdirAll(path, 0700)
 			if err != nil {
+				logrus.Errorf("error: %s", err)
 				return "", err
 			}
-			logrus.Infof("caching filesystem at %s", cacheDir)
+			logrus.Infof("caching filesystem at %s", path)
 		}
 	} else {
 		// otherwise, create tempdir
