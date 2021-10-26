@@ -195,11 +195,15 @@ func addToMap(packages map[string]map[string]util.PackageInfo, pack string, path
 	packages[pack][path] = packInfo
 }
 
-func getPythonVersion(pathToLayer string) ([]string, error) {
+func getPythonVersion(pathToLayer string, libPaths ...string) ([]string, error) {
 	matches := []string{}
 	pattern := regexp.MustCompile("^python[0-9]+\\.[0-9]+$")
 
-	libPaths := []string{"usr/local/lib", "usr/lib"}
+	// Use default python binaries path if libPaths not defined.
+	if libPaths == nil {
+		libPaths = []string{"usr/local/lib", "usr/lib"}
+	}
+
 	for _, lp := range libPaths {
 		libPath := filepath.Join(pathToLayer, lp)
 		libContents, err := ioutil.ReadDir(libPath)
