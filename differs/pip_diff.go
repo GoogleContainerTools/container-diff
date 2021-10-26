@@ -56,9 +56,19 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 		return packages, err
 	}
 	if config.Config.Env != nil {
-		paths := getPythonPaths(config.Config.Env)
-		for _, p := range paths {
-			pythonPaths = append(pythonPaths, p)
+		condaPaths := getPythonCondaPaths(config.Config.Env)
+		// Iterate over conda paths if there is any.
+		for _, p := range condaPaths {
+			condaBinPath := filepath.Join(p, "bin")
+			pythonVersions, _ := getPythonVersion(path, condaBinPath)
+			for _, pythonVersion := range pythonVersions {
+				pythonPaths = append(pythonPaths, filepath.Join(path, p, "lib", pythonVersion, "dist-packages"))
+				pythonPaths = append(pythonPaths, filepath.Join(path, p, "lib", pythonVersion, "site-packages"))
+			}
+		}
+		systemPaths := getPythonSystemPaths(config.Config.Env)
+		for _, p := range systemPaths {
+			pythonPaths = append(systemPaths, p)
 		}
 	}
 	pythonVersions, err := getPythonVersion(path)
