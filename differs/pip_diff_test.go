@@ -29,6 +29,7 @@ func TestGetPythonVersion(t *testing.T) {
 	testCases := []struct {
 		layerPath        string
 		expectedVersions []string
+		libPaths         []string
 		err              bool
 	}{
 		{
@@ -57,13 +58,25 @@ func TestGetPythonVersion(t *testing.T) {
 			err:              false,
 		},
 		{
+			layerPath:        "testDirs/pipTests/pythonVersionTests/version2.7CondaLayer",
+			expectedVersions: []string{"python2.7"},
+			libPaths:         []string{"/opt/conda/bin"},
+			err:              false,
+		},
+		{
+			layerPath:        "testDirs/pipTests/pythonVersionTests/version3.6CondaLayer",
+			expectedVersions: []string{"python3.6"},
+			libPaths:         []string{"/opt/conda/bin"},
+			err:              false,
+		},
+		{
 			layerPath:        "testDirs/pipTests/pythonVersionTests/2VersionLayer",
 			expectedVersions: []string{"python2.7", "python3.6"},
 			err:              false,
 		},
 	}
 	for _, test := range testCases {
-		version, err := getPythonVersion(test.layerPath)
+		version, err := getPythonVersion(test.layerPath, test.libPaths...)
 		if err != nil && !test.err {
 			t.Errorf("Got unexpected error: %s", err)
 		}
@@ -161,6 +174,37 @@ func TestGetPythonPackages(t *testing.T) {
 			expectedPackages: map[string]map[string]util.PackageInfo{
 				"packageone": {"/usr/local/lib/python3.6/site-packages": {Version: "3.6.9", Size: 0}},
 				"packagetwo": {"/usr/local/lib/python3.6/site-packages": {Version: "4.6.2", Size: 0}},
+			},
+		},
+		{
+			descrip: "noPackagesCondaTest, CONDA_DIR",
+			image: pkgutil.Image{
+				FSPath: "testDirs/pipTests/noPackagesCondaTest",
+				Image: &pkgutil.TestImage{
+					Config: &v1.ConfigFile{
+						Config: v1.Config{
+							Env: []string{"CONDA_DIR=/opt/conda"},
+						},
+					},
+				},
+			},
+			expectedPackages: map[string]map[string]util.PackageInfo{},
+		},
+		{
+			descrip: "pythonCondaDirTests, CONDA_DIR",
+			image: pkgutil.Image{
+				FSPath: "testDirs/pipTests/pythonCondaDirTests",
+				Image: &pkgutil.TestImage{
+					Config: &v1.ConfigFile{
+						Config: v1.Config{
+							Env: []string{"CONDA_DIR=/opt/conda"},
+						},
+					},
+				},
+			},
+			expectedPackages: map[string]map[string]util.PackageInfo{
+				"packageone": {"/opt/conda/lib/python3.6/site-packages": {Version: "3.6.9", Size: 0}},
+				"packagetwo": {"/opt/conda/lib/python3.6/site-packages": {Version: "4.6.2", Size: 0}},
 			},
 		},
 	}
