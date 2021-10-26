@@ -221,10 +221,10 @@ func getPythonVersion(pathToLayer string, libPaths ...string) ([]string, error) 
 	return matches, nil
 }
 
-func getPythonPaths(vars []string) []string {
+func getPythonPaths(vars []string, pattern string) []string {
 	paths := []string{}
+	pythonPathPattern := regexp.MustCompile(pattern)
 	for _, envVar := range vars {
-		pythonPathPattern := regexp.MustCompile("^PYTHONPATH=(.*)")
 		match := pythonPathPattern.FindStringSubmatch(envVar)
 		if len(match) != 0 {
 			pythonPath := match[1]
@@ -232,5 +232,17 @@ func getPythonPaths(vars []string) []string {
 			break
 		}
 	}
+	return paths
+}
+
+func getPythonSystemPaths(vars []string) []string {
+	pattern := "^PYTHONPATH=(.*)"
+	paths := getPythonPaths(vars, pattern)
+	return paths
+}
+
+func getPythonCondaPaths(vars []string) []string {
+	pattern := "^CONDA_DIR=(.*)"
+	paths := getPythonPaths(vars, pattern)
 	return paths
 }
