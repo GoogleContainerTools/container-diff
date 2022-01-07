@@ -30,6 +30,8 @@ const fileAnalyzer = "file"
 const layerAnalyzer = "layer"
 const sizeAnalyzer = "size"
 const sizeLayerAnalyzer = "sizelayer"
+const apkAnalyzer = "apk"
+const apkLayerAnalyzer = "apklayer"
 const aptAnalyzer = "apt"
 const aptLayerAnalyzer = "aptlayer"
 const rpmAnalyzer = "rpm"
@@ -62,6 +64,8 @@ var Analyzers = map[string]Analyzer{
 	layerAnalyzer:     FileLayerAnalyzer{},
 	sizeAnalyzer:      SizeAnalyzer{},
 	sizeLayerAnalyzer: SizeLayerAnalyzer{},
+	apkAnalyzer:       ApkAnalyzer{},
+	apkLayerAnalyzer:  ApkLayerAnalyzer{},
 	aptAnalyzer:       AptAnalyzer{},
 	aptLayerAnalyzer:  AptLayerAnalyzer{},
 	rpmAnalyzer:       RPMAnalyzer{},
