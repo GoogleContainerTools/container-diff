@@ -19,10 +19,10 @@ package util
 const FSDiffOutput = `
 -----{{.DiffType}}-----
 
-These entries have been added to {{.Image1}}:{{if not .Diff.Adds}} None{{else}}
+These entries have been added to {{.Image2}}:{{if not .Diff.Adds}} None{{else}}
 FILE	SIZE{{range .Diff.Adds}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}{{end}}
 
-These entries have been deleted from {{.Image1}}:{{if not .Diff.Dels}} None{{else}}
+These entries have been deleted from {{.Image2}}:{{if not .Diff.Dels}} None{{else}}
 FILE	SIZE{{range .Diff.Dels}}{{"\n"}}{{.Name}}	{{.Size}}{{end}}{{end}}
 
 These entries have been changed between {{.Image1}} and {{.Image2}}:{{if not .Diff.Mods}} None{{else}}
