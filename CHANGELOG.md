@@ -158,7 +158,7 @@ Huge thanks goes out to all of our contributors for this release:
 * Fix Makefile to preserve all build artifacts
 
 # Version 0.5.1 - 11/20/17
-* Change types flag from comma separated --types list to repeated --typeflag
+* Change types flag from comma separated --types list to repeated --type flag
 * Added --filename flag to show diffs of individual files
 * Added layer caching
 

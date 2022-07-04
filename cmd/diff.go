@@ -69,7 +69,7 @@ func checkFilenameFlag(_ []string) error {
 			return nil
 		}
 	}
-	return errors.New("please include --types=file with the --filename flag")
+	return errors.New("please include --type=file with the --filename flag")
 }
 
 // processImage is a concurrency-friendly wrapper around getImageForName
@@ -174,7 +174,7 @@ func diffFile(image1, image2 *pkgutil.Image) error {
 }
 
 func init() {
-	diffCmd.Flags().StringVarP(&filename, "filename", "f", "", "Set this flag to the path of a file in both containers to view the diff of the file. Must be used with --types=file flag.")
+	diffCmd.Flags().StringVarP(&filename, "filename", "f", "", "Set this flag to the path of a file in both containers to view the diff of the file. Must be used with --type=file flag.")
 	RootCmd.AddCommand(diffCmd)
 	addSharedFlags(diffCmd)
 	output.AddFlags(diffCmd)
