@@ -1,36 +1,30 @@
-.PHONY: \
-	all \
-	staticcheck \
-	fmtcheck \
-	pretest \
-	test \
-	integration
-
-DEP_TOOL ?= dep
-
-all: test
-
-staticcheck:
-	GO111MODULE=off go get honnef.co/go/tools/cmd/staticcheck
-	staticcheck ./...
-
-fmtcheck:
-	if [ -z "$${SKIP_FMT_CHECK}" ]; then [ -z "$$(gofmt -s -d *.go ./testing | tee /dev/stderr)" ]; fi
-
-testdeps:
-ifeq ($(DEP_TOOL), dep)
-	GO111MODULE=off go get -u github.com/golang/dep/cmd/dep
-	dep ensure -v
-else
-	go mod download
+ifeq "$(strip $(shell go env GOARCH))" "amd64"
+RACE_FLAG := -race
 endif
 
-pretest: testdeps staticcheck fmtcheck
-
-gotest:
-	go test -race ./...
-
+.PHONY: test
 test: pretest gotest
 
+.PHONY: golangci-lint
+golangci-lint:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	golangci-lint run
+
+.PHONY: staticcheck
+staticcheck:
+	go install honnef.co/go/tools/cmd/staticcheck@master
+	staticcheck ./...
+
+.PHONY: lint
+lint: golangci-lint staticcheck
+
+.PHONY: pretest
+pretest: lint
+
+.PHONY: gotest
+gotest:
+	go test $(RACE_FLAG) -vet all ./...
+
+.PHONY: integration
 integration:
 	go test -tags docker_integration -run TestIntegration -v

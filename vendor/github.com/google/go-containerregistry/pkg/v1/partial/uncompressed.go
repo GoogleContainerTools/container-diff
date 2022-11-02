@@ -19,9 +19,9 @@ import (
 	"io"
 	"sync"
 
+	"github.com/google/go-containerregistry/internal/gzip"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/types"
-	"github.com/google/go-containerregistry/pkg/v1/v1util"
 )
 
 // UncompressedLayer represents the bare minimum interface a natively
@@ -32,6 +32,9 @@ type UncompressedLayer interface {
 
 	// Uncompressed returns an io.ReadCloser for the uncompressed layer contents.
 	Uncompressed() (io.ReadCloser, error)
+
+	// Returns the mediaType for the compressed Layer
+	MediaType() (types.MediaType, error)
 }
 
 // uncompressedLayerExtender implements v1.Image using the uncompressed base properties.
@@ -51,7 +54,7 @@ func (ule *uncompressedLayerExtender) Compressed() (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return v1util.GzipReadCloser(u)
+	return gzip.ReadCloser(u), nil
 }
 
 // Digest implements v1.Layer
@@ -86,7 +89,7 @@ func UncompressedToLayer(ul UncompressedLayer) (v1.Layer, error) {
 // UncompressedImageCore represents the bare minimum interface a natively
 // uncompressed image must implement for us to produce a v1.Image
 type UncompressedImageCore interface {
-	imageCore
+	ImageCore
 
 	// LayerByDiffID is a variation on the v1.Image method, which returns
 	// an UncompressedLayer instead.
@@ -111,11 +114,6 @@ type uncompressedImageExtender struct {
 
 // Assert that our extender type completes the v1.Image interface
 var _ v1.Image = (*uncompressedImageExtender)(nil)
-
-// BlobSet implements v1.Image
-func (i *uncompressedImageExtender) BlobSet() (map[v1.Hash]struct{}, error) {
-	return BlobSet(i)
-}
 
 // Digest implements v1.Image
 func (i *uncompressedImageExtender) Digest() (v1.Hash, error) {
@@ -157,20 +155,12 @@ func (i *uncompressedImageExtender) Manifest() (*v1.Manifest, error) {
 
 	m.Layers = make([]v1.Descriptor, len(ls))
 	for i, l := range ls {
-		sz, err := l.Size()
-		if err != nil {
-			return nil, err
-		}
-		h, err := l.Digest()
+		desc, err := Descriptor(l)
 		if err != nil {
 			return nil, err
 		}
 
-		m.Layers[i] = v1.Descriptor{
-			MediaType: types.DockerLayer,
-			Size:      sz,
-			Digest:    h,
-		}
+		m.Layers[i] = *desc
 	}
 
 	i.manifest = m
@@ -180,6 +170,11 @@ func (i *uncompressedImageExtender) Manifest() (*v1.Manifest, error) {
 // RawManifest implements v1.Image
 func (i *uncompressedImageExtender) RawManifest() ([]byte, error) {
 	return RawManifest(i)
+}
+
+// Size implements v1.Image
+func (i *uncompressedImageExtender) Size() (int64, error) {
+	return Size(i)
 }
 
 // ConfigName implements v1.Image

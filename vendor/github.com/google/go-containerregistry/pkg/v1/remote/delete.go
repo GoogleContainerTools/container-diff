@@ -16,19 +16,21 @@ package remote
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
-	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote/transport"
 )
 
 // Delete removes the specified image reference from the remote registry.
-func Delete(ref name.Reference, auth authn.Authenticator, t http.RoundTripper) error {
+func Delete(ref name.Reference, options ...Option) error {
+	o, err := makeOptions(ref.Context(), options...)
+	if err != nil {
+		return err
+	}
 	scopes := []string{ref.Scope(transport.DeleteScope)}
-	tr, err := transport.New(ref.Context().Registry, auth, t, scopes)
+	tr, err := transport.NewWithContext(o.context, ref.Context().Registry, o.auth, o.transport, scopes)
 	if err != nil {
 		return err
 	}
@@ -45,20 +47,11 @@ func Delete(ref name.Reference, auth authn.Authenticator, t http.RoundTripper) e
 		return err
 	}
 
-	resp, err := c.Do(req)
+	resp, err := c.Do(req.WithContext(o.context))
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	switch resp.StatusCode {
-	case http.StatusOK, http.StatusAccepted:
-		return nil
-	default:
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		return fmt.Errorf("unrecognized status code during DELETE: %v; %v", resp.Status, string(b))
-	}
+	return transport.CheckError(resp, http.StatusOK, http.StatusAccepted)
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
 package unix
@@ -18,6 +19,15 @@ import (
 // on fd, using the specified request number.
 func IoctlSetInt(fd int, req uint, value int) error {
 	return ioctl(fd, req, uintptr(value))
+}
+
+// IoctlSetPointerInt performs an ioctl operation which sets an
+// integer value on fd, using the specified request number. The ioctl
+// argument is called with a pointer to the integer value, rather than
+// passing the integer value directly.
+func IoctlSetPointerInt(fd int, req uint, value int) error {
+	v := int32(value)
+	return ioctl(fd, req, uintptr(unsafe.Pointer(&v)))
 }
 
 // IoctlSetWinsize performs an ioctl on fd with a *Winsize argument.
@@ -43,6 +53,9 @@ func IoctlSetTermios(fd int, req uint, value *Termios) error {
 
 // IoctlGetInt performs an ioctl operation which gets an integer value
 // from fd, using the specified request number.
+//
+// A few ioctl requests use the return value as an output parameter;
+// for those, IoctlRetInt should be used instead of this function.
 func IoctlGetInt(fd int, req uint) (int, error) {
 	var value int
 	err := ioctl(fd, req, uintptr(unsafe.Pointer(&value)))

@@ -37,4 +37,35 @@ const (
 	DockerPluginConfig          MediaType = "application/vnd.docker.plugin.v1+json"
 	DockerForeignLayer          MediaType = "application/vnd.docker.image.rootfs.foreign.diff.tar.gzip"
 	DockerUncompressedLayer     MediaType = "application/vnd.docker.image.rootfs.diff.tar"
+
+	OCIVendorPrefix    = "vnd.oci"
+	DockerVendorPrefix = "vnd.docker"
 )
+
+// IsDistributable returns true if a layer is distributable, see:
+// https://github.com/opencontainers/image-spec/blob/master/layer.md#non-distributable-layers
+func (m MediaType) IsDistributable() bool {
+	switch m {
+	case DockerForeignLayer, OCIRestrictedLayer, OCIUncompressedRestrictedLayer:
+		return false
+	}
+	return true
+}
+
+// IsImage returns true if the mediaType represents an image manifest, as opposed to something else, like an index.
+func (m MediaType) IsImage() bool {
+	switch m {
+	case OCIManifestSchema1, DockerManifestSchema2:
+		return true
+	}
+	return false
+}
+
+// IsIndex returns true if the mediaType represents an index, as opposed to something else, like an image.
+func (m MediaType) IsIndex() bool {
+	switch m {
+	case OCIImageIndex, DockerManifestList:
+		return true
+	}
+	return false
+}

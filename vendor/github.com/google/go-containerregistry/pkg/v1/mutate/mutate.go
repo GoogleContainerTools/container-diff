@@ -26,13 +26,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/go-containerregistry/internal/gzip"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/empty"
+	"github.com/google/go-containerregistry/pkg/v1/match"
 	"github.com/google/go-containerregistry/pkg/v1/partial"
-	"github.com/google/go-containerregistry/pkg/v1/stream"
 	"github.com/google/go-containerregistry/pkg/v1/tarball"
 	"github.com/google/go-containerregistry/pkg/v1/types"
-	"github.com/google/go-containerregistry/pkg/v1/v1util"
 )
 
 const whiteoutPrefix = ".wh."
@@ -40,11 +40,14 @@ const whiteoutPrefix = ".wh."
 // Addendum contains layers and history to be appended
 // to a base image
 type Addendum struct {
-	Layer   v1.Layer
-	History v1.History
+	Layer       v1.Layer
+	History     v1.History
+	URLs        []string
+	Annotations map[string]string
+	MediaType   types.MediaType
 }
 
-// AppendLayers applies layers to a base image
+// AppendLayers applies layers to a base image.
 func AppendLayers(base v1.Image, layers ...v1.Layer) (v1.Image, error) {
 	additions := make([]Addendum, 0, len(layers))
 	for _, layer := range layers {
@@ -69,6 +72,38 @@ func Append(base v1.Image, adds ...Addendum) (v1.Image, error) {
 	}, nil
 }
 
+// Appendable is an interface that represents something that can be appended
+// to an ImageIndex. We need to be able to construct a v1.Descriptor in order
+// to append something, and this is the minimum required information for that.
+type Appendable interface {
+	MediaType() (types.MediaType, error)
+	Digest() (v1.Hash, error)
+	Size() (int64, error)
+}
+
+// IndexAddendum represents an appendable thing and all the properties that
+// we may want to override in the resulting v1.Descriptor.
+type IndexAddendum struct {
+	Add Appendable
+	v1.Descriptor
+}
+
+// AppendManifests appends a manifest to the ImageIndex.
+func AppendManifests(base v1.ImageIndex, adds ...IndexAddendum) v1.ImageIndex {
+	return &index{
+		base: base,
+		adds: adds,
+	}
+}
+
+// RemoveManifests removes any descriptors that match the match.Matcher.
+func RemoveManifests(base v1.ImageIndex, matcher match.Matcher) v1.ImageIndex {
+	return &index{
+		base:   base,
+		remove: matcher,
+	}
+}
+
 // Config mutates the provided v1.Image to have the provided v1.Config
 func Config(base v1.Image, cfg v1.Config) (v1.Image, error) {
 	cf, err := base.ConfigFile()
@@ -78,10 +113,77 @@ func Config(base v1.Image, cfg v1.Config) (v1.Image, error) {
 
 	cf.Config = cfg
 
-	return configFile(base, cf)
+	return ConfigFile(base, cf)
 }
 
-func configFile(base v1.Image, cfg *v1.ConfigFile) (v1.Image, error) {
+// Annotatable represents a manifest that can carry annotations.
+type Annotatable interface {
+	partial.WithRawManifest
+}
+
+// Annotations mutates the annotations on an annotatable image or index manifest.
+//
+// The annotatable input is expected to be a v1.Image or v1.ImageIndex, and
+// returns the same type. You can type-assert the result like so:
+//
+//     img := Annotations(empty.Image, map[string]string{
+//         "foo": "bar",
+//     }).(v1.Image)
+//
+// Or for an index:
+//
+//     idx := Annotations(empty.Index, map[string]string{
+//         "foo": "bar",
+//     }).(v1.ImageIndex)
+//
+// If the input Annotatable is not an Image or ImageIndex, the result will
+// attempt to lazily annotate the raw manifest.
+func Annotations(f Annotatable, anns map[string]string) Annotatable {
+	if img, ok := f.(v1.Image); ok {
+		return &image{
+			base:        img,
+			annotations: anns,
+		}
+	}
+	if idx, ok := f.(v1.ImageIndex); ok {
+		return &index{
+			base:        idx,
+			annotations: anns,
+		}
+	}
+	return arbitraryRawManifest{f, anns}
+}
+
+type arbitraryRawManifest struct {
+	a    Annotatable
+	anns map[string]string
+}
+
+func (a arbitraryRawManifest) RawManifest() ([]byte, error) {
+	b, err := a.a.RawManifest()
+	if err != nil {
+		return nil, err
+	}
+	var m map[string]interface{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return nil, err
+	}
+	if ann, ok := m["annotations"]; ok {
+		if annm, ok := ann.(map[string]string); ok {
+			for k, v := range a.anns {
+				annm[k] = v
+			}
+		} else {
+			return nil, fmt.Errorf(".annotations is not a map: %T", ann)
+		}
+	} else {
+		m["annotations"] = a.anns
+	}
+	return json.Marshal(m)
+}
+
+// ConfigFile mutates the provided v1.Image to have the provided v1.ConfigFile
+func ConfigFile(base v1.Image, cfg *v1.ConfigFile) (v1.Image, error) {
 	m, err := base.Manifest()
 	if err != nil {
 		return nil, err
@@ -106,223 +208,7 @@ func CreatedAt(base v1.Image, created v1.Time) (v1.Image, error) {
 	cfg := cf.DeepCopy()
 	cfg.Created = created
 
-	return configFile(base, cfg)
-}
-
-type image struct {
-	base v1.Image
-	adds []Addendum
-
-	computed   bool
-	configFile *v1.ConfigFile
-	manifest   *v1.Manifest
-	diffIDMap  map[v1.Hash]v1.Layer
-	digestMap  map[v1.Hash]v1.Layer
-}
-
-var _ v1.Image = (*image)(nil)
-
-func (i *image) MediaType() (types.MediaType, error) { return i.base.MediaType() }
-
-func (i *image) compute() error {
-	// Don't re-compute if already computed.
-	if i.computed {
-		return nil
-	}
-	var configFile *v1.ConfigFile
-	if i.configFile != nil {
-		configFile = i.configFile
-	} else {
-		cf, err := i.base.ConfigFile()
-		if err != nil {
-			return err
-		}
-		configFile = cf.DeepCopy()
-	}
-	diffIDs := configFile.RootFS.DiffIDs
-	history := configFile.History
-
-	diffIDMap := make(map[v1.Hash]v1.Layer)
-	digestMap := make(map[v1.Hash]v1.Layer)
-
-	for _, add := range i.adds {
-		diffID, err := add.Layer.DiffID()
-		if err != nil {
-			return err
-		}
-		diffIDs = append(diffIDs, diffID)
-		history = append(history, add.History)
-		diffIDMap[diffID] = add.Layer
-	}
-
-	m, err := i.base.Manifest()
-	if err != nil {
-		return err
-	}
-	manifest := m.DeepCopy()
-	manifestLayers := manifest.Layers
-	for _, add := range i.adds {
-		d := v1.Descriptor{
-			MediaType: types.DockerLayer,
-		}
-
-		var err error
-		if d.Size, err = add.Layer.Size(); err != nil {
-			return err
-		}
-
-		if d.Digest, err = add.Layer.Digest(); err != nil {
-			return err
-		}
-
-		manifestLayers = append(manifestLayers, d)
-		digestMap[d.Digest] = add.Layer
-	}
-
-	configFile.RootFS.DiffIDs = diffIDs
-	configFile.History = history
-
-	manifest.Layers = manifestLayers
-
-	rcfg, err := json.Marshal(configFile)
-	if err != nil {
-		return err
-	}
-	d, sz, err := v1.SHA256(bytes.NewBuffer(rcfg))
-	if err != nil {
-		return err
-	}
-	manifest.Config.Digest = d
-	manifest.Config.Size = sz
-
-	i.configFile = configFile
-	i.manifest = manifest
-	i.diffIDMap = diffIDMap
-	i.digestMap = digestMap
-	i.computed = true
-	return nil
-}
-
-// Layers returns the ordered collection of filesystem layers that comprise this image.
-// The order of the list is oldest/base layer first, and most-recent/top layer last.
-func (i *image) Layers() ([]v1.Layer, error) {
-	if err := i.compute(); err == stream.ErrNotComputed {
-		// Image contains a streamable layer which has not yet been
-		// consumed. Just return the layers we have in case the caller
-		// is going to consume the layers.
-		layers, err := i.base.Layers()
-		if err != nil {
-			return nil, err
-		}
-		for _, add := range i.adds {
-			layers = append(layers, add.Layer)
-		}
-		return layers, nil
-	} else if err != nil {
-		return nil, err
-	}
-
-	diffIDs, err := partial.DiffIDs(i)
-	if err != nil {
-		return nil, err
-	}
-	ls := make([]v1.Layer, 0, len(diffIDs))
-	for _, h := range diffIDs {
-		l, err := i.LayerByDiffID(h)
-		if err != nil {
-			return nil, err
-		}
-		ls = append(ls, l)
-	}
-	return ls, nil
-}
-
-// BlobSet returns an unordered collection of all the blobs in the image.
-func (i *image) BlobSet() (map[v1.Hash]struct{}, error) {
-	if err := i.compute(); err != nil {
-		return nil, err
-	}
-	return partial.BlobSet(i)
-}
-
-// ConfigName returns the hash of the image's config file.
-func (i *image) ConfigName() (v1.Hash, error) {
-	if err := i.compute(); err != nil {
-		return v1.Hash{}, err
-	}
-	return partial.ConfigName(i)
-}
-
-// ConfigFile returns this image's config file.
-func (i *image) ConfigFile() (*v1.ConfigFile, error) {
-	if err := i.compute(); err != nil {
-		return nil, err
-	}
-	return i.configFile, nil
-}
-
-// RawConfigFile returns the serialized bytes of ConfigFile()
-func (i *image) RawConfigFile() ([]byte, error) {
-	if err := i.compute(); err != nil {
-		return nil, err
-	}
-	return json.Marshal(i.configFile)
-}
-
-// Digest returns the sha256 of this image's manifest.
-func (i *image) Digest() (v1.Hash, error) {
-	if err := i.compute(); err != nil {
-		return v1.Hash{}, err
-	}
-	return partial.Digest(i)
-}
-
-// Manifest returns this image's Manifest object.
-func (i *image) Manifest() (*v1.Manifest, error) {
-	if err := i.compute(); err != nil {
-		return nil, err
-	}
-	return i.manifest, nil
-}
-
-// RawManifest returns the serialized bytes of Manifest()
-func (i *image) RawManifest() ([]byte, error) {
-	if err := i.compute(); err != nil {
-		return nil, err
-	}
-	return json.Marshal(i.manifest)
-}
-
-// LayerByDigest returns a Layer for interacting with a particular layer of
-// the image, looking it up by "digest" (the compressed hash).
-func (i *image) LayerByDigest(h v1.Hash) (v1.Layer, error) {
-	if cn, err := i.ConfigName(); err != nil {
-		return nil, err
-	} else if h == cn {
-		return partial.ConfigLayer(i)
-	}
-	if layer, ok := i.digestMap[h]; ok {
-		return layer, nil
-	}
-	return i.base.LayerByDigest(h)
-}
-
-// LayerByDiffID is an analog to LayerByDigest, looking up by "diff id"
-// (the uncompressed hash).
-func (i *image) LayerByDiffID(h v1.Hash) (v1.Layer, error) {
-	if layer, ok := i.diffIDMap[h]; ok {
-		return layer, nil
-	}
-	return i.base.LayerByDiffID(h)
-}
-
-func validate(adds []Addendum) error {
-	for _, add := range adds {
-		if add.Layer == nil {
-			return errors.New("Unable to add a nil layer to the image")
-		}
-	}
-	return nil
+	return ConfigFile(base, cfg)
 }
 
 // Extract takes an image and returns an io.ReadCloser containing the image's
@@ -333,8 +219,6 @@ func validate(adds []Addendum) error {
 //
 // If a caller doesn't read the full contents, they should Close it to free up
 // resources used during extraction.
-//
-// Adapted from https://github.com/google/containerregistry/blob/master/client/v2_2/docker_image_.py#L731
 func Extract(img v1.Image) io.ReadCloser {
 	pr, pw := io.Pipe()
 
@@ -349,6 +233,7 @@ func Extract(img v1.Image) io.ReadCloser {
 	return pr
 }
 
+// Adapted from https://github.com/google/containerregistry/blob/da03b395ccdc4e149e34fbb540483efce962dc64/client/v2_2/docker_image_.py#L816
 func extract(img v1.Image, w io.Writer) error {
 	tarWriter := tar.NewWriter(w)
 	defer tarWriter.Close()
@@ -357,8 +242,9 @@ func extract(img v1.Image, w io.Writer) error {
 
 	layers, err := img.Layers()
 	if err != nil {
-		return fmt.Errorf("retrieving image layers: %v", err)
+		return fmt.Errorf("retrieving image layers: %w", err)
 	}
+
 	// we iterate through the layers in reverse order because it makes handling
 	// whiteout layers more efficient, since we can just keep track of the removed
 	// files as we see .wh. layers and ignore those in previous layers.
@@ -366,17 +252,26 @@ func extract(img v1.Image, w io.Writer) error {
 		layer := layers[i]
 		layerReader, err := layer.Uncompressed()
 		if err != nil {
-			return fmt.Errorf("reading layer contents: %v", err)
+			return fmt.Errorf("reading layer contents: %w", err)
 		}
+		defer layerReader.Close()
 		tarReader := tar.NewReader(layerReader)
 		for {
 			header, err := tarReader.Next()
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			}
 			if err != nil {
-				return fmt.Errorf("reading tar: %v", err)
+				return fmt.Errorf("reading tar: %w", err)
 			}
+
+			// Some tools prepend everything with "./", so if we don't Clean the
+			// name, we may have duplicate entries, which angers tar-split.
+			header.Name = filepath.Clean(header.Name)
+			// force PAX format to remove Name/Linkname length limit of 100 characters
+			// required by USTAR and to not depend on internal tar package guess which
+			// prefers USTAR over PAX
+			header.Format = tar.FormatPAX
 
 			basename := filepath.Base(header.Name)
 			dirname := filepath.Dir(header.Name)
@@ -407,9 +302,11 @@ func extract(img v1.Image, w io.Writer) error {
 			// any entries with a matching (or child) name
 			fileMap[name] = tombstone || !(header.Typeflag == tar.TypeDir)
 			if !tombstone {
-				tarWriter.WriteHeader(header)
+				if err := tarWriter.WriteHeader(header); err != nil {
+					return err
+				}
 				if header.Size > 0 {
-					if _, err := io.Copy(tarWriter, tarReader); err != nil {
+					if _, err := io.CopyN(tarWriter, tarReader, header.Size); err != nil {
 						return err
 					}
 				}
@@ -442,56 +339,63 @@ func Time(img v1.Image, t time.Time) (v1.Image, error) {
 
 	layers, err := img.Layers()
 	if err != nil {
-
-		return nil, fmt.Errorf("Error getting image layers: %v", err)
+		return nil, fmt.Errorf("getting image layers: %w", err)
 	}
 
 	// Strip away all timestamps from layers
-	var newLayers []v1.Layer
-	for _, layer := range layers {
+	newLayers := make([]v1.Layer, len(layers))
+	for idx, layer := range layers {
 		newLayer, err := layerTime(layer, t)
 		if err != nil {
-			return nil, fmt.Errorf("Error setting layer times: %v", err)
+			return nil, fmt.Errorf("setting layer times: %w", err)
 		}
-		newLayers = append(newLayers, newLayer)
+		newLayers[idx] = newLayer
 	}
 
 	newImage, err = AppendLayers(newImage, newLayers...)
 	if err != nil {
-		return nil, fmt.Errorf("Error appending layers: %v", err)
+		return nil, fmt.Errorf("appending layers: %w", err)
 	}
 
 	ocf, err := img.ConfigFile()
 	if err != nil {
-		return nil, fmt.Errorf("Error getting original config file: %v", err)
+		return nil, fmt.Errorf("getting original config file: %w", err)
 	}
 
 	cf, err := newImage.ConfigFile()
 	if err != nil {
-		return nil, fmt.Errorf("Error setting config file: %v", err)
+		return nil, fmt.Errorf("setting config file: %w", err)
 	}
 
 	cfg := cf.DeepCopy()
 
 	// Copy basic config over
+	cfg.Architecture = ocf.Architecture
+	cfg.OS = ocf.OS
+	cfg.OSVersion = ocf.OSVersion
 	cfg.Config = ocf.Config
-	cfg.ContainerConfig = ocf.ContainerConfig
 
 	// Strip away timestamps from the config file
 	cfg.Created = v1.Time{Time: t}
 
-	for _, h := range cfg.History {
+	for i, h := range cfg.History {
 		h.Created = v1.Time{Time: t}
+		h.CreatedBy = ocf.History[i].CreatedBy
+		h.Comment = ocf.History[i].Comment
+		h.EmptyLayer = ocf.History[i].EmptyLayer
+		// Explicitly ignore Author field; which hinders reproducibility
+		cfg.History[i] = h
 	}
 
-	return configFile(newImage, cfg)
+	return ConfigFile(newImage, cfg)
 }
 
 func layerTime(layer v1.Layer, t time.Time) (v1.Layer, error) {
 	layerReader, err := layer.Uncompressed()
 	if err != nil {
-		return nil, fmt.Errorf("Error getting layer: %v", err)
+		return nil, fmt.Errorf("getting layer: %w", err)
 	}
+	defer layerReader.Close()
 	w := new(bytes.Buffer)
 	tarWriter := tar.NewWriter(w)
 	defer tarWriter.Close()
@@ -499,21 +403,22 @@ func layerTime(layer v1.Layer, t time.Time) (v1.Layer, error) {
 	tarReader := tar.NewReader(layerReader)
 	for {
 		header, err := tarReader.Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("Error reading layer: %v", err)
+			return nil, fmt.Errorf("reading layer: %w", err)
 		}
 
 		header.ModTime = t
 		if err := tarWriter.WriteHeader(header); err != nil {
-			return nil, fmt.Errorf("Error writing tar header: %v", err)
+			return nil, fmt.Errorf("writing tar header: %w", err)
 		}
 
 		if header.Typeflag == tar.TypeReg {
-			if _, err = io.Copy(tarWriter, tarReader); err != nil {
-				return nil, fmt.Errorf("Error writing layer file: %v", err)
+			// TODO(#1168): This should be lazy, and not buffer the entire layer contents.
+			if _, err = io.CopyN(tarWriter, tarReader, header.Size); err != nil {
+				return nil, fmt.Errorf("writing layer file: %w", err)
 			}
 		}
 	}
@@ -525,16 +430,11 @@ func layerTime(layer v1.Layer, t time.Time) (v1.Layer, error) {
 	b := w.Bytes()
 	// gzip the contents, then create the layer
 	opener := func() (io.ReadCloser, error) {
-		g, err := v1util.GzipReadCloser(ioutil.NopCloser(bytes.NewReader(b)))
-		if err != nil {
-			return nil, fmt.Errorf("Error compressing layer: %v", err)
-		}
-
-		return g, nil
+		return gzip.ReadCloser(ioutil.NopCloser(bytes.NewReader(b))), nil
 	}
 	layer, err = tarball.LayerFromOpener(opener)
 	if err != nil {
-		return nil, fmt.Errorf("Error creating layer: %v", err)
+		return nil, fmt.Errorf("creating layer: %w", err)
 	}
 
 	return layer, nil
@@ -560,8 +460,31 @@ func Canonical(img v1.Image) (v1.Image, error) {
 
 	cfg.Container = ""
 	cfg.Config.Hostname = ""
-	cfg.ContainerConfig.Hostname = ""
 	cfg.DockerVersion = ""
 
-	return configFile(img, cfg)
+	return ConfigFile(img, cfg)
+}
+
+// MediaType modifies the MediaType() of the given image.
+func MediaType(img v1.Image, mt types.MediaType) v1.Image {
+	return &image{
+		base:      img,
+		mediaType: &mt,
+	}
+}
+
+// ConfigMediaType modifies the MediaType() of the given image's Config.
+func ConfigMediaType(img v1.Image, mt types.MediaType) v1.Image {
+	return &image{
+		base:            img,
+		configMediaType: &mt,
+	}
+}
+
+// IndexMediaType modifies the MediaType() of the given index.
+func IndexMediaType(idx v1.ImageIndex, mt types.MediaType) v1.ImageIndex {
+	return &index{
+		base:      idx,
+		mediaType: &mt,
+	}
 }

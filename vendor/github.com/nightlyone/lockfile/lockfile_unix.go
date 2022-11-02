@@ -16,5 +16,6 @@ func isRunning(pid int) (bool, error) {
 	if err := proc.Signal(syscall.Signal(0)); err != nil {
 		return false, nil
 	}
+
 	return true, nil
 }
