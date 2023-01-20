@@ -37,6 +37,7 @@ const rpmLayerAnalyzer = "rpmlayer"
 const pipAnalyzer = "pip"
 const nodeAnalyzer = "node"
 const emergeAnalyzer = "emerge"
+const phpAnalyzer = "php"
 
 type DiffRequest struct {
 	Image1    pkgutil.Image
@@ -69,6 +70,7 @@ var Analyzers = map[string]Analyzer{
 	pipAnalyzer:       PipAnalyzer{},
 	nodeAnalyzer:      NodeAnalyzer{},
 	emergeAnalyzer:    EmergeAnalyzer{},
+	phpAnalyzer:       PhpAnalyzer{},
 }
 
 var LayerAnalyzers = [...]string{layerAnalyzer, sizeLayerAnalyzer, aptLayerAnalyzer, rpmLayerAnalyzer}
