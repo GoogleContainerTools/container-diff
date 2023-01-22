@@ -49,6 +49,7 @@ func (a PhpAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 	path := image.FSPath
 	packages := make(map[string]map[string]util.PackageInfo)
 	var extensionsPath string
+	var mapPath string
 	config, err := image.Image.ConfigFile()
 
 	if err != nil {
@@ -58,7 +59,13 @@ func (a PhpAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 		confPath := getPhpConfPaths(config.Config.Env)
 		// File walk to the dir where the extensions are installed
 		extensionsPath = filepath.Join(path, confPath, "../../lib/php/extensions")
+		mapPath = filepath.Join(confPath, "../../lib/php/extensions")
+	} else {
+		//Set default value
+		extensionsPath = filepath.Join(path, "usr/local/etc/php", "../../lib/php/extensions")
+		mapPath = filepath.Join("/usr/local/etc/php", "../../lib/php/extensions")
 	}
+
 	phpVersion := getPhpVersion(config.Config.Env)
 
 	files, err := os.ReadDir(extensionsPath)
@@ -88,7 +95,6 @@ func (a PhpAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 			}
 
 			currPackage := util.PackageInfo{Version: phpVersion, Size: info.Size()}
-			mapPath := filepath.Join(extensionsPath, info.Name())
 			packageName := strings.Split(info.Name(), ".")[0]
 			addToMap(packages, packageName, mapPath, currPackage)
 		}
@@ -116,7 +122,7 @@ func getPhpVersion(vars []string) string {
 }
 
 func getPhpConfPaths(vars []string) string {
-	path := "/usr/local/etc/php" // set default configuration path
+	var path string
 	for _, envVar := range vars {
 		phpIniPathPattern := regexp.MustCompile("^PHP_INI_DIR=(.*)")
 		match := phpIniPathPattern.FindStringSubmatch(envVar)
