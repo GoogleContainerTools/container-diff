@@ -17,6 +17,7 @@ limitations under the License.
 package differs
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -45,6 +46,7 @@ func (a PhpAnalyzer) Analyze(image pkgutil.Image) (util.Result, error) {
 }
 
 func (a PhpAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]util.PackageInfo, error) {
+	path := image.FSPath
 	packages := make(map[string]map[string]util.PackageInfo)
 	var extensionsPath string
 	config, err := image.Image.ConfigFile()
@@ -55,7 +57,7 @@ func (a PhpAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 	if config.Config.Env != nil {
 		confPath := getPhpConfPaths(config.Config.Env)
 		// File walk to the dir where the extensions are installed
-		extensionsPath = filepath.Join(confPath, "../../lib/php/extensions")
+		extensionsPath = filepath.Join(path, confPath, "../../lib/php/extensions")
 	}
 	phpVersion := getPhpVersion(config.Config.Env)
 
@@ -64,27 +66,37 @@ func (a PhpAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 		return packages, err
 	}
 
-	for _, file := range files {
+	stop_walk := false
+	for !stop_walk {
+		var nextFiles []fs.DirEntry
+		for _, file := range files {
 
-		if file.IsDir() {
+			if file.IsDir() {
 
-			nextFile, err := os.ReadDir(filepath.Join(extensionsPath, file.Name()))
+				nextFile, err := os.ReadDir(filepath.Join(extensionsPath, file.Name()))
+				if err != nil {
+					return packages, err
+				}
+
+				nextFiles = append(nextFiles, nextFile...)
+				continue
+			}
+
+			info, err := file.Info()
 			if err != nil {
 				return packages, err
 			}
-			files = append(files, nextFile...)
-			continue
-		}
 
-		info, err := file.Info()
-		if err != nil {
-			return packages, err
+			currPackage := util.PackageInfo{Version: phpVersion, Size: info.Size()}
+			mapPath := filepath.Join(extensionsPath, info.Name())
+			packageName := strings.Split(info.Name(), ".")[0]
+			addToMap(packages, packageName, mapPath, currPackage)
 		}
-
-		currPackage := util.PackageInfo{Version: phpVersion, Size: info.Size()}
-		mapPath := filepath.Join(extensionsPath, file.Name())
-		packageName := strings.Split(file.Name(), ".")[0]
-		addToMap(packages, packageName, mapPath, currPackage)
+		if len(nextFiles) > 0 {
+			files = nextFiles
+		} else {
+			stop_walk = true
+		}
 	}
 
 	return packages, nil
@@ -104,7 +116,7 @@ func getPhpVersion(vars []string) string {
 }
 
 func getPhpConfPaths(vars []string) string {
-	var path string
+	path := "/usr/local/etc/php" // set default configuration path
 	for _, envVar := range vars {
 		phpIniPathPattern := regexp.MustCompile("^PHP_INI_DIR=(.*)")
 		match := phpIniPathPattern.FindStringSubmatch(envVar)
