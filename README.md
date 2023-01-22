@@ -64,6 +64,7 @@ container-diff analyze <img> --type=pip  [Pip]
 container-diff analyze <img> --type=apt  [Apt]
 container-diff analyze <img> --type=node  [Node]
 container-diff analyze <img> --type=apt --type=node  [Apt and Node]
+container-diff analyze <img> --type=php  [PHP]
 # --type=<analyzer1> --type=<analyzer2> --type=<analyzer3>,...
 ```
 
@@ -154,7 +155,7 @@ The file system analyzer outputs a list of file system contents, including names
 
 ### Package Analysis
 
-Package analyzers such as pip, apt, and node inspect the packages installed within the image provided. All package analyses leverage the `PackageOutput` struct, which contains the version and size for a given package instance (and a potential installation path for a specific instance of a package where multiple versions are allowed to be installed), as detailed below:
+Package analyzers such as pip, apt, node and php inspect the packages installed within the image provided. All package analyses leverage the `PackageOutput` struct, which contains the version and size for a given package instance (and a potential installation path for a specific instance of a package where multiple versions are allowed to be installed), as detailed below:
 ```go
 type PackageOutput struct {
 	Name    string
@@ -172,7 +173,7 @@ Here, the `Path` field is omitted because there is only one instance of each pac
 
 #### Multi Version Package Analysis
 
-Multi version package analyzers (pip, node) have the following output structure: `[]PackageOutput`
+Multi version package analyzers (pip, node, php) have the following output structure: `[]PackageOutput`
 
 Here, the `Path` field is included because there may be more than one instance of each package, and thus the path exists to pinpoint where the package exists in case additional investigation into the package instance is desired.
 
@@ -215,7 +216,7 @@ type DirDiff struct {
 
 ### Package Diffs
 
-Package differs such as pip, apt, and node inspect the packages contained within the images provided. All packages differs currently leverage the PackageInfo struct which contains the version and size for a given package instance, as detailed below:
+Package differs such as pip, apt, node and php inspect the packages contained within the images provided. All packages differs currently leverage the PackageInfo struct which contains the version and size for a given package instance, as detailed below:
 ```go
 type PackageInfo struct {
 	Version string
