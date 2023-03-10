@@ -62,6 +62,18 @@ func (h *Hash) UnmarshalJSON(data []byte) error {
 	return h.parse(s)
 }
 
+// MarshalText implements encoding.TextMarshaler. This is required to use
+// v1.Hash as a key in a map when marshalling JSON.
+func (h Hash) MarshalText() (text []byte, err error) {
+	return []byte(h.String()), nil
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler. This is required to use
+// v1.Hash as a key in a map when unmarshalling JSON.
+func (h *Hash) UnmarshalText(text []byte) error {
+	return h.parse(string(text))
+}
+
 // Hasher returns a hash.Hash for the named algorithm (e.g. "sha256")
 func Hasher(name string) (hash.Hash, error) {
 	switch name {
@@ -75,7 +87,7 @@ func Hasher(name string) (hash.Hash, error) {
 func (h *Hash) parse(unquoted string) error {
 	parts := strings.Split(unquoted, ":")
 	if len(parts) != 2 {
-		return fmt.Errorf("too many parts in hash: %s", unquoted)
+		return fmt.Errorf("cannot parse hash: %q", unquoted)
 	}
 
 	rest := strings.TrimLeft(parts[1], "0123456789abcdef")

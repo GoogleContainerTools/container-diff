@@ -17,8 +17,13 @@ package partial
 import (
 	"io"
 
+	"github.com/google/go-containerregistry/internal/and"
+	"github.com/google/go-containerregistry/internal/compression"
+	"github.com/google/go-containerregistry/internal/gzip"
+	"github.com/google/go-containerregistry/internal/zstd"
+	comp "github.com/google/go-containerregistry/pkg/compression"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
-	"github.com/google/go-containerregistry/pkg/v1/v1util"
+	"github.com/google/go-containerregistry/pkg/v1/types"
 )
 
 // CompressedLayer represents the bare minimum interface a natively
@@ -32,6 +37,9 @@ type CompressedLayer interface {
 
 	// Size returns the compressed size of the Layer.
 	Size() (int64, error)
+
+	// Returns the mediaType for the compressed Layer
+	MediaType() (types.MediaType, error)
 }
 
 // compressedLayerExtender implements v1.Image using the compressed base properties.
@@ -40,22 +48,43 @@ type compressedLayerExtender struct {
 }
 
 // Uncompressed implements v1.Layer
-func (ule *compressedLayerExtender) Uncompressed() (io.ReadCloser, error) {
-	u, err := ule.Compressed()
+func (cle *compressedLayerExtender) Uncompressed() (io.ReadCloser, error) {
+	rc, err := cle.Compressed()
 	if err != nil {
 		return nil, err
 	}
-	return v1util.GunzipReadCloser(u)
+
+	// Often, the "compressed" bytes are not actually-compressed.
+	// Peek at the first two bytes to determine whether it's correct to
+	// wrap this with gzip.UnzipReadCloser or zstd.UnzipReadCloser.
+	cp, pr, err := compression.PeekCompression(rc)
+	if err != nil {
+		return nil, err
+	}
+
+	prc := &and.ReadCloser{
+		Reader:    pr,
+		CloseFunc: rc.Close,
+	}
+
+	switch cp {
+	case comp.GZip:
+		return gzip.UnzipReadCloser(prc)
+	case comp.ZStd:
+		return zstd.UnzipReadCloser(prc)
+	default:
+		return prc, nil
+	}
 }
 
 // DiffID implements v1.Layer
-func (ule *compressedLayerExtender) DiffID() (v1.Hash, error) {
+func (cle *compressedLayerExtender) DiffID() (v1.Hash, error) {
 	// If our nested CompressedLayer implements DiffID,
 	// then delegate to it instead.
-	if wdi, ok := ule.CompressedLayer.(WithDiffID); ok {
+	if wdi, ok := cle.CompressedLayer.(WithDiffID); ok {
 		return wdi.DiffID()
 	}
-	r, err := ule.Uncompressed()
+	r, err := cle.Uncompressed()
 	if err != nil {
 		return v1.Hash{}, err
 	}
@@ -72,7 +101,7 @@ func CompressedToLayer(ul CompressedLayer) (v1.Layer, error) {
 // CompressedImageCore represents the base minimum interface a natively
 // compressed image must implement for us to produce a v1.Image.
 type CompressedImageCore interface {
-	imageCore
+	ImageCore
 
 	// RawManifest returns the serialized bytes of the manifest.
 	RawManifest() ([]byte, error)
@@ -90,11 +119,6 @@ type compressedImageExtender struct {
 
 // Assert that our extender type completes the v1.Image interface
 var _ v1.Image = (*compressedImageExtender)(nil)
-
-// BlobSet implements v1.Image
-func (i *compressedImageExtender) BlobSet() (map[v1.Hash]struct{}, error) {
-	return BlobSet(i)
-}
 
 // Digest implements v1.Image
 func (i *compressedImageExtender) Digest() (v1.Hash, error) {
@@ -149,6 +173,11 @@ func (i *compressedImageExtender) ConfigFile() (*v1.ConfigFile, error) {
 // Manifest implements v1.Image
 func (i *compressedImageExtender) Manifest() (*v1.Manifest, error) {
 	return Manifest(i)
+}
+
+// Size implements v1.Image
+func (i *compressedImageExtender) Size() (int64, error) {
+	return Size(i)
 }
 
 // CompressedToImage fills in the missing methods from a CompressedImageCore so that it implements v1.Image

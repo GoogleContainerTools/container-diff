@@ -17,15 +17,23 @@ package transport
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
+
+	"github.com/google/go-containerregistry/internal/redact"
 )
 
 // Error implements error to support the following error specification:
 // https://github.com/docker/distribution/blob/master/docs/spec/api.md#errors
 type Error struct {
 	Errors []Diagnostic `json:"errors,omitempty"`
+	// The http status code returned.
+	StatusCode int
+	// The request that failed.
+	Request *http.Request
+	// The raw body if we couldn't understand it.
+	rawBody string
 }
 
 // Check that Error implements error
@@ -33,9 +41,23 @@ var _ error = (*Error)(nil)
 
 // Error implements error
 func (e *Error) Error() string {
+	prefix := ""
+	if e.Request != nil {
+		prefix = fmt.Sprintf("%s %s: ", e.Request.Method, redact.URL(e.Request.URL))
+	}
+	return prefix + e.responseErr()
+}
+
+func (e *Error) responseErr() string {
 	switch len(e.Errors) {
 	case 0:
-		return "<empty transport.Error response>"
+		if len(e.rawBody) == 0 {
+			if e.Request != nil && e.Request.Method == http.MethodHead {
+				return fmt.Sprintf("unexpected status code %d %s (HEAD responses have no body, use GET for details)", e.StatusCode, http.StatusText(e.StatusCode))
+			}
+			return fmt.Sprintf("unexpected status code %d %s", e.StatusCode, http.StatusText(e.StatusCode))
+		}
+		return fmt.Sprintf("unexpected status code %d %s: %s", e.StatusCode, http.StatusText(e.StatusCode), e.rawBody)
 	case 1:
 		return e.Errors[0].String()
 	default:
@@ -44,15 +66,29 @@ func (e *Error) Error() string {
 			errors = append(errors, d.String())
 		}
 		return fmt.Sprintf("multiple errors returned: %s",
-			strings.Join(errors, ";"))
+			strings.Join(errors, "; "))
 	}
+}
+
+// Temporary returns whether the request that preceded the error is temporary.
+func (e *Error) Temporary() bool {
+	if len(e.Errors) == 0 {
+		_, ok := temporaryStatusCodes[e.StatusCode]
+		return ok
+	}
+	for _, d := range e.Errors {
+		if _, ok := temporaryErrorCodes[d.Code]; !ok {
+			return false
+		}
+	}
+	return true
 }
 
 // Diagnostic represents a single error returned by a Docker registry interaction.
 type Diagnostic struct {
-	Code    ErrorCode   `json:"code"`
-	Message string      `json:"message,omitempty"`
-	Detail  interface{} `json:"detail,omitempty"`
+	Code    ErrorCode `json:"code"`
+	Message string    `json:"message,omitempty"`
+	Detail  any       `json:"detail,omitempty"`
 }
 
 // String stringifies the Diagnostic in the form: $Code: $Message[; $Detail]
@@ -85,7 +121,29 @@ const (
 	UnauthorizedErrorCode        ErrorCode = "UNAUTHORIZED"
 	DeniedErrorCode              ErrorCode = "DENIED"
 	UnsupportedErrorCode         ErrorCode = "UNSUPPORTED"
+	TooManyRequestsErrorCode     ErrorCode = "TOOMANYREQUESTS"
+	UnknownErrorCode             ErrorCode = "UNKNOWN"
+
+	// This isn't defined by either docker or OCI spec, but is defined by docker/distribution:
+	// https://github.com/distribution/distribution/blob/6a977a5a754baa213041443f841705888107362a/registry/api/errcode/register.go#L60
+	UnavailableErrorCode ErrorCode = "UNAVAILABLE"
 )
+
+// TODO: Include other error types.
+var temporaryErrorCodes = map[ErrorCode]struct{}{
+	BlobUploadInvalidErrorCode: {},
+	TooManyRequestsErrorCode:   {},
+	UnknownErrorCode:           {},
+	UnavailableErrorCode:       {},
+}
+
+var temporaryStatusCodes = map[int]struct{}{
+	http.StatusRequestTimeout:      {},
+	http.StatusInternalServerError: {},
+	http.StatusBadGateway:          {},
+	http.StatusServiceUnavailable:  {},
+	http.StatusGatewayTimeout:      {},
+}
 
 // CheckError returns a structured error if the response status is not in codes.
 func CheckError(resp *http.Response, codes ...int) error {
@@ -95,17 +153,21 @@ func CheckError(resp *http.Response, codes ...int) error {
 			return nil
 		}
 	}
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
 	// https://github.com/docker/distribution/blob/master/docs/spec/api.md#errors
-	var structuredError Error
-	if err := json.Unmarshal(b, &structuredError); err != nil {
-		// If the response isn't an unstructured error, then return some
-		// reasonable error response containing the response body.
-		return fmt.Errorf("unsupported status code %d; body: %s", resp.StatusCode, string(b))
-	}
-	return &structuredError
+	structuredError := &Error{}
+
+	// This can fail if e.g. the response body is not valid JSON. That's fine,
+	// we'll construct an appropriate error string from the body and status code.
+	_ = json.Unmarshal(b, structuredError)
+
+	structuredError.rawBody = string(b)
+	structuredError.StatusCode = resp.StatusCode
+	structuredError.Request = resp.Request
+
+	return structuredError
 }

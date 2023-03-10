@@ -19,15 +19,6 @@ import (
 	"unicode/utf8"
 )
 
-// Strictness defines the level of strictness for name validation.
-type Strictness int
-
-// Enums for CRUD operations.
-const (
-	StrictValidation Strictness = iota
-	WeakValidation
-)
-
 // stripRunesFn returns a function which returns -1 (i.e. a value which
 // signals deletion in strings.Map) for runes in 'runes', and the rune otherwise.
 func stripRunesFn(runes string) func(rune) rune {
@@ -44,9 +35,9 @@ func stripRunesFn(runes string) func(rune) rune {
 func checkElement(name, element, allowedRunes string, minRunes, maxRunes int) error {
 	numRunes := utf8.RuneCountInString(element)
 	if (numRunes < minRunes) || (maxRunes < numRunes) {
-		return NewErrBadName("%s must be between %d and %d runes in length: %s", name, minRunes, maxRunes, element)
+		return newErrBadName("%s must be between %d and %d characters in length: %s", name, minRunes, maxRunes, element)
 	} else if len(strings.Map(stripRunesFn(allowedRunes), element)) != 0 {
-		return NewErrBadName("%s can only contain the runes `%s`: %s", name, allowedRunes, element)
+		return newErrBadName("%s can only contain the characters `%s`: %s", name, allowedRunes, element)
 	}
 	return nil
 }

@@ -24,19 +24,20 @@ type Image interface {
 	// The order of the list is oldest/base layer first, and most-recent/top layer last.
 	Layers() ([]Layer, error)
 
-	// BlobSet returns an unordered collection of all the blobs in the image.
-	BlobSet() (map[Hash]struct{}, error)
-
 	// MediaType of this image's manifest.
 	MediaType() (types.MediaType, error)
 
-	// ConfigName returns the hash of the image's config file.
+	// Size returns the size of the manifest.
+	Size() (int64, error)
+
+	// ConfigName returns the hash of the image's config file, also known as
+	// the Image ID.
 	ConfigName() (Hash, error)
 
 	// ConfigFile returns this image's config file.
 	ConfigFile() (*ConfigFile, error)
 
-	// RawConfigFile returns the serialized bytes of ConfigFile()
+	// RawConfigFile returns the serialized bytes of ConfigFile().
 	RawConfigFile() ([]byte, error)
 
 	// Digest returns the sha256 of this image's manifest.

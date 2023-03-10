@@ -12,24 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package name defines structured types for representing image references.
 package name
 
 import (
+	_ "crypto/sha256" // Recommended by go-digest.
 	"strings"
+
+	"github.com/opencontainers/go-digest"
 )
 
-const (
-	// These have the form: sha256:<hex string>
-	// TODO(dekkagaijin): replace with opencontainers/go-digest or docker/distribution's validation.
-	digestChars = "sh:0123456789abcdef"
-	digestDelim = "@"
-)
+const digestDelim = "@"
 
 // Digest stores a digest name in a structured form.
 type Digest struct {
 	Repository
-	digest string
+	digest   string
+	original string
 }
 
 // Ensure Digest implements Reference
@@ -55,37 +53,41 @@ func (d Digest) Name() string {
 	return d.Repository.Name() + digestDelim + d.DigestStr()
 }
 
+// String returns the original input string.
 func (d Digest) String() string {
-	return d.Name()
+	return d.original
 }
 
-func checkDigest(name string) error {
-	return checkElement("digest", name, digestChars, 7+64, 7+64)
-}
-
-// NewDigest returns a new Digest representing the given name, according to the given strictness.
-func NewDigest(name string, strict Strictness) (Digest, error) {
+// NewDigest returns a new Digest representing the given name.
+func NewDigest(name string, opts ...Option) (Digest, error) {
 	// Split on "@"
 	parts := strings.Split(name, digestDelim)
 	if len(parts) != 2 {
-		return Digest{}, NewErrBadName("a digest must contain exactly one '@' separator (e.g. registry/repository@digest) saw: %s", name)
+		return Digest{}, newErrBadName("a digest must contain exactly one '@' separator (e.g. registry/repository@digest) saw: %s", name)
 	}
 	base := parts[0]
-	digest := parts[1]
-
-	// We don't require a digest, but if we get one check it's valid,
-	// even when not being strict.
-	// If we are being strict, we want to validate the digest regardless in case
-	// it's empty.
-	if digest != "" || strict == StrictValidation {
-		if err := checkDigest(digest); err != nil {
-			return Digest{}, err
-		}
+	dig := parts[1]
+	prefix := digest.Canonical.String() + ":"
+	if !strings.HasPrefix(dig, prefix) {
+		return Digest{}, newErrBadName("unsupported digest algorithm: %s", dig)
+	}
+	hex := strings.TrimPrefix(dig, prefix)
+	if err := digest.Canonical.Validate(hex); err != nil {
+		return Digest{}, err
 	}
 
-	repo, err := NewRepository(base, strict)
+	tag, err := NewTag(base, opts...)
+	if err == nil {
+		base = tag.Repository.Name()
+	}
+
+	repo, err := NewRepository(base, opts...)
 	if err != nil {
 		return Digest{}, err
 	}
-	return Digest{repo, digest}, nil
+	return Digest{
+		Repository: repo,
+		digest:     dig,
+		original:   name,
+	}, nil
 }
