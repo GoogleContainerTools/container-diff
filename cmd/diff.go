@@ -32,6 +32,7 @@ import (
 )
 
 var filename string
+var ci bool
 
 var diffCmd = &cobra.Command{
 	Use:   "diff image1 image2",
@@ -40,7 +41,7 @@ var diffCmd = &cobra.Command{
 
 For details on how to specify images, run: container-diff help`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if err := validateArgs(args, checkDiffArgNum, checkIfValidAnalyzer, checkFilenameFlag); err != nil {
+		if err := validateArgs(args, checkDiffArgNum, checkDiffImages, checkIfValidAnalyzer, checkFilenameFlag); err != nil {
 			return err
 		}
 		return nil
@@ -56,6 +57,13 @@ For details on how to specify images, run: container-diff help`,
 func checkDiffArgNum(args []string) error {
 	if len(args) != 2 {
 		return errors.New("'diff' requires two images as arguments: container-diff diff [image1] [image2]")
+	}
+	return nil
+}
+
+func checkDiffImages(args []string) error {
+	if args[0] == args[1] {
+		return errors.New("'diff' requires two different images")
 	}
 	return nil
 }
@@ -153,7 +161,36 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		logrus.Infof("images were saved at %s and %s", image1.FSPath,
 			image2.FSPath)
 	}
+
+	if ci {
+		counter := getDiffs(diffs)
+		if counter > 0 {
+			os.Exit(counter)
+		}
+	}
+
 	return nil
+}
+
+func getDiffs(diffs map[string]util.Result) int {
+	var counter = 0
+	for i, result := range diffs {
+		switch i {
+		case "HistoryAnalyzer":
+			diff := result.(*util.HistDiffResult).Diff.(differs.HistDiff)
+			counter += len(diff.Adds) + len(diff.Dels)
+			break
+		case "MetadataAnalyzer":
+			diff := result.(*util.MetadataDiffResult).Diff.(differs.MetadataDiff)
+			counter += len(diff.Adds) + len(diff.Dels)
+			break
+		case "RPMAnalyzer", "AptAnalyzer":
+			diff := result.(*util.SingleVersionPackageDiffResult).Diff.(util.PackageDiff)
+			counter += len(diff.Packages1) + len(diff.Packages2) + len(diff.InfoDiff)
+			break
+		}
+	}
+	return counter
 }
 
 func diffFile(image1, image2 *pkgutil.Image) error {
@@ -175,6 +212,7 @@ func diffFile(image1, image2 *pkgutil.Image) error {
 
 func init() {
 	diffCmd.Flags().StringVarP(&filename, "filename", "f", "", "Set this flag to the path of a file in both containers to view the diff of the file. Must be used with --types=file flag.")
+	diffCmd.Flags().BoolVar(&ci, "ci", false, "If set will exit the with error code when differences where found.")
 	RootCmd.AddCommand(diffCmd)
 	addSharedFlags(diffCmd)
 	output.AddFlags(diffCmd)
