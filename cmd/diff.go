@@ -188,6 +188,10 @@ func getDiffs(diffs map[string]util.Result) int {
 			diff := result.(*util.SingleVersionPackageDiffResult).Diff.(util.PackageDiff)
 			counter += len(diff.Packages1) + len(diff.Packages2) + len(diff.InfoDiff)
 			break
+		case "FileAnalyzer":
+			diff := result.(*util.DirDiffResult).Diff.(util.DirDiff)
+			counter += len(diff.Adds) + len(diff.Dels) + len(diff.Mods)
+			break
 		}
 	}
 	return counter
