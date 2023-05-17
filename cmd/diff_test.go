@@ -18,6 +18,8 @@ package cmd
 
 import (
 	"testing"
+
+	"github.com/GoogleContainerTools/container-diff/differs"
 )
 
 var diffArgNumTests = []testpair{
@@ -38,13 +40,14 @@ type imageDiff struct {
 	image1      string
 	image2      string
 	shouldError bool
+	different   bool
 }
 
 var imageDiffs = []imageDiff{
-	{"", "", true},
-	{"gcr.io/google-appengine/python", "gcr.io/google-appengine/debian9", false},
-	{"gcr.io/google-appengine/python", "cats", true},
-	{"mcr.microsoft.com/mcr/hello-world:latest", "mcr.microsoft.com/mcr/hello-world:latest", false},
+	{"", "", true, false},
+	{"gcr.io/google-appengine/python", "gcr.io/google-appengine/debian9", false, true},
+	{"gcr.io/google-appengine/python", "cats", true, false},
+	{"mcr.microsoft.com/mcr/hello-world:latest", "mcr.microsoft.com/mcr/hello-world:latest", false, false},
 }
 
 func TestDiffImages(t *testing.T) {
@@ -62,6 +65,40 @@ func checkError(t *testing.T, err error, shouldError bool) {
 			t.Errorf("expected error but got none")
 		} else {
 			t.Errorf("got unexpected error: %s", err)
+		}
+	}
+}
+
+func TestCheckDiffImages(t *testing.T) {
+	for _, test := range imageDiffs {
+		err := checkDiffImages([]string{test.image1, test.image2})
+
+		if test.image1 == test.image2 && err == nil {
+			t.Error("expected error got nil")
+		}
+		if test.image1 != test.image2 && err != nil {
+			t.Errorf("unexpected error: %s", err)
+		}
+	}
+}
+
+func TestGetDiffCount(t *testing.T) {
+	for _, test := range imageDiffs {
+		diffTypes, _ := differs.GetAnalyzers([]string{"apt"})
+		image1, image2, _ := processImages(test.image1, test.image2)
+
+		req := differs.DiffRequest{
+			Image1:    *image1,
+			Image2:    *image2,
+			DiffTypes: diffTypes}
+		diffs, _ := req.GetDiff()
+		diffCount := getDiffCount(diffs)
+
+		if test.different && diffCount == 0 {
+			t.Error("Images does not contain expected differences")
+		}
+		if !test.different && diffCount > 0 {
+			t.Error("Images contains unexpected differences")
 		}
 	}
 }

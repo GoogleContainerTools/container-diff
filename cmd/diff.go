@@ -89,30 +89,9 @@ func processImage(imageName string, errChan chan<- error) *pkgutil.Image {
 	return &image
 }
 
-// collects errors from a channel and combines them
-// assumes channel has already been closed
-func readErrorsFromChannel(c chan error) error {
-	errs := []string{}
-	for err := range c {
-		errs = append(errs, err.Error())
-	}
-
-	if len(errs) > 0 {
-		return errors.New(strings.Join(errs, "\n"))
-	}
-	return nil
-}
-
-func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
-	diffTypes, err := differs.GetAnalyzers(diffArgs)
-	if err != nil {
-		return errors.Wrap(err, "getting analyzers")
-	}
-
+func processImages(image1Arg, image2Arg string) (*pkgutil.Image, *pkgutil.Image, error) {
 	var wg sync.WaitGroup
 	wg.Add(2)
-
-	logrus.Infof("starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
 
 	var image1, image2 *pkgutil.Image
 	errChan := make(chan error, 2)
@@ -134,8 +113,35 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 		defer pkgutil.CleanupImage(*image2)
 	}
 
-	if err := readErrorsFromChannel(errChan); err != nil {
-		return err
+	err := readErrorsFromChannel(errChan)
+
+	return image1, image2, err
+}
+
+// collects errors from a channel and combines them
+// assumes channel has already been closed
+func readErrorsFromChannel(c chan error) error {
+	errs := []string{}
+	for err := range c {
+		errs = append(errs, err.Error())
+	}
+
+	if len(errs) > 0 {
+		return errors.New(strings.Join(errs, "\n"))
+	}
+	return nil
+}
+
+func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
+	diffTypes, err := differs.GetAnalyzers(diffArgs)
+	if err != nil {
+		return errors.Wrap(err, "getting analyzers")
+	}
+
+	logrus.Infof("starting diff on images %s and %s, using differs: %s\n", image1Arg, image2Arg, diffArgs)
+	image1, image2, err := processImages(image1Arg, image2Arg)
+	if err != nil {
+		return errors.Wrap(err, "Processing input images")
 	}
 
 	logrus.Info("computing diffs")
@@ -163,7 +169,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	}
 
 	if ci {
-		counter := getDiffs(diffs)
+		counter := getDiffCount(diffs)
 		if counter > 0 {
 			os.Exit(counter)
 		}
@@ -172,7 +178,7 @@ func diffImages(image1Arg, image2Arg string, diffArgs []string) error {
 	return nil
 }
 
-func getDiffs(diffs map[string]util.Result) int {
+func getDiffCount(diffs map[string]util.Result) int {
 	var counter = 0
 	for i, result := range diffs {
 		switch i {
