@@ -195,7 +195,7 @@ func getExtractPathForName(name string, cacheDir string) (string, error) {
 	} else {
 		// otherwise, create tempdir
 		logrus.Infof("skipping caching")
-		path, err = ioutil.TempDir("", strings.Replace(name, "/", "", -1))
+		path, err = ioutil.TempDir("", "extracttar")
 		if err != nil {
 			return "", err
 		}
