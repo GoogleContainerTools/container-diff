@@ -26,6 +26,12 @@ curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-dar
 sudo install container-diff-darwin-amd64 /usr/local/bin/container-diff
 ```
 
+There is also an [Homebrew Formulae](https://formulae.brew.sh/formula/container-diff). You can install by running:
+
+```shell
+brew install container-diff
+```
+
 ### Linux
 ```shell
 curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64 && \
