@@ -1,0 +1,6 @@
+name: container-diff
+
+runs:
+  using: 'docker'
+  image: 'action/Dockerfile'
+
