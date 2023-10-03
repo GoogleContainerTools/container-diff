@@ -1,6 +1,14 @@
 name: container-diff
 
+inputs:
+  argument:
+    required: true
+    description: "String of arguments to pass to the container-diff command"
+    default: help
+
 runs:
   using: 'docker'
   image: 'action/Dockerfile'
+  args:
+    - ${{ inputs.argument }}
 
