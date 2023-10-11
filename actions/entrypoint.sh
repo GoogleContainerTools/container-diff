@@ -1,4 +1,5 @@
 #!/bin/bash
 
-echo "$@"
-/go/bin/container-diff ${@}
+command="${INPUT_COMMAND} ${INPUT_ARGS}"
+echo "container-diff ${command}"
+/usr/local/bin/container-diff ${command}
