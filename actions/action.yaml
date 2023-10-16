@@ -1,0 +1,14 @@
+name: container-diff
+
+inputs:
+  command:
+    required: true
+    description: "Container diff command to use (defaults to analyze)"
+    default: analyze
+  args:
+    description: "String of arguments to pass to the container-diff command"
+    default: help
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
