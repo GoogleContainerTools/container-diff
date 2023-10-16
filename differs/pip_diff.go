@@ -57,9 +57,7 @@ func (a PipAnalyzer) getPackages(image pkgutil.Image) (map[string]map[string]uti
 	}
 	if config.Config.Env != nil {
 		paths := getPythonPaths(config.Config.Env)
-		for _, p := range paths {
-			pythonPaths = append(pythonPaths, p)
-		}
+		pythonPaths = append(pythonPaths, paths...)
 	}
 	pythonVersions, err := getPythonVersion(path)
 	if err != nil {
