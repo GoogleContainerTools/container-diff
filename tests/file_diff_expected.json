@@ -6731,6 +6731,26 @@
           "Size2": 10125
         },
         {
+          "Name": "/var/lib/rpm/Obsoletename",
+          "Size1": 8192,
+          "Size2": 8192
+        },
+        {
+          "Name": "/var/lib/rpm/Group",
+          "Size1": 8192,
+          "Size2": 8192
+        },
+        {
+          "Name": "/var/lib/rpm/Sigmd5",
+          "Size1": 8192,
+          "Size2": 8192
+        },
+        {
+          "Name": "/var/lib/rpm/Sha1header",
+          "Size1": 8192,
+          "Size2": 8192
+        },
+        {
           "Name": "/var/lib/rpm/Conflictname",
           "Size1": 8192,
           "Size2": 8192
@@ -6741,27 +6761,7 @@
           "Size2": 8192
         },
         {
-          "Name": "/var/lib/rpm/Sigmd5",
-          "Size1": 8192,
-          "Size2": 8192
-        },
-        {
           "Name": "/var/lib/rpm/Installtid",
-          "Size1": 8192,
-          "Size2": 8192
-        },
-        {
-          "Name": "/var/lib/rpm/Group",
-          "Size1": 8192,
-          "Size2": 8192
-        },
-        {
-          "Name": "/var/lib/rpm/Obsoletename",
-          "Size1": 8192,
-          "Size2": 8192
-        },
-        {
-          "Name": "/var/lib/rpm/Sha1header",
           "Size1": 8192,
           "Size2": 8192
         },
@@ -6791,12 +6791,12 @@
           "Size2": 546
         },
         {
-          "Name": "/var/lib/yum/rpmdb-indexes/version",
+          "Name": "/var/cache/yum/x86_64/7/timedhosts",
           "Size1": 44,
           "Size2": 44
         },
         {
-          "Name": "/var/cache/yum/x86_64/7/timedhosts",
+          "Name": "/var/lib/yum/rpmdb-indexes/version",
           "Size1": 44,
           "Size2": 44
         }

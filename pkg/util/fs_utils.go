@@ -54,7 +54,7 @@ func GetSize(path string) int64 {
 	return stat.Size()
 }
 
-//GetFileContents returns the contents of a file at the specified path
+// GetFileContents returns the contents of a file at the specified path
 func GetFileContents(path string) (*string, error) {
 	if _, err := os.Lstat(path); os.IsNotExist(err) {
 		return nil, err

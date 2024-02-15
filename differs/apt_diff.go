@@ -28,7 +28,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//APT package database location
+// APT package database location
 const dpkgStatusFile string = "var/lib/dpkg/status"
 
 type AptAnalyzer struct {

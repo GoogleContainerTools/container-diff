@@ -26,25 +26,5 @@ if [[ $files ]]; then
     exit 1
 fi
 
-# Check for python on host, and use it if possible, otherwise fall back on python dockerized
-if [[ -f $(which python 2>&1) ]]; then
-	PYTHON="python"
-else
-	PYTHON="docker run --rm -it -v $(pwd):/container-diff -w /container-diff python python"
-fi
-
-
-# Ignore these paths in the following tests.
-ignore="vendor\|out\|actions\|setup-tests"
-
-# Check boilerplate
-echo "Checking boilerplate..."
-BOILERPLATEDIR=./boilerplate
-# Grep returns a non-zero exit code if we don't match anything, which is good in this case.
-set +e
-files=$(${PYTHON} ${BOILERPLATEDIR}/boilerplate.py --rootdir . --boilerplate-dir ${BOILERPLATEDIR} | grep -v $ignore)
-set -e
-if [[ ! -z ${files} ]]; then
-	echo "Boilerplate missing in: ${files}."
-	exit 1
-fi
+echo "Checking go-addlicense..."
+addlicense -check -l apache -ignore \{actions,differs,vendor,setup-tests,out\}/**/* -ignore cloudbuild\*yaml * 

@@ -45,10 +45,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//RPM macros file location
+// RPM macros file location
 const rpmMacros string = "/usr/lib/rpm/macros"
 
-//RPM command to extract packages from the rpm database
+// RPM command to extract packages from the rpm database
 var rpmCmd = []string{
 	"rpm", "--nodigest", "--nosignature",
 	"-qa", "--qf", "%{NAME}\t%{VERSION}-%{RELEASE}\t%{SIZE}\n",

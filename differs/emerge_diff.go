@@ -28,7 +28,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//Emerge package database location
+// Emerge package database location
 const emergePkgFile string = "/var/db/pkg"
 
 type EmergeAnalyzer struct{}
