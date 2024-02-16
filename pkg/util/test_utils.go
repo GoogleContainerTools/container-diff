@@ -69,3 +69,7 @@ func (i *TestImage) LayerByDigest(v1.Hash) (v1.Layer, error) {
 func (i *TestImage) Layers() ([]v1.Layer, error) {
 	return nil, nil
 }
+
+func (i *TestImage) Size() (int64, error) {
+	return 0, nil
+}
