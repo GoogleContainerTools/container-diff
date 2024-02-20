@@ -36,7 +36,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/google/go-containerregistry/pkg/v1/tarball"
 
-	"github.com/docker/docker/pkg/system"
+	"github.com/moby/sys/sequential"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -292,7 +292,7 @@ func GetImageLayers(pathToImage string) []string {
 func copyToFile(outfile string, r io.Reader) error {
 	// We use sequential file access here to avoid depleting the standby list
 	// on Windows. On Linux, this is a call directly to ioutil.TempFile
-	tmpFile, err := system.TempFileSequential(filepath.Dir(outfile), ".docker_temp_")
+	tmpFile, err := sequential.CreateTemp(filepath.Dir(outfile), ".docker_temp_")
 	if err != nil {
 		return err
 	}
