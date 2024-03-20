@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20231017140541-3b893ed0421b
-	github.com/docker/docker v25.0.3+incompatible
+	github.com/docker/docker v25.0.5+incompatible
 	github.com/fsouza/go-dockerclient v1.10.2
 	github.com/google/go-containerregistry v0.19.0
 	github.com/google/go-github v17.0.0+incompatible
