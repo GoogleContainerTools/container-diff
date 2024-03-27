@@ -1,4 +1,7 @@
-# container-diff
+
+This project is archived. 
+- If you wish to continue maintaining it, you may fork and continue development on that fork.
+- If you are looking for an alternative, try [diffoci](https://github.com/reproducible-containers/diffoci)
 
 [![Build
 Status](https://travis-ci.org/GoogleContainerTools/container-diff.svg?branch=master)](https://travis-ci.org/GoogleContainerTools/container-diff)
